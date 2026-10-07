@@ -1,6 +1,6 @@
 # S3-C runner map, S3-owned glue, and supported-runtime contract
 
-Status: DRAFT CANDIDATE, supporting `S3_PREREG_v0.1.md` r3. Not normative, not frozen. Sections 1-7 were derived by reading the frozen sources (S2b `8eaa91c`, S2a `741d56d`); the experimental spike under `spike/` later executed the traced path, and its executed findings are recorded in §8 and in `spike/FEASIBILITY_REPORT.md`, clearly separated from source inspection. Manifest coverage confers no normative authority.
+Status: DRAFT CANDIDATE, supporting `S3_PREREG_v0.1.md` r4. Not normative, not frozen. Sections 1-7 were derived by reading the frozen sources (S2b `8eaa91c`, S2a `741d56d`); the experimental spike under `spike/` later executed the traced path, and its executed findings are recorded in §8 and in `spike/FEASIBILITY_REPORT.md`, clearly separated from source inspection. Manifest coverage confers no normative authority.
 
 ## 1. Implementation acceptance is not capture acceptance
 
@@ -30,7 +30,7 @@ Therefore S3-C needs the following **S3-owned code**, which is part of the S3-C 
 | G2 composer | apply prereg r7 §16.6 to the S2b result; stop on non-`Verified` | table-driven copy of the frozen table; no new mapping |
 | G3 S2a job writer | write `jobs.tsv` for `tb`, `inst`, `pb`, `cov`, `e2e` over the exact `tB`, `pB`, `inst`, `iB` files | exact-bytes; no re-encoding |
 | G4 post-S2a input assembler | build `PostS2aInputs` from the **actual** `tB`, `pB`, `iB`, the authenticated Receipt `leaf_index`, the target payload and protected `sub` extracted from the authenticated target (frozen `parse_cose_sign1` and `read_protected`; detached payloads from the exact request material), the actual S2a `cov`/`e2e` results and the frozen A12–A14 digests (read from the S2b schema freeze record) | does NOT copy the assembly in `tests/s2a/run_post.py`, which uses the expected transcript and generator-known subject/payload values; `[OPEN]` A12–A14 digests for a non-toy instance |
-| G5 correspondence checker | prereg §6.1 | limited to artifact correspondence |
+| G5 correspondence checker | prereg §6.1; format and reason codes: `spec/capture-format.md` | limited to artifact correspondence. Candidate implementation: `verifier/g5/` (Rust over the unchanged pinned S2b crate; candidate acceptance code, not adopted); test evidence: `tests/offline/g5/` |
 
 Guardrail proposed for G1–G5: run the same glue over the ratified runner-control fixtures (prereg §7.3) and require each recorded expectation to reproduce unchanged, so any divergence of the glue from the frozen test tooling is visible. This shows consistency on those fixtures; it does not prove the glue adds no rule.
 
@@ -66,7 +66,7 @@ Verification is supported only inside the environment below. Dependencies were i
 | S1 source | commit `e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1`; also vendored inside S2a (`vendor/p10-underdetermination-lean-s1`); S2b records vendored tree `6cdf48c29cd2207243912881c8f38c416ba2026a` | Lean build, `.olean` reproducibility | prep, run |
 | Rust toolchain | `1.82.0`, profile minimal (`rust-toolchain.toml`) | G1 build | prep (install), run (build) |
 | Rust crates | 53 packages locked in `Cargo.lock`; offline build requires them to be available locally (`verify.sh` step 6 is "clean offline Rust build") | G1 build | prep (fetch/vendor), run |
-| Lean toolchain | `leanprover/lean4:v4.33.0`; `lean_build_common.sh` selects the Lean executable by SHA-256 pinned in the S2a verifier manifest (`f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46`) and refuses an unpinned binary | S2a runner, closureAt helper | prep (obtain), run |
+| Lean toolchain | `leanprover/lean4:v4.33.0` (conda-forge `lean4` 4.33.0 build `h6c1889d_0`). `lean_build_common.sh` selects the `lean` executable by SHA-256 `9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847`, the S2a verifier manifest's `lean_toolchain_artifact_digest` (the S1 manifest records the same value as `lean_toolchain_artifact_sha256`), and refuses an unpinned binary. `lake` (`8c57ee92…d7d2`) and `libleanshared.so` (`0df64f23…c4d`) are used by the launchers (`lake build`) and are pinned only by the **S1** manifest; the host preflight enforces both, plus the version string, as required. `leanchecker` (`612915ad…5f33`, S1 manifest) is not used on this chain. `f8380b19…` is the digest of the S2a verifier manifest file itself, not a Lean pin (an earlier revision of this table wrongly gave it as the Lean pin) | S2a runner, closureAt helper | prep (obtain), run |
 | Native C compiler / linker | `cc_wrapper.sh` uses one native `cc` (`$P10_NATIVE_CC` or `command -v cc`) for the pinned Conda-built Lean's native build, logging path and hash | Lean native build | host prerequisite |
 | Python 3 | interpreter used by `post_s2a.py` and glue; `[OPEN]` exact version not pinned in the sources inspected | G2–G5, post-S2a | host prerequisite |
 | Python package | `zstandard==0.25.0` (listed in S2a `requirements.lock`) | **not required by the spike chain**: the glue and `post_s2a.py` ran on the standard library only, and the chain ran on an interpreter without `zstandard` | none observed |
@@ -97,3 +97,10 @@ Executed in a Claude Code cloud container (Ubuntu 24.04, x86_64, gcc 13.3.0, Pyt
 - The pinned Lean executable was obtained and matched: conda-forge `lean4-4.33.0-h6c1889d_0`, `lean` SHA-256 `9842f89b…2847` equal to the S2a manifest pin and the S1 manifest pin; `lake`, `leanchecker` and `libleanshared.so` equal to the S1 manifest pins. The S2b launchers then built the S2a runner and the closureAt helper fresh and accepted the executable by hash.
 - All eight runner controls and the `volmax-owner` fixture passed with their recorded expectations in two consecutive network-isolated runs, with identical verdict projections, `tB` bytes and helper-binary hashes.
 - The S1 OPEN-S13 reproduction (run mode) under the pinned toolchain reproduced the three frozen composite digests used as A12–A14.
+
+## 9. Runner hardening after the feasibility baseline (executed in the container; see `spike/HARDENING_REPORT.md`)
+
+- The host script now stops if network isolation cannot be established or fails its own test (loopback-only interface list, no external TCP connection); a connected run requires the explicit `--no-offline` and is labelled.
+- `lake`, `libleanshared.so` and the version string of the Lean directory actually used are required against the S1 manifest.
+- The glue reads S2a runner output strictly; an error object, malformed result or missing `evidence_repr` is an infrastructure failure, never a semantic `false` or an A15 REJECT.
+- Post-S2a controls compare result, code and rule exactly (and the T5 detail text and the presence of the real helper's binary hash where the helper is required).

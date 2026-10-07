@@ -8,8 +8,9 @@ Experimental code and evidence showing that the traced offline chain can be exec
 | `glue/s3_spike_chain.py` | sequencing glue: S2b result composition, S2a runner jobs, post-S2a inputs from actual outputs, comparison (expected artifacts only read after actual outputs) |
 | `host/run_host.sh` | single host command; `preflight.py` checks each pin; `make_cases.py`, `compare_runs.py` |
 | `fixtures/volmax-owner/` | public material of a `volmax-owner` instance on the frozen toy semantics (test keys; private keys not in the repository); `gen_volmax_owner.py` is the generator |
-| `PINS.json`, `API_INVENTORY.md`, `A12_A14_APPLICABILITY.md`, `FEASIBILITY_REPORT.md` | pins, API accessibility, A12–A14 analysis, results |
-| `evidence/2026-10-07-container/` | commands' outputs from the Claude Code container run (not the maintainer's host) |
+| `PINS.json`, `API_INVENTORY.md`, `A12_A14_APPLICABILITY.md`, `FEASIBILITY_REPORT.md`, `HARDENING_REPORT.md` | pins, API accessibility, A12–A14 analysis, baseline results, runner hardening results |
+| `evidence/2026-10-07-container/` | baseline outputs from the Claude Code container run (not the maintainer's host); preserved unchanged |
+| `evidence/hardening-container/` | outputs of the hardening pass (stop paths, connected run label, fault injection, negative preflights) |
 
 Not committed: `.deps/` (symlink to the S2b checkout), `s3-entry/target/`, private keys.
 

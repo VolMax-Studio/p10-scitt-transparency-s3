@@ -1,0 +1,34 @@
+ok   s1-commit
+ok   s1-clean
+ok   s1-tag-peels-to-pin :: v0.1.0-s1-ratified -> e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1
+ok   s2a-commit
+ok   s2a-clean
+ok   s2a-tag-peels-to-pin :: v0.1.0-s2a-ratified -> 741d56d36d7b2bfe2e9e0080a1cba4393e4a47da
+ok   s2b-commit
+ok   s2b-clean
+ok   s2b-tag-peels-to-pin :: v0.1.0-s2b-complete -> 8eaa91cad1ffa963158b365c6d0d7316f4965e89
+ok   s2b-frozen-files-vs-PINS.txt
+ok   s2a-files-vs-UPSTREAM_HASHES
+ok   s1-verifier-manifest-sha256
+ok   s1-static-open-s13-check
+ok   lean[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/fk1/bin]-vs-S2a-manifest :: 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S2a pin 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847)
+ok   lean[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/fk1/bin]-vs-S1-manifest :: 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S1 pin 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847)
+info lake[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/fk1/bin]-vs-S1-manifest :: 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S1 pin 8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2)
+info leanchecker[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/fk1/bin]-vs-S1-manifest :: None (S1 pin 612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33)
+ok   libleanshared[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/fk1/bin]-vs-S1-manifest :: 0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d (S1 pin 0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d)
+ok   lean[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/fk1/bin]-version-vs-S1-manifest :: 'Lean (version 4.33.0, commit 5da8a13c67369827303c441170d2f4051339df4c, Release)'
+ok   selected-lean-vs-S1-manifest
+FAIL selected-lake-vs-S1-manifest :: 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S1 manifest lake_executable_sha256 = 8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2)
+ok   selected-libleanshared-vs-S1-manifest
+ok   selected-lean-version-vs-S1-manifest
+info selected-leanchecker-vs-S1-manifest (not used on this chain) :: None
+ok   lean-executable-pinned-by-S2a-manifest-available
+ok   rustc-1.82.0 (spike/s3-entry/rust-toolchain.toml)
+ok   native-link-libuv (cc -luv)
+ok   native-cc-version :: cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+ok   python-version :: 3.13.16 (the S2b acceptance environment pins CPython 3.12.3 for its oracle; the spike chain uses only the standard library)
+ok   spike-Cargo.lock-subset-of-S2b-Cargo.lock
+ok   candidate-g5-Cargo.lock-subset-of-S2b-Cargo.lock
+
+preflight: 31 checks, 1 required failed
+  MISSING/WRONG: selected-lake-vs-S1-manifest -> 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S1 manifest lake_executable_sha256 = 8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2)

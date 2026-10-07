@@ -5,7 +5,8 @@
 #
 # Required checkouts (clean, detached at the pinned commits; preflight verifies): S1 e4db3747..., S2a 741d56d3..., S2b 8eaa91ca...
 # Preparation (may use a network): obtaining checkouts and the pinned Lean, `cargo fetch --locked`.
-# Chain execution: run under `unshare -n` (no network) when available; pass --no-offline to skip (then the log says so).
+# Chain execution: DEFAULT is network-isolated (`unshare -n`, else `unshare -rn`) and the isolation is tested; if isolation cannot be established the
+# run STOPS. Only an explicit --no-offline permits a connected run, which is labelled CONNECTED RUN in the log and in OFFLINE_STATUS.txt.
 # Stops on the first failed required prerequisite or failed stage. Never substitutes expected outputs: expected artifacts are only compared.
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; SPIKE="$(dirname "$HERE")"; REPO="$(dirname "$SPIKE")"
@@ -27,18 +28,59 @@ step "host"; { date -u +%FT%TZ; uname -a; python3 --version; cargo --version 2>&
 step "1 preflight (each toolchain/source against its own frozen pin)"
 python3 -B "$HERE/preflight.py" --s1 "$S1" --s2a "$S2A" --s2b "$S2B" ${LEANBIN:+--lean-bin-dir "$LEANBIN"} --out "$OUT/preflight.json" || die "preflight failed: see the MISSING/WRONG lines above"
 
+# the Lean directory that passed the pin checks is the one the S2b launchers must use
+SEL="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['selected_lean_bin_dir'] or '')" "$OUT/preflight.json")"
+[ -n "$SEL" ] || die "preflight selected no Lean directory"
+export P10_LEAN_BIN_DIR="$SEL"; echo "Lean directory used by the launchers: $SEL"
+
 step "2 build the S3 spike entry against the pinned S2b crate (cargo --locked)"
 ln -sfn "$S2B" "$SPIKE/.deps/s2b" 2>/dev/null || { mkdir -p "$SPIKE/.deps" && ln -sfn "$S2B" "$SPIKE/.deps/s2b"; }
 ( cd "$SPIKE/s3-entry" && rustc -V && cargo fetch --locked && cargo build --locked --offline ) || die "entry build failed"
 ENTRY="$SPIKE/s3-entry/target/debug/s3-spike-entry"; sha256sum "$ENTRY" | tee "$OUT/entry.sha256"
+
+step "2b candidate G5 (verifier/g5): build, unit tests, and the correspondence check of the committed test capture against its external anchor"
+VER="$REPO/verifier"; mkdir -p "$VER/.deps" && ln -sfn "$S2B" "$VER/.deps/s2b"
+( cd "$VER/g5" && cargo build --locked --offline && cargo test --locked --offline --lib ) || die "G5 build or unit tests failed"
+CAPDIR="$REPO/tests/offline/g5/fixtures/volmax-owner-capture"
+ANCHOR="$(grep -E '  tests/offline/g5/fixtures/volmax-owner-capture/capture.json$' "$REPO/MANIFEST.sha256" | cut -d' ' -f1)"
+[ -n "$ANCHOR" ] || die "no MANIFEST.sha256 anchor for the committed test capture's capture.json (regenerate MANIFEST.sha256)"
+"$VER/g5/target/debug/s3-g5" --capture "$CAPDIR" --index-sha256 "$ANCHOR" | tee "$OUT/g5-committed-capture.json"
+grep -q '"g5":"PASS"' "$OUT/g5-committed-capture.json" || die "G5 did not pass on the committed test capture"
 
 step "3 cases (controls reuse ratified S2b fixtures unchanged; plus spike/fixtures/*)"
 python3 -B "$HERE/make_cases.py" --s2b "$S2B" --fixtures "$SPIKE/fixtures" --out "$OUT/cases.json" || die "make_cases failed"
 
 RUNNER=(env)
 if [ "$OFFLINE" = 1 ]; then
-  if unshare -n true 2>/dev/null; then RUNNER=(unshare -n); echo "chain execution: network namespace without network (unshare -n)"; else echo "WARNING: unshare -n unavailable; chain execution is NOT network-isolated"; fi
-else echo "chain execution: network isolation skipped (--no-offline)"; fi
+  ISO=""
+  for cand in "unshare -n" "unshare -rn"; do
+    if $cand true 2>/dev/null; then ISO="$cand"; break; fi
+  done
+  [ -n "$ISO" ] || die "network isolation could not be established (neither 'unshare -n' nor 'unshare -rn' works). Re-run with an environment that allows it, or pass --no-offline to accept a CONNECTED run (it will be labelled as such)."
+  # test the isolation from inside the namespace: no interface other than loopback may exist (independent of any egress policy), and no
+  # external TCP connection may succeed
+  if $ISO python3 -c "
+import socket,sys
+names=[n for _,n in socket.if_nameindex()]
+if any(n!='lo' for n in names):
+    sys.exit(1)
+for fam,addr in ((socket.AF_INET,('1.1.1.1',53)),(socket.AF_INET6,('2606:4700:4700::1111',53))):
+    try:
+        s=socket.socket(fam,socket.SOCK_STREAM); s.settimeout(3)
+        s.connect(addr)
+    except OSError:
+        continue            # unsupported family or unreachable: isolated for this family
+    sys.exit(1)             # a connection succeeded: not isolated
+sys.exit(0)"; then
+    echo "network isolation established and tested: $ISO (loopback only; no external TCP connection possible)"
+  else
+    die "network isolation test failed: a non-loopback interface or an external address was reachable inside '$ISO'. Pass --no-offline to accept a CONNECTED run."
+  fi
+  RUNNER=($ISO); echo "network-isolated: yes ($ISO)" > "$OUT/OFFLINE_STATUS.txt"
+else
+  echo "*** CONNECTED RUN (--no-offline): chain execution is NOT network-isolated ***"
+  echo "network-isolated: NO (--no-offline)" > "$OUT/OFFLINE_STATUS.txt"
+fi
 
 for n in 1 2; do
   step "4.$n chain run $n (S2b -> S2a -> post-S2a with real closureAt helper)"

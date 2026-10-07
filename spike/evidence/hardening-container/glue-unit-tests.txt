@@ -1,0 +1,12 @@
+test_compose (test_glue.T.test_compose) ... ok
+test_frozen_digests (test_glue.T.test_frozen_digests) ... ok
+test_match_post_exact (test_glue.T.test_match_post_exact) ... ok
+test_match_s2b (test_glue.T.test_match_s2b) ... ok
+test_norm_s2a (test_glue.T.test_norm_s2a) ... ok
+test_strict_cov_and_codec (test_glue.T.test_strict_cov_and_codec) ... ok
+test_strict_e2e (test_glue.T.test_strict_e2e) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK

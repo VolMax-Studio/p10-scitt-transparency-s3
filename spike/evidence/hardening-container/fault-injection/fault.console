@@ -1,0 +1,17 @@
+C-ACC            FAIL
+    FAIL post-s2a-result-code-rule: result NOT_EVIDENCE != BINDING_MATCH
+    FAIL no-infrastructure-failure: post-S2a: NOT_EVIDENCE (verdict used a non-Lean (scripted/mock) closureAt provider)
+C-POST-REJ       FAIL
+    FAIL post-s2a-result-code-rule: result NOT_EVIDENCE != REJECT
+    FAIL no-infrastructure-failure: post-S2a: NOT_EVIDENCE (verdict used a non-Lean (scripted/mock) closureAt provider)
+C-POST-HALT      FAIL
+    FAIL post-s2a-result-code-rule: result NOT_EVIDENCE != HALT
+    FAIL no-infrastructure-failure: post-S2a: NOT_EVIDENCE (verdict used a non-Lean (scripted/mock) closureAt provider)
+C-S2A-REJ        PASS
+C-S2A-HALT       PASS
+C-S2B-REJ        PASS
+C-S2B-HALT       PASS
+C-S2B-UNAV       PASS
+FX-volmax-owner  FAIL
+    FAIL post-s2a-result-code-rule: result NOT_EVIDENCE != BINDING_MATCH
+    FAIL no-infrastructure-failure: post-S2a: NOT_EVIDENCE (verdict used a non-Lean (scripted/mock) closureAt provider)

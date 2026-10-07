@@ -116,6 +116,21 @@ def main():
         chk(f"lean[{d}]-version-vs-S1-manifest", so == m1["lean_version_string"], f"{so!r}", required=False)
         if ok2a and not found:
             found = d
+    if found:
+        # Components this chain actually uses are REQUIRED against their own pins: `lean` (S2a pin, equal to the S1 pin), `lake` (the
+        # S2b launchers run `lake build`), `libleanshared.so` (loaded by lean/lake), and the version string. `leanchecker` is used only by
+        # the S1 reproduction harness, not by this chain, so it stays informational here.
+        def need(cid, path, key, what):
+            g = sha256_file(path) if os.path.isfile(path) else None
+            chk(cid, g == m1[key], f"{g} (S1 manifest {key} = {m1[key]})")
+        need("selected-lean-vs-S1-manifest", os.path.join(found, "lean"), "lean_toolchain_artifact_sha256", "lean")
+        need("selected-lake-vs-S1-manifest", os.path.join(found, "lake"), "lake_executable_sha256", "lake")
+        need("selected-libleanshared-vs-S1-manifest", os.path.join(os.path.dirname(found), "lib", "lean", "libleanshared.so"), "lean_shared_library_sha256", "libleanshared")
+        rc, so, se = sh([os.path.join(found, "lean"), "--version"])
+        chk("selected-lean-version-vs-S1-manifest", so == m1["lean_version_string"], so)
+        lc = os.path.join(found, "leanchecker")
+        g = sha256_file(lc) if os.path.isfile(lc) else None
+        chk("selected-leanchecker-vs-S1-manifest (not used on this chain)", g == m1["leanchecker_executable_sha256"], f"{g}", required=False)
     chk("lean-executable-pinned-by-S2a-manifest-available", found is not None,
         f"candidate dir {found}" if found else "no candidate directory contains a `lean` with SHA-256 " + m2a["lean_toolchain_artifact_digest"] +
         " (conda-forge lean4 4.33.0 build h6c1889d_0); pass --lean-bin-dir or set P10_LEAN_BIN_DIR")
@@ -142,11 +157,17 @@ def main():
             c = re.search(r'checksum = "([^"]+)"', blk)
             out[n.group(1)] = (v.group(1), c.group(1) if c else None)
         return out
-    l2b, lsp = locked(os.path.join(a.s2b, "Cargo.lock")), locked(os.path.join(spike, "s3-entry", "Cargo.lock"))
-    diff = [n for n, v in lsp.items() if n not in ("s3-spike-entry",) and l2b.get(n) != v]
-    chk("spike-Cargo.lock-subset-of-S2b-Cargo.lock", not diff, "differ: " + ",".join(diff))
+    l2b = locked(os.path.join(a.s2b, "Cargo.lock"))
+    for label, lockpath, own in (("spike", os.path.join(spike, "s3-entry", "Cargo.lock"), "s3-spike-entry"),
+                                 ("candidate-g5", os.path.join(os.path.dirname(spike), "verifier", "g5", "Cargo.lock"), "s3-g5")):
+        if not os.path.exists(lockpath):
+            chk(f"{label}-Cargo.lock-subset-of-S2b-Cargo.lock", False, "lock file missing")
+            continue
+        lsp = locked(lockpath)
+        diff = [n for n, v in lsp.items() if n != own and l2b.get(n) != v]
+        chk(f"{label}-Cargo.lock-subset-of-S2b-Cargo.lock", not diff, "differ: " + ",".join(diff))
 
-    json.dump(res, open(a.out, "w"), indent=1)
+    json.dump({"selected_lean_bin_dir": found, "checks": res}, open(a.out, "w"), indent=1)
     failed = [r for r in res if r["required"] and not r["ok"]]
     print(f"\npreflight: {len(res)} checks, {len(failed)} required failed")
     for r in failed:

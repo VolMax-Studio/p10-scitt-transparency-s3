@@ -1,0 +1,28 @@
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-ACC/s2b/tB.bin
+inst	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+pb	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-ACC/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+e2e	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-ACC/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/iB.json	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-POST-REJ/s2b/tB.bin
+inst	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+pb	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-POST-REJ/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+e2e	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-POST-REJ/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/BIND-A10-mismatch/iB.json	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-POST-HALT/s2b/tB.bin
+inst	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+pb	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-POST-HALT/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+e2e	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-POST-HALT/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/T13-T5-closureAt-none/iB.json	/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-S2A-REJ/s2b/tB.bin
+inst	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/inst.bin
+pb	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-S2A-REJ/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/pB.json	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/inst.bin
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-S2A-HALT/s2b/tB.bin
+inst	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/inst.bin
+pb	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/C-S2A-HALT/s2b/tB.bin	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/pB.json	/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/inst.bin
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/FX-volmax-owner/s2b/tB.bin
+inst	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/inst.bin
+pb	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/FX-volmax-owner/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/pB.json	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/inst.bin
+e2e	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/final/default/run1/cases/FX-volmax-owner/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/pB.json	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/iB.json	/home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/inst.bin

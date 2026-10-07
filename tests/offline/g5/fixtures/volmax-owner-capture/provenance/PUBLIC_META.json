@@ -1,0 +1,87 @@
+{
+ "file_sha256": {
+  "iB.json": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "inst.bin": "5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+  "pB.json": "a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c",
+  "request.cbor": "6e4dd60f97b908c0b12d1da249f12807a9da175f49bdea888bc5708de7055e7d",
+  "tB.expected": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519",
+  "target_payload.json": "ca8fbce856544615eb6a0c8c73b38a4a40662a01b38b7489fd1be474d1d03181"
+ },
+ "generator_environment": {
+  "note": "NOT the pinned oracle interpreter (CPython 3.12.3); generator output is test input, validated by the pinned chain",
+  "python": "3.13.16"
+ },
+ "identity": {
+  "instance_subject": "p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2",
+  "issuer_key_thumbprints": {
+   "admitter-one": "1bfd484b396512dadfef491786708152cc0245658f1a868cda047eb1e15338fe",
+   "admitter-two": "c78ba9d6ae8f4b19fd7dca2e93d0e08aee34b4a04814801764f12ec6425e9fd1",
+   "intruder-x": "4e27df34db7604a6f0d93778965190d2403a878c4c0e9a3de44397bd1c0208a5",
+   "volmax-owner": "e9b5393e2e7aab7d2629eee641999f2fdd68314928028daf66d85b8bb051e71a"
+  },
+  "log_identity_digest": "7dd7aff43fd2d5becf170822b4e600b928a1fb4031285142a7068a42fa9ebf75",
+  "owner_iss": "volmax-owner",
+  "ts_iss": "https://ts.example/volmax-s3-spike",
+  "ts_key_thumbprint": "87b27077c51ffcecdb7704b6ca8d960054c2e5b4f1cbab5ba0836dc9c9ca452b"
+ },
+ "private_keys": "generated outside the repository, not committed, not recorded",
+ "sanity_checks": [
+  {
+   "check": "toy iB bytes are the S1 p1.instance.json bytes (sha256 62353069...)",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "SubjectDeriveV0 re-derivation reproduces the toy instance_subject",
+   "detail": "b'p10s2sub:3ab2026305aeee8e1c2db40245102927d5c48c574c42f8d334f3b9b270ac873d' vs b'p10s2sub:3ab2026305aeee8e1c2db40245102927d5c48c574c42f8d334f3b9b270ac873d'",
+   "ok": true
+  },
+  {
+   "check": "LogIdentityV0 re-derivation reproduces the toy log_identity_digest",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "only identity-dependent instance fields changed",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "pB differs from the toy pB only in key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "authorized admitters unchanged (owner is not an admitter)",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "adjudication wire carries the frozen A12-A14 digests unchanged",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "adjudication wire instance_subject is the derived volmax-owner subject",
+   "detail": "",
+   "ok": true
+  }
+ ],
+ "sources": {
+  "s2a_commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+  "s2b_commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+  "template_inst_sha256": "24316063d808800e66c610d3cbaeeb2010aaa76ea5fdfc59b41a0a5d0833e95d",
+  "template_pB_sha256": "7d840d07184049cb9ca97e68d267ab3be2cb53eed7a00e6f8c866323e03fa9ad"
+ },
+ "status": "NON-NORMATIVE FEASIBILITY SPIKE FIXTURE; test keys only; not S3 live-capture evidence; not a mutation of any S3 capture",
+ "unchanged_vs_ratified_toy": {
+  "a12_a14": {
+   "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+   "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+   "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+  },
+  "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "lifecycle_shape": "profile(0) instance(1) admission(2) closure(3) adjudication(4); target 4",
+  "verifier_manifest_digest": "f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46"
+ }
+}

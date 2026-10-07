@@ -1,0 +1,38 @@
+{
+ "all_identical": true,
+ "closureat_binary_identical": true,
+ "s2a_runner_binary_identical": true,
+ "tB": {
+  "C-ACC": {
+   "a": "3ad48229409d7c576868d4e5ca0adbcf30cccd51c713be1259fcdabdd0d52f93",
+   "b": "3ad48229409d7c576868d4e5ca0adbcf30cccd51c713be1259fcdabdd0d52f93",
+   "identical": true
+  },
+  "C-POST-HALT": {
+   "a": "e340c8dd1f213ca262ca1fc72ab69dcf98a5d00c322dbf66381d6358a3fec873",
+   "b": "e340c8dd1f213ca262ca1fc72ab69dcf98a5d00c322dbf66381d6358a3fec873",
+   "identical": true
+  },
+  "C-POST-REJ": {
+   "a": "4ce7e8c36704bd0a3f971346d923f78ca2ca8b43ab215b52ae0db7d6d526ebb6",
+   "b": "4ce7e8c36704bd0a3f971346d923f78ca2ca8b43ab215b52ae0db7d6d526ebb6",
+   "identical": true
+  },
+  "C-S2A-HALT": {
+   "a": "0231376b19919d58ef089acaa73da73d0498ac37af0608083c154b8b396a071b",
+   "b": "0231376b19919d58ef089acaa73da73d0498ac37af0608083c154b8b396a071b",
+   "identical": true
+  },
+  "C-S2A-REJ": {
+   "a": "e7acb74cc9e1665e7d3edb2105324559313d5a7b974299e4feffde0477d8dfda",
+   "b": "e7acb74cc9e1665e7d3edb2105324559313d5a7b974299e4feffde0477d8dfda",
+   "identical": true
+  },
+  "FX-volmax-owner": {
+   "a": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519",
+   "b": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519",
+   "identical": true
+  }
+ },
+ "verdict_projection_identical": true
+}

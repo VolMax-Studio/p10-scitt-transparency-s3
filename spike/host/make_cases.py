@@ -25,6 +25,30 @@ CONTROLS = [
 ]
 
 
+def with_code(post):
+    """Add the exact post-S2a code, detail and helper requirement to an expectation {verdict, rule}.
+    SOURCE: spike annotation derived by inspection of orchestration/post_s2a.py (codes and the T5 detail text), NOT read from the ratified
+    vectors' expected.json, which record only verdict and rule. A result that merely has the same verdict and rule but a different code
+    (for example HALT/T5 with code ClosureAtUnavailable) must not satisfy a control."""
+    if post is None:
+        return None
+    post = dict(post)
+    v, r = post["verdict"], post.get("rule")
+    if "code" not in post:
+        if v == "BINDING_MATCH":
+            post["code"] = "BindingMatch"
+        elif v == "REJECT":
+            post["code"] = "BindingMismatch"
+        elif v == "HALT" and r and r.startswith("T"):
+            post["code"] = "TargetAdjudicationNotEstablished"
+        elif v == "HALT" and r and r.startswith("A"):
+            post["code"] = "BindingMaterialUnavailable"
+    if v == "HALT" and r == "T5":
+        post.setdefault("detail_contains", "closureAt returned none")
+    post.setdefault("helper_required", not (v == "HALT" and r in ("T1", "T2", "T3", "T4", "T6")))
+    return post
+
+
 def inventory(dirpath, extra=()):
     names = ["request.cbor", "pB.json", "inst.bin", "iB.json", "target_payload.json", "tB.expected", "expected.json"] + list(extra)
     return {n: os.path.exists(os.path.join(dirpath, n)) for n in names}
@@ -64,7 +88,7 @@ def main():
                 c["retained_target_payload"] = os.path.join(d, "target_payload.json")
                 e["s2a"] = ".accept" if ex["s2a_precondition"] == "accept" else None
                 e["e2e"] = ex.get("s1_end_to_end_expected")
-                e["post"] = ex["post_s2a_expected"]
+                e["post"] = with_code(ex["post_s2a_expected"])
             else:   # s2a-t11
                 c["pb"], c["inst"] = os.path.join(d, "pB.json"), os.path.join(d, "inst.bin")
                 if have["iB.json"]:
@@ -80,6 +104,7 @@ def main():
             if not os.path.exists(os.path.join(d, "request.cbor")):
                 continue
             ex = json.load(open(os.path.join(d, "expect.json")))
+            ex["post"] = with_code(ex.get("post"))
             c = {"id": "FX-" + name, "request": os.path.join(d, "request.cbor"), "source": "spike/fixtures/" + name,
                  "pb": os.path.join(d, "pB.json"), "inst": os.path.join(d, "inst.bin"), "ib": os.path.join(d, "iB.json"),
                  "retained_target_payload": os.path.join(d, "target_payload.json"), "tb_expected": os.path.join(d, "tB.expected"), "expect": ex}

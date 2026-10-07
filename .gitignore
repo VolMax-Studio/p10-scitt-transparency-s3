@@ -1,4 +1,6 @@
 spike/.deps/
 spike/s3-entry/target/
+verifier/.deps/
+verifier/g5/target/
 __pycache__/
 *.pyc

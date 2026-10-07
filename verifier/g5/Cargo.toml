@@ -1,0 +1,24 @@
+# CANDIDATE S3 acceptance-layer code (G5, capture-correspondence checker). Not ratified, not frozen, not adopted.
+# Role: artifact correspondence between a capture directory and its request.cbor. It implements no P10 rule.
+[package]
+name = "s3-g5"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.82"
+publish = false
+description = "Candidate G5: capture-correspondence checker over the unchanged pinned S2b crate."
+
+[lib]
+name = "s3_g5"
+path = "src/lib.rs"
+
+[[bin]]
+name = "s3-g5"
+path = "src/main.rs"
+
+# p10_replay: the pinned S2b checkout (commit 8eaa91cad1ffa963158b365c6d0d7316f4965e89), linked at ../.deps/s2b by the host script
+# (not committed). sha2 and serde_json are the exact versions already locked by S2b; no other dependency.
+[dependencies]
+p10_replay = { path = "../.deps/s2b" }
+sha2 = { version = "=0.10.8", default-features = false }
+serde_json = { version = "=1.0.132", default-features = false, features = ["std"] }

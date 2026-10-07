@@ -115,6 +115,73 @@ def match_s2b(expect, res):
     return True, ""
 
 
+# Strict reading of S2a runner output (source: orchestration/helper/S2aRunner.lean). Format problems and runner errors are
+# INFRASTRUCTURE failures; they are returned as errors and can never turn into a semantic value (for example e2e "false" -> A15 REJECT).
+
+def _job(obj, op):
+    if not isinstance(obj, dict):
+        return None, "job output is not an object"
+    if "error" in obj:
+        return None, f"runner error: {obj.get('error')}"
+    if obj.get("op") != op:
+        return None, f"op {obj.get('op')!r} != {op!r}"
+    return obj, None
+
+
+def parse_codec_job(obj, op):
+    """tb / inst / pb strict decode + re-encode identity. -> (True, None) | (False, error)."""
+    v, e = _job(obj, op)
+    if e:
+        return False, e
+    if v.get("decode") is not True or v.get("reencode_identical") is not True:
+        return False, f"{op}: decode={v.get('decode')!r} reencode_identical={v.get('reencode_identical')!r}"
+    return True, None
+
+
+def parse_cov_job(obj):
+    """-> (result dict, None) | (None, error). outcome in accept/reject/halt; accept needs a 64-hex evidence digest."""
+    v, e = _job(obj, "cov")
+    if e:
+        return None, e
+    r = v.get("result")
+    if not isinstance(r, dict) or r.get("outcome") not in ("accept", "reject", "halt") or not isinstance(r.get("repr"), str):
+        return None, f"cov: malformed result {r!r}"
+    if r["outcome"] == "accept" and not (isinstance(r.get("evidence_digest"), str) and HEX64.fullmatch(r["evidence_digest"])):
+        return None, "cov: accept without a 64-hex evidence_digest"
+    return r, None
+
+
+def parse_e2e_job(obj):
+    """-> (True|False, None) only for an explicit "some"/"none"; anything else -> (None, error)."""
+    v, e = _job(obj, "e2e")
+    if e:
+        return None, e
+    r = v.get("result")
+    if r == "some" and isinstance(v.get("evidence_repr"), str):
+        return True, None
+    if r == "none":
+        return False, None
+    return None, f"e2e: result {r!r} is neither an explicit some (with evidence_repr) nor none"
+
+
+INFRA_POST_CODES = ("ClosureAtUnavailable", "ClosureAtInconsistent", "NOT_EVIDENCE")
+
+
+def match_post(expect, post):
+    """Exact comparison of a post-S2a evidence record with an expectation {verdict, rule, code, detail_contains?, helper_required?}."""
+    if post.get("result") != expect["verdict"]:
+        return False, f"result {post.get('result')} != {expect['verdict']}"
+    if post.get("rule") != expect.get("rule"):
+        return False, f"rule {post.get('rule')} != {expect.get('rule')}"
+    if "code" in expect and post.get("code") != expect["code"]:
+        return False, f"code {post.get('code')} != {expect['code']}"
+    if "detail_contains" in expect and expect["detail_contains"] not in (post.get("detail") or ""):
+        return False, f"detail {post.get('detail')!r} lacks {expect['detail_contains']!r}"
+    if expect.get("helper_required") and not post.get("closure_helper_binary_sha256"):
+        return False, "no closureAt helper binary hash recorded for a result that requires the real helper"
+    return True, ""
+
+
 # ---------------------------------------------------------------------------------------------------- main
 
 def main():
@@ -125,6 +192,8 @@ def main():
     ap.add_argument("--s2a", required=True)
     ap.add_argument("--entry", required=True)
     ap.add_argument("--s2b-only", action="store_true", help="stop after the S2b stage (no Lean)")
+    ap.add_argument("--inject-closureat-unavailable", action="store_true",
+                    help="TEST HOOK: skip the closureAt helper run to simulate helper unavailability (controls must then FAIL, never match)")
     a = ap.parse_args()
     out = os.path.abspath(a.out)
     os.makedirs(out, exist_ok=True)
@@ -217,32 +286,45 @@ def main():
         for cid, idx in s2a_index.items():
             st = state[cid]
             c = st["case"]
-            tbj, instj, pbj, cov = (s2a_res[idx[k]] for k in ("tb", "inst", "pb", "cov"))
+            tbj, instj, pbj, covj = (s2a_res[idx[k]] for k in ("tb", "inst", "pb", "cov"))
             st["stages"]["s2a_codec"] = {"tb": tbj, "inst": instj, "pb": pbj}
-            st["s2a_cov"] = cov
-            e2e = s2a_res[idx["e2e"]] if "e2e" in idx else None
-            st["s2a_e2e"] = e2e
-            codec_ok = all(j.get("decode") and j.get("reencode_identical") for j in (tbj, instj, pbj))
+            st["s2a_cov"] = covj
+            st["infra"] = st.get("infra", [])
+            codec_ok = True
+            for nm, j in (("tb", tbj), ("inst", instj), ("pb", pbj)):
+                ok_, err_ = parse_codec_job(j, nm)
+                if not ok_:
+                    codec_ok = False
+                    st["infra"].append("S2a codec: " + err_)
             st["s2a_codec_ok"] = codec_ok
-            if not codec_ok or "result" not in cov:
+            cov, err_ = parse_cov_job(covj)
+            if err_:
+                st["infra"].append("S2a cov: " + err_)
+            if not codec_ok or cov is None:
                 continue
-            outcome, reason = norm_s2a(cov["result"])
+            outcome, reason = norm_s2a(cov)
             st["s2a"] = (outcome, reason)
             if outcome != "accept":
                 continue
+            e2er = None
+            if "e2e" in idx:
+                st["s2a_e2e"] = s2a_res[idx["e2e"]]
+                e2er, err_ = parse_e2e_job(st["s2a_e2e"])
+                if err_:
+                    st["infra"].append("S2a e2e: " + err_)
+                    continue
+            else:
+                st["s2a_e2e"] = None
+            if not c.get("ib"):
+                st["post_not_run"] = "no S1 instance bytes (iB) for this case"
+                continue
             t = st["s2b"]["target"]
             tdir = os.path.join(st["dir"], "s2b")
-            e2er = None
-            if e2e is not None:
-                v = e2e.get("result")
-                e2er = (v == "some")
-            if not c.get("ib"):
-                continue    # no S1 instance bytes: post-S2a cannot run for this case (reported)
             post_inputs[cid] = P.PostS2aInputs(
                 True, open(os.path.join(tdir, "tB.bin"), "rb").read(), open(c["pb"], "rb").read(), open(c["ib"], "rb").read(),
                 int(open(os.path.join(tdir, "target.leaf_index.txt")).read()), open(os.path.join(tdir, "target.payload.bin"), "rb").read(),
                 open(os.path.join(tdir, "target.sub.txt"), encoding="utf-8").read(),
-                bytes.fromhex(cov["result"]["evidence_digest"]), e2er, fz)
+                bytes.fromhex(cov["evidence_digest"]), e2er, fz)
 
         class Recording:
             def __init__(self):
@@ -259,7 +341,10 @@ def main():
         rec = Recording()
         for cid, inp in post_inputs.items():
             P.evaluate(inp, rec)
-        if rec.jobs and not a.s2b_only:
+        if rec.jobs and a.inject_closureat_unavailable:
+            cinfo["error"] = "TEST HOOK: closureAt helper deliberately not run (--inject-closureat-unavailable)"
+            report["fault_injected"] = "closureat-unavailable"
+        elif rec.jobs and not a.s2b_only:
             tmp = tempfile.mkdtemp()
             lines = []
             for n, (tb, pb, ib, k) in enumerate(rec.jobs):
@@ -279,8 +364,12 @@ def main():
                         cinfo[k] = ln.split(" ", 1)[1]
             outs = [l for l in so.splitlines() if l.strip()]
             if rc == 0 and len(outs) == len(rec.jobs):
-                for job, line in zip(rec.jobs, outs):
-                    answers[job] = P.parse_helper_output(line, job[3], cinfo.get("helper-binary-sha256"), trusted=True)
+                try:
+                    for job, line in zip(rec.jobs, outs):
+                        answers[job] = P.parse_helper_output(line, job[3], cinfo.get("helper-binary-sha256"), trusted=True)
+                except P.ClosureAtUnavailable as e:
+                    answers.clear()
+                    cinfo["error"] = f"closureAt output malformed: {e}"
             else:
                 cinfo["error"] = f"closureAt batch did not run (exit {rc}); stage NOT RUN"
                 cinfo["stderr_tail"] = se[-600:]
@@ -290,7 +379,9 @@ def main():
             try:
                 state[cid]["post"] = P.evidence_record(v)
             except P.UntrustedVerdictError as e:
-                state[cid]["post"] = {"result": "NOT_EVIDENCE", "code": str(e), "rule": None}
+                state[cid]["post"] = {"result": "NOT_EVIDENCE", "code": "NOT_EVIDENCE", "rule": None, "detail": str(e)}
+            if state[cid]["post"].get("code") in INFRA_POST_CODES:
+                state[cid].setdefault("infra", []).append(f"post-S2a: {state[cid]['post'].get('code')} ({state[cid]['post'].get('detail')})")
     report["closureat_helper"] = cinfo
 
     # ---------------- comparison (expected artifacts read only here)
@@ -323,14 +414,17 @@ def main():
                 chk("s2a-outcome", got is not None and got[0] == want[0] and (want[1] is None or got[1] == want[1]), f"{got} vs {want}")
                 row["s2a"] = {"actual": got, "codec_ok": st.get("s2a_codec_ok")}
         if "e2e" in exp and exp["e2e"] and not a.s2b_only and s2a_res and st.get("s2a_e2e") is not None:
-            chk("s1-e2e", st["s2a_e2e"].get("result") == exp["e2e"], f"{st['s2a_e2e'].get('result')} vs {exp['e2e']}")
+            val, err_ = parse_e2e_job(st["s2a_e2e"])
+            chk("s1-e2e", err_ is None and (("some" if val else "none") == exp["e2e"]), f"{err_ or ('some' if val else 'none')} vs {exp['e2e']}")
         if "post" in exp and exp["post"]:
             if "post" not in st:
                 row["post"] = "NOT RUN"
             else:
                 row["post"] = st["post"]
-                chk("post-s2a-verdict", st["post"]["result"] == exp["post"]["verdict"] and (exp["post"].get("rule") in (None, st["post"].get("rule"))),
-                    f"{st['post']['result']}/{st['post'].get('rule')} vs {exp['post']}")
+                ok_, d_ = match_post(exp["post"], st["post"])
+                chk("post-s2a-result-code-rule", ok_, d_ or f"{st['post']['result']}/{st['post'].get('code')}/{st['post'].get('rule')}")
+        row["infra_failures"] = st.get("infra", [])
+        chk("no-infrastructure-failure", not row["infra_failures"], "; ".join(row["infra_failures"]))
         row["pass"] = bool(row["checks"]) and all(x["ok"] for x in row["checks"])
         row["not_run"] = [k for k in ("s2a", "post") if row.get(k) == "NOT RUN"]
         report["cases"][cid] = row

@@ -1,0 +1,111 @@
+{
+ "C-ACC": {
+  "dir": "s2a-post/POST-BASE-match",
+  "files": {
+   "expected.json": true,
+   "iB.json": true,
+   "inst.bin": false,
+   "pB.json": false,
+   "request.cbor": true,
+   "tB.expected": true,
+   "target_payload.json": true
+  }
+ },
+ "C-POST-HALT": {
+  "dir": "s2a-post/T13-T5-closureAt-none",
+  "files": {
+   "expected.json": true,
+   "iB.json": true,
+   "inst.bin": false,
+   "pB.json": false,
+   "request.cbor": true,
+   "tB.expected": true,
+   "target_payload.json": true
+  }
+ },
+ "C-POST-REJ": {
+  "dir": "s2a-post/BIND-A10-mismatch",
+  "files": {
+   "expected.json": true,
+   "iB.json": true,
+   "inst.bin": false,
+   "pB.json": false,
+   "request.cbor": true,
+   "tB.expected": true,
+   "target_payload.json": true
+  }
+ },
+ "C-S2A-HALT": {
+  "dir": "s2a-t11/N7a",
+  "files": {
+   "expected.json": true,
+   "iB.json": false,
+   "inst.bin": true,
+   "pB.json": true,
+   "request.cbor": true,
+   "tB.expected": true,
+   "target_payload.json": false
+  }
+ },
+ "C-S2A-REJ": {
+  "dir": "s2a-t11/N13b",
+  "files": {
+   "expected.json": true,
+   "iB.json": false,
+   "inst.bin": true,
+   "pB.json": true,
+   "request.cbor": true,
+   "tB.expected": true,
+   "target_payload.json": false
+  }
+ },
+ "C-S2B-HALT": {
+  "dir": "M/M1",
+  "files": {
+   "expected.json": true,
+   "iB.json": false,
+   "inst.bin": false,
+   "pB.json": false,
+   "request.cbor": true,
+   "tB.expected": false,
+   "target_payload.json": false
+  }
+ },
+ "C-S2B-REJ": {
+  "dir": "E/E10-unprotected",
+  "files": {
+   "expected.json": true,
+   "iB.json": false,
+   "inst.bin": false,
+   "pB.json": false,
+   "request.cbor": true,
+   "tB.expected": false,
+   "target_payload.json": false
+  }
+ },
+ "C-S2B-UNAV": {
+  "dir": "M/M8",
+  "files": {
+   "expected.json": true,
+   "iB.json": false,
+   "inst.bin": false,
+   "pB.json": false,
+   "request.cbor": true,
+   "tB.expected": false,
+   "target_payload.json": false
+  }
+ },
+ "FX-volmax-owner": {
+  "dir": "spike/fixtures/volmax-owner",
+  "files": {
+   "expect.json": true,
+   "expected.json": false,
+   "iB.json": true,
+   "inst.bin": true,
+   "pB.json": true,
+   "request.cbor": true,
+   "tB.expected": true,
+   "target_payload.json": true
+  }
+ }
+}

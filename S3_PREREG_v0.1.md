@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r3 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r4 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r4 (runner hardening and capture layer, relative to r3 at `23ba96f`): the capture layout, the index format and the exact G5 packaging failure reasons are specified in `spec/capture-format.md`; a candidate G5 implementation exists under `verifier/g5/` with test evidence under `tests/offline/g5/` (candidate acceptance-code evidence, kept separate from the feasibility-spike evidence under `spike/`); the mixed-log test is identified in `spec/mixed-log-test-plan.md`; the spike runner was hardened (`spike/HARDENING_REPORT.md`). Nothing is adopted by this document.
 
 Revision r3 (feasibility-spike pass, relative to r2 at `fcb1efa`): the fixed toy semantics are distinguished from configurable identity/key data (I13); the sentence that post-hoc corruption could only yield `RootMismatch` or `S3-FAIL` is removed and replaced by an accurate statement (Section 7.4); post-S2a target payload and protected `sub` must originate from the authenticated target (Section 6.1a); open items updated. The non-normative spike under `spike/` supports these corrections with executed evidence (`spike/FEASIBILITY_REPORT.md`); nothing in the spike is adopted by this document.
 
@@ -113,7 +115,7 @@ The acceptance path MUST NOT contain: S3-specific semantic assistance, transform
 
 It does not re-encode any signed object, and it does not check configuration, identity, fingerprint, lifecycle, or coverage rules: `key_resolution`, `ts_iss`, `LogIdentityV0` against the commitment and `pB`, and key-fingerprint binding are checked by the frozen chain (S2b phases P0/P7, S2a C1/C1b), and re-implementing them would create a second implementation of the same rules. This delegation is deliberate.
 
-The checker is S3-owned code in the acceptance path and therefore part of the trusted computing base of S3-C. Its role is artifact correspondence, not P10 semantics. `[OPEN]` its implementation form and where it runs relative to the chain.
+The checker is S3-owned code in the acceptance path and therefore part of the trusted computing base of S3-C. Its role is artifact correspondence, not P10 semantics. The capture layout, the `capture.json` index, the ordered checks and the exact failure reasons are specified in `spec/capture-format.md`; the check that `capture.json` itself is the committed one uses an external anchor (the hash recorded in the repository manifest) supplied to the checker. A candidate implementation (`verifier/g5/`, Rust over the unchanged pinned S2b crate) exists and has been exercised (`tests/offline/g5/`); it is not adopted. On any checker failure the S2b replay, the S2a runner, the closureAt helper and the post-S2a stage MUST NOT be called. `[OPEN]` where the checker runs relative to the chain in the final runner, and the review of its code.
 
 ### 6.1a Provenance of post-S2a inputs
 
@@ -159,7 +161,7 @@ Outcome vocabulary: `S3-FAIL(layer)` is an S3-owned packaging failure and is not
 
 ### 7.2 S3-owned negative cases (new behavior)
 
-Each case is applied to a copy of the committed capture; the committed capture is never modified. `[OPEN]` exact `S3-FAIL` reason codes are to be defined with the checker.
+Each case is applied to a copy of the committed capture; the committed capture is never modified. The exact `S3-FAIL(packaging)` reasons are the G5 reason codes of `spec/capture-format.md` §4, and the variants executed for each case (index unchanged vs re-anchored) are listed in §6 of that document.
 
 | ID | Input artifact | Change | Unchanged | Expected phase / outcome |
 |---|---|---|---|---|
@@ -172,7 +174,7 @@ Each case is applied to a copy of the committed capture; the committed capture i
 | N-P7 | `pB`, `inst`, `iB`, target payload or `request.cbor` | file replaced by another consistent file whose hash is not in the manifest | other files | correspondence step 4 ⇒ `S3-FAIL(packaging)` |
 | N-D1 (positive control) | a derived request built from the same capture files | `leaves` records delivered in a permuted order, indices unchanged | all bytes | frozen chain result `Verified` with `tB` byte-identical to the committed run (analogue of S2b `M7b`) |
 
-For N-P1..N-P7 the case fails closed before the chain; none of them produces a P10 verdict. They exist to show the S3 checker cannot be bypassed by a stale or edited packaging layer, not to test P10 rules.
+For N-P1..N-P7 the case fails closed before the chain (the S2b replay, S2a runner, closureAt helper and post-S2a stage are not called); none of them produces a P10 verdict. They exist to show the S3 checker cannot be bypassed by a stale or edited packaging layer, not to test P10 rules.
 
 ### 7.3 Runner propagation controls (existing fixtures)
 
@@ -257,7 +259,9 @@ Excluded from the repository and manifest: private keys, secrets, and any artifa
 5. Form of the Rust entry: the spike uses a thin S3-owned binary over the unchanged pinned S2b crate; adoption versus the separately versioned `p10-replay-cli` adapter is not decided (`spec/acceptance-runner-map.md` §3).
 6. The S3-owned glue (post-S2a input assembly, composer, correspondence checker): the spike contains experimental code; form, review against this preregistration, and how it is shown to add no rule are not decided. G4 inputs for a non-toy instance (A12–A14 digests) remain open; for the toy semantics the frozen values were reproduced by the spike (`spike/A12_A14_APPLICABILITY.md`).
 7. Toolchain carriage vs declared host prerequisites (Section 6.4); the spike found one prerequisite not covered by the frozen scripts (a native `libuv` development library for the Lean link step).
-8. `S3-FAIL` reason codes; exact recorded-but-not-compared field list (Section 8).
+8. Reason codes: candidate set in `spec/capture-format.md` (executed against the candidate checker); stability and review not decided. Exact recorded-but-not-compared field list (Section 8).
 9. Receipt payload form (attached vs detached) of the selected TS, which fixes the reason codes for Receipt-fault references (Section 7.4).
 10. Adequacy of the runner-control fixtures (Section 7.3): the eight candidates were exercised in the spike with their own bound inputs; whether they suffice for the adopted runner is not decided.
 11. Python version and operating system pins for S3-C (the spike glue used only the standard library).
+12. Mixed-log test (policy/trust-anchor leaves followed by the lifecycle at shifted indices): identified, not built (`spec/mixed-log-test-plan.md`).
+13. Real capture tooling with independent sources for submissions, exports and Receipts; the tested materialization derives all files from one request.

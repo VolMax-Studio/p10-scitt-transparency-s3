@@ -49,6 +49,37 @@ class T(unittest.TestCase):
         miss = {"status": "Unavailable", "reason": {"class": "Material", "reason": "MissingIndex { first_missing: 2 }"}}
         self.assertTrue(G.match_s2b({"status": "Unavailable", "class": "material", "reason": "MissingIndex"}, miss)[0])
 
+    def test_strict_e2e(self):
+        self.assertEqual(G.parse_e2e_job({"op": "e2e", "result": "some", "evidence_repr": "x"}), (True, None))
+        self.assertEqual(G.parse_e2e_job({"op": "e2e", "result": "none"}), (False, None))
+        for bad in ({"op": "e2e", "result": "some"}, {"op": "e2e", "error": "boom"}, {"op": "e2e", "result": "maybe"}, {"op": "cov", "result": "none"}, "x", None, {"op": "e2e"}):
+            v, err = G.parse_e2e_job(bad)
+            self.assertIsNone(v, bad)          # an error must never become a semantic False/True
+            self.assertIsNotNone(err, bad)
+
+    def test_strict_cov_and_codec(self):
+        ok = {"op": "cov", "result": {"outcome": "accept", "evidence_digest": "a" * 64, "repr": "accept"}}
+        self.assertEqual(G.parse_cov_job(ok)[1], None)
+        self.assertIsNotNone(G.parse_cov_job({"op": "cov", "result": {"outcome": "accept", "repr": "x"}})[1])
+        self.assertIsNotNone(G.parse_cov_job({"op": "cov", "error": "e"})[1])
+        self.assertIsNotNone(G.parse_cov_job({"op": "cov", "result": {"outcome": "weird", "repr": "x"}})[1])
+        self.assertEqual(G.parse_codec_job({"op": "tb", "decode": True, "reencode_identical": True}, "tb"), (True, None))
+        self.assertFalse(G.parse_codec_job({"op": "tb", "decode": True, "reencode_identical": False}, "tb")[0])
+        self.assertFalse(G.parse_codec_job({"op": "tb", "decode": False}, "tb")[0])
+        self.assertFalse(G.parse_codec_job({"op": "inst", "error": "x"}, "inst")[0])
+
+    def test_match_post_exact(self):
+        exp = {"verdict": "HALT", "rule": "T5", "code": "TargetAdjudicationNotEstablished", "detail_contains": "closureAt returned none", "helper_required": True}
+        good = {"result": "HALT", "rule": "T5", "code": "TargetAdjudicationNotEstablished", "detail": "closureAt returned none", "closure_helper_binary_sha256": "ab" * 32}
+        self.assertTrue(G.match_post(exp, good)[0])
+        # helper unavailability has the same verdict and rule but another code, and no helper hash: it must NOT satisfy the control
+        unavailable = {"result": "HALT", "rule": "T5", "code": "ClosureAtUnavailable", "detail": "recording pass", "closure_helper_binary_sha256": None}
+        self.assertFalse(G.match_post(exp, unavailable)[0])
+        self.assertIn("ClosureAtUnavailable", G.INFRA_POST_CODES)
+        self.assertFalse(G.match_post(exp, dict(good, closure_helper_binary_sha256=None))[0])
+        self.assertFalse(G.match_post(exp, dict(good, detail="other"))[0])
+        self.assertFalse(G.match_post(exp, dict(good, rule="T6"))[0])
+
 
 if __name__ == "__main__":
     unittest.main()

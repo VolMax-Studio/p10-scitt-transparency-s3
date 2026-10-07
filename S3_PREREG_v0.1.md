@@ -1,6 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze.
+Status: **DRAFT CANDIDATE, revision r2 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+
+Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r2 changes (relative to the first candidate commit `ba54cd4`): I2/I4/I10 corrected against the frozen sources; policy non-claim added; negative testing narrowed to new S3 behavior with exact recipes; `request.cbor` made a committed capture artifact with a limited correspondence check; execution path traced; supported-runtime contract replaces "any machine"; S2b baseline pin proposed.
 
 ---
 
@@ -12,24 +16,27 @@ Status: **DRAFT CANDIDATE — preparation only.** Not ratified, not frozen, not 
 
 **Layers.**
 
-- S3-A — deployment definition: what a P10-compatible TS instance is (Section 3, Section 4).
+- S3-A — deployment definition: what a P10-compatible TS instance is (Sections 3–4).
 - S3-B — live capture: the real registration process and export (Section 5).
 - S3-C — offline acceptance: the frozen verifier chain run over the frozen capture (Section 6).
 
-**Boundary.** S3 is a transport / transparency / deployment layer. It adds no P10 semantics. `TargetAdjudicationValidV0` and `AdjudicationBindingV0` are separate post-S2a semantic bindings and are out of S3 scope, except insofar as the existing post-S2a checks are run unchanged in the acceptance oracle (Section 6).
+**Boundary.** S3 is a transport / transparency / deployment layer. It adds no P10 semantics. `TargetAdjudicationValidV0` and `AdjudicationBindingV0` are post-S2a stages of the frozen chain and run there unchanged; S3 defines no rule of its own for them.
 
 **Choice of Option A over Option B.** Option A means the "real Transparency Service" is a P10-compatible instance operated for this demonstration (for example an adapted open-source RFC 9162-style SCITT TS), so the claim is feasibility of such a deployment, not compatibility with an independent third-party service. Option B (a third-party TS hashing raw Statement bytes) is incompatible with the frozen `LeafEncodeV0`; adapting to it would be a new profile instance (e.g. `LeafEncodeV1`) and is not S3.
+
+**Pinned baseline (proposed).** Chain components are identified by immutable commits (Section 6.4): S1 `e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1`, S2a `741d56d36d7b2bfe2e9e0080a1cba4393e4a47da`, S2b `8eaa91cad1ffa963158b365c6d0d7316f4965e89` (`v0.1.0-s2b-complete`).
 
 ---
 
 ## 2. Non-claims
 
-1. S3 does not establish operator independence or non-equivocation against a malicious operator when the Statement issuer and Transparency Service are controlled by the same party.
-2. S3 does not claim compatibility with arbitrary RFC 9943 Transparency Services. Exact full-prefix byte export and `LeafEncodeV0` are requirements of this P10 profile instance.
-3. S3 does not exercise receipt-key rotation during the committed capture.
-4. S3 does not exercise the X.509 identity path. This S3 instance uses the non-X.509 `kid` path with a preregistered public COSE key and `iss = "volmax-owner"`. The X.509 path is simply outside the frozen identity model exercised here; no claim is made that it is syntactically incompatible with S2a.
+1. The frozen P10 chain authenticates the inclusion of Registration Policy and trust-anchor Statement bytes in the captured prefix, but does not verify their issuer signatures or payload semantics. S3 does not establish that the live Transparency Service enforced the declared Registration Policy.
+2. S3 does not establish operator independence or non-equivocation against a malicious operator when the Statement issuer and Transparency Service are controlled by the same party. (A policy Statement at a low leaf index is, in that setting, a claim by the operator, not evidence.)
+3. S3 does not claim compatibility with arbitrary RFC 9943 Transparency Services. Exact full-prefix byte export and `LeafEncodeV0` are requirements of this P10 profile instance.
+4. S3 does not exercise receipt-key rotation during the committed capture.
+5. S3 does not exercise the X.509 identity path. This S3 instance uses the non-X.509 `kid` path with a preregistered public COSE key and `iss = "volmax-owner"` for the instance issuer. The X.509 path is simply outside the frozen identity model exercised here; no claim is made that it is syntactically incompatible with S2a.
 
-Additional non-claims: S3 does not claim that a SCITT TS confirms any P10 verdict; it does not claim byte-identical output from repeated S3-B executions (Section 8); it does not claim that rollback/rotation procedures (RFC 9943 key-management guidance) are tested.
+Additional non-claims: S3 does not claim that a SCITT TS confirms any P10 verdict; it does not claim byte-identical output from repeated S3-B executions (Section 8); it does not claim that rollback or key-rotation procedures are tested; it does not re-prove the rules of S2b/S2a (Section 7); it does not claim reproducibility outside the declared pinned environment (Section 8).
 
 ---
 
@@ -38,19 +45,19 @@ Additional non-claims: S3 does not claim that a SCITT TS confirms any P10 verdic
 An instance is P10 S3-compatible only if all of the following hold.
 
 - **I1 — Mixed Statement Sequence.** The VDS Statement Sequence is a mixed SCITT/P10 sequence. Registration Policy and trust-anchor Signed Statements are registered on the same VDS (per RFC 9943), so `[0,n)` is a complete SCITT Statement Sequence, not a P10-only log. `LeafEncodeV0` MUST be applied to every registered leaf, including policy and trust-anchor statements.
-- **I2 — Non-target leaves are classifiable.** Registration Policy / trust-anchor statements are non-target leaves. Each MUST carry a protected CWT `iss` and `sub` (required by RFC 9943), and its `sub` MUST lie outside the target P10 subject namespace so the frozen verifier classifies it deterministically as a non-target row. **All** leaves in `[0,n)` MUST remain parsable and classifiable by the frozen verifier; an unparsable leaf is a failed capture, not something to be tolerated by S3 tooling. `[OPEN]` the concrete non-target `sub` value(s) and the exact namespace rule must be taken from the frozen S1/S2 specification.
+- **I2 — Subject membership and classifiable leaves.** Subject membership in the frozen chain is exact byte equality of the protected CWT `sub` with `instance_subject`; there is no frozen P10 namespace rule. Registration Policy and trust-anchor statements are non-target leaves: their `sub` MUST be a valid UTF-8 text string not byte-equal to `instance_subject`. **Every** leaf of `[0,n)` MUST satisfy the frozen readability conditions, otherwise it becomes an `unavailable` row and the frozen chain HALTs: the leaf is a tagged `#6.18(COSE_Sign1)`; its protected header is exactly one CBOR map without duplicate labels; label 15 (CWT claims) is a map without duplicate labels containing `iss` (claim 1) and `sub` (claim 2) as valid UTF-8 text strings. `[OPEN]` the concrete non-target `sub` value(s) are an S3 choice.
 - **I3 — Bootstrap frozen before execution.** The bootstrap mechanism (Section 4) is chosen and frozen before S3-B runs; the implementation does not select it.
-- **I4 — Exact registered-form bytes.** Signed Statements are submitted with an empty unprotected header (`{}`), the form RFC 9943 requires prior to inclusion in the Statement Sequence. The acceptance condition is `submitted_registered_form_bytes == exported_leaf_statement_bytes`. No semantically-equivalent normalization by the TS is accepted.
+- **I4 — Exact registered-form bytes; empty unprotected header on every leaf.** Every Signed Statement registered into `[0,n)` — P10 lifecycle statements, Registration Policy and trust-anchor statements alike — MUST carry an empty unprotected header (`{}`), the form RFC 9943 requires prior to inclusion in the Statement Sequence. The frozen chain treats any readable leaf with a non-empty unprotected header as a domain violation. The acceptance condition for submitted statements is `submitted_registered_form_bytes == exported_leaf_statement_bytes`; no semantically-equivalent normalization by the TS is accepted. For TS-originated statements (if any), the bytes registered are the bytes exported.
 - **I5 — Sequential lifecycle submission.** Log order need not follow submission order in general, and P10 relies on leaf indices for lifecycle ordering. Therefore: submit one statement, obtain its Receipt and committed leaf index, verify the index, and only then submit the next.
 - **I6 — Single-writer window.** The committed vector is captured in a single-writer window; no other writer registers leaves during it.
-- **I7 — Fixed Receipt-signing key.** One Receipt-signing key is fixed for the entire bounded S3 capture. The demonstration interval MUST NOT cross the selected receipt-key cryptoperiod. Key rotation is not tested. The key's RFC 9679 thumbprint enters `LogIdentityV0`; the key MUST NOT change beneath a given `LogIdentityV0`.
-- **I8 — Original Receipts retained.** The Receipt obtained at the time of each registration is a capture artifact, hashed in the manifest. A later "fresh" Receipt for the same statement (which RFC 9943 permits to be signed with a different key or algorithm) MUST NOT replace it.
+- **I7 — Fixed Receipt-signing key.** One Receipt-signing key is fixed for the entire bounded S3 capture. The demonstration interval MUST NOT cross the selected receipt-key cryptoperiod. Key rotation is not tested. The key's RFC 9679 thumbprint is committed in the frozen configuration and `LogIdentityV0`; the key MUST NOT change beneath a given `LogIdentityV0`.
+- **I8 — Original Receipts retained.** The Receipt obtained at the time of each registration is a capture artifact, hashed in the manifest. A later "fresh" Receipt for the same statement (which RFC 9943 permits to be signed with a different key or algorithm) MUST NOT replace it. The Receipt selected for the replay is the one for the target (the adjudication Statement, Section 6).
 - **I9 — Full-prefix export is a P10 requirement.** Exact full `[0,n)` Statement byte export is a P10 compatibility requirement, not a generic RFC 9943 requirement (RFC 9943 permits hash-only VDS). A SCITT-compliant TS that cannot export it fails the P10 S3 gate; that is not a statement about its SCITT compliance.
-- **I10 — Profile parameters.** VDS = 1 (`RFC9162_SHA256`); inclusion proof carries `tree_size`, `leaf_index`, `inclusion_path` in a tagged COSE_Sign1 Receipt; ES256 for Receipts and Statements; identity by `kid` with `iss = "volmax-owner"`; no X.509 headers.
+- **I10 — Profile parameters and identity path.** VDS = 1 (`RFC9162_SHA256`); inclusion proof carries `tree_size`, `leaf_index`, `inclusion_path` in a tagged COSE_Sign1 Receipt; ES256 for Receipts and Statements; no X.509 headers. `kid` is the selected SCITT header path for statements (RFC 9943: `kid` is required when neither `x5t` nor `x5chain` is present). The frozen verifier does not read `kid`: it resolves statement-signing keys through the statement's protected `iss`, the frozen-configuration table `key_resolution` (`iss` → key fingerprint) and `key_material` (`iss` → COSE_Key). The instance issuer's `iss` is `volmax-owner`, which the frozen S2a token-alphabet rule (`[A-Za-z0-9_.:-]`, applied to the instance issuer only) accepts. `ts_iss` and the `iss` of non-target leaves are not alphabet-restricted by the frozen chain.
 - **I11 — Keys.** Private issuer and TS keys MUST NOT appear in the capture or the manifest.
 - **I12 — Public-material sufficiency.** S3-C MUST succeed using public verification material only. This also serves as a completeness test of the capture.
 
-**Compatibility checklist (pre-integration gate).** A candidate TS implementation is evaluated against I1–I12 before any integration code is written. Because `LeafEncodeV0` is a P10-defined wrapper, no off-the-shelf service is expected to pass; the gate is expected to select an adaptable implementation, not discover a ready-made one.
+**Compatibility checklist (pre-integration gate).** A candidate TS implementation is evaluated against I1–I12 before any integration code is written. Because `LeafEncodeV0` is a P10-defined wrapper, no off-the-shelf service is expected to pass; the gate is expected to select an adaptable implementation, not discover a ready-made one. `[OPEN]` TS selection.
 
 ---
 
@@ -58,7 +65,7 @@ An instance is P10 S3-compatible only if all of the following hold.
 
 RFC 9943 permits (a) preconfigured Registration Policy and trust anchors, (b) a first policy statement registered without registration checks, or (c) authenticated out-of-band management. S3 MUST NOT leave this choice to the implementation.
 
-`[OPEN]` Select exactly one mechanism and record: the mechanism; the content and hash of the initial Registration Policy and trust anchors; what occupies leaf index 0; and which policy version is active for each P10 statement (derivable from the prefix, since policy statements are leaves and the applicable policy is the last one committed before a registration). The selection is part of the deployment definition and of capture provenance, and MUST be recorded before S3-B begins.
+`[OPEN]` Select exactly one mechanism and record: the mechanism; the content and hash of the initial Registration Policy and trust anchors; what occupies leaf index 0; and which policy version is active for each P10 statement (derivable from the prefix, since policy statements are leaves and the applicable policy is the last one committed before a registration). Whatever the choice, the policy statements are bytes in the prefix and are subject to I2 and I4. The selection is part of the deployment definition and of capture provenance, and MUST be recorded before S3-B begins. A leading preference for mechanism (b) is recorded in discussion only; it is not a decision.
 
 ---
 
@@ -67,43 +74,132 @@ RFC 9943 permits (a) preconfigured Registration Policy and trust anchors, (b) a 
 1. Freeze the deployment definition (Sections 3–4) and record TS implementation identity and version, configuration, and the active Registration Policy.
 2. Generate issuer and TS keys outside the repository. Publish only public keys (COSE public key, thumbprint).
 3. Perform the frozen bootstrap (Section 4).
-4. For each Signed Statement in the controlled P10 lifecycle sequence, in order: build the registered-form bytes (empty unprotected header); submit; obtain the Receipt; verify the committed leaf index; record the submitted bytes and the Receipt; only then submit the next statement (I5).
+4. For each Signed Statement in the controlled P10 lifecycle sequence, in order: build the registered-form bytes (empty unprotected header); submit; obtain the Receipt; verify the committed leaf index; record the submitted bytes and the Receipt; only then submit the next statement (I5). The sequence MUST end with the owner's adjudication Statement, which is the Receipt target of the replay.
 5. Export the complete prefix `[0,n)` with exact Statement bytes (I9).
-6. Assemble the capture: submitted bytes, original Receipts (I8), exported prefix, public keys, bootstrap and policy records, provenance metadata. No private keys (I11).
-7. Hash all artifacts into the manifest and freeze the capture.
+6. Assemble the capture: submitted bytes, original Receipts (I8), exported prefix, public keys, bootstrap and policy records, the exact `pB` (profile artifact) and `inst` (instance commitment) bytes, the S1 instance bytes `iB`, the target adjudication payload bytes, declared public configuration, provenance metadata. No private keys (I11).
+7. Assemble `request.cbor` (Section 6.1) from the exported files, before S3-C and after the capture is complete.
+8. Hash all artifacts into the manifest and freeze the capture.
 
-`[OPEN]` The lifecycle sequence content (statement count, which P10 statements) and the capture file layout (`spec/capture-format.md`) are not yet specified.
+`[OPEN]` The lifecycle sequence content (statement count, which P10 statements), the capture file layout (`spec/capture-format.md`, not yet written), and the provenance of `pB`/`inst`/`iB` for this instance. The ratified toy profile (`profile/pB.json`, `profile/inst.bin` in S2b) binds fixed issuer names and keys; whether S3 uses a new profile artifact for `volmax-owner` and whether S2a's strict `pB` decoder accepts it was not established.
 
 ---
 
 ## 6. Acceptance oracle (S3-C)
 
 ```
-captured material -> frozen S2b -> frozen S2a -> existing post-S2a checks
+captured material -> request.cbor -> frozen S2b (decode_request -> replay_p0_p9 -> exact tB)
+                  -> pinned frozen S2a coverage runner -> existing post-S2a orchestration
 ```
 
-The frozen chain runs unchanged over the frozen capture, using public material only, offline.
+The chain runs unchanged over the frozen capture, offline, using public material only. The step-by-step runner map (entry points, inputs, which pieces are frozen code and which are S3-owned glue) is in `spec/acceptance-runner-map.md`.
 
 The acceptance path MUST NOT contain: S3-specific semantic assistance, transformations of captured bytes, fallback parsing, identity translation, or network lookup.
 
-Acceptance requires, in addition to the chain accepting: `submitted_registered_form_bytes == exported_leaf_statement_bytes` for every submitted statement (I4), and manifest hashes matching.
+**Implementation acceptance is distinct from capture acceptance.** `scripts/verify.sh` of S2b (16 steps, ratified) checks the S2b implementation against its own corpus and fixtures; it does not take a new capture as input. Passing it, even in the pinned environment, says nothing about the S3 capture. S3-C MUST show that this capture's own `request.cbor` passes through the chain, with its own outputs recorded.
 
-S3's claim remains limited to transport/deployment: the chain's acceptance shows the captured material is sufficient for existing P10 semantics, not that S3 adds or confirms any.
+### 6.1 `request.cbor` as a committed capture artifact
+
+`request.cbor` (the `ReplayRequestV0` of S2b `frozen/IMPLEMENTATION_SELECTION_v0.md` §4.1) is assembled at S3-B and committed and manifest-covered. It is not rebuilt inside S3-C.
+
+**Correspondence checker (S3-owned acceptance code).** It does exactly the following and nothing else:
+
+1. Decode `request.cbor` through the pinned frozen S2b `decode_request`. A second CBOR parser is not introduced; decode failure is an S3-C failure of the packaging layer, not a P10 verdict.
+2. Compare, byte for byte, each decoded raw-byte field with the corresponding capture file: every `leaves` record `[index, statement-bytes]` against `prefix/NNNNNN.cose`; `selected_receipt_bytes` against the retained original Receipt; `target_registered_statement_bytes` against the target prefix file; every `detached_statement_payloads` record against its capture file.
+3. Account for every supplied record: records are matched one-to-one with capture files; duplicate indices, extra records, extra files and missing records are failures; nothing is silently deduplicated, reordered into a different assignment, or discarded. (Delivery order of `leaves` carries no meaning in S2b, so order alone is not a failure.)
+4. Verify manifest hashes of `request.cbor`, `pB`, `inst`, `iB`, the target payload, and the declared public configuration and provenance files.
+
+It does not re-encode any signed object, and it does not check configuration, identity, fingerprint, lifecycle, or coverage rules: `key_resolution`, `ts_iss`, `LogIdentityV0` against the commitment and `pB`, and key-fingerprint binding are checked by the frozen chain (S2b phases P0/P7, S2a C1/C1b), and re-implementing them would create a second implementation of the same rules. This delegation is deliberate.
+
+The checker is S3-owned code in the acceptance path and therefore part of the trusted computing base of S3-C. Its role is artifact correspondence, not P10 semantics. `[OPEN]` its implementation form and where it runs relative to the chain.
+
+### 6.2 Outputs recorded
+
+The exact `tB` bytes produced by S2b; the S2b result and evidence record (Section 8 defines which parts must reproduce byte for byte); the S2a runner output; the post-S2a verdict record. These are derived outputs and are not committed as normative.
+
+### 6.3 Composed outcomes
+
+Composition of S2b results into HALT/REJECT is the frozen table of S2b prereg r7 §16.6, not an S3 rule. S3 only requires that the runner propagates it faithfully (Section 7, runner controls).
+
+### 6.4 Supported runtime contract
+
+Verification is supported within the declared pinned environment only. `spec/acceptance-runner-map.md` §5 inventories the dependencies and separates **preparation** (obtaining and hash-checking pinned inputs, toolchains and crates; may use a network) from **S3-C execution** (network disabled). `[OPEN]` whether toolchains are carried in the package or declared host prerequisites verified by hash.
+
+Proposed S2b baseline pin: commit `8eaa91cad1ffa963158b365c6d0d7316f4965e89` (`v0.1.0-s2b-complete`). Comparison with the licensed public tag `v0.1.1-s2b-public` (`8e89f9a4192bdd0ab280556701dc595eb55539d2`): the trees differ only in `LICENSE-APACHE`, `LICENSE-MIT`, `NOTICE.md`, `README.md`, `SECURITY.md`, `docs/INTEGRATION.md` (verified by `git diff --name-status` between the two commits; the manifest-covered implementation files inspected, `replay.rs` and `statement.rs`, are byte-identical at both). Pinning to `8eaa91c` is a proposal, not a freeze.
 
 ---
 
 ## 7. Mutations
 
-Preregistered negative tests, each applied to a copy of the frozen capture and run through the unchanged oracle (Section 6). Each MUST be rejected. `[OPEN]` the exact expected failing stage and failure code for each mutation must be preregistered from the frozen S2b/S2a error taxonomy before execution.
+### 7.1 Principle
 
-| ID | Mutation | Expected outcome |
-|----|----------|------------------|
-| M1 | One changed registered Statement byte | Reject `[OPEN: stage/code]` |
-| M2 | Incorrect Receipt / inclusion proof | Reject `[OPEN: stage/code]` |
-| M3 | Missing prefix leaf | Reject `[OPEN: stage/code]` |
-| M4 | Reordered lifecycle capture where ordering is semantically invalid | Reject `[OPEN: stage/code]` |
-| M5 | Substituted Receipt-signing public key / `LogIdentityV0` mismatch | Reject `[OPEN: stage/code]` |
-| M6 | Non-empty or byte-altered registered-form representation (where applicable) | Reject `[OPEN: stage/code]` |
+S3 negative testing covers only behavior that is new in S3:
+
+- (a) capture packaging and the correspondence between capture files and `request.cbor`;
+- (b) runner propagation of HALT and REJECT through the traced path;
+- (c) delivery-order invariance with unchanged leaf indices.
+
+Coverage of the rules inside S2b and S2a is by reference to the ratified S2b vectors at the baseline pin, by name (Section 7.4). S3 does not regenerate those families and does not build semantic mutations of the committed capture. Each mandatory negative case MUST produce its preregistered non-accepting outcome; a case that produces a different non-accepting outcome, or acceptance, is a failure of the case.
+
+Outcome vocabulary: `S3-FAIL(layer)` is an S3-owned packaging failure and is not a P10 verdict; HALT/REJECT are the composed outcomes of the frozen chain.
+
+### 7.2 S3-owned negative cases (new behavior)
+
+Each case is applied to a copy of the committed capture; the committed capture is never modified. `[OPEN]` exact `S3-FAIL` reason codes are to be defined with the checker.
+
+| ID | Input artifact | Change | Unchanged | Expected phase / outcome |
+|---|---|---|---|---|
+| N-P1 | one `prefix/NNNNNN.cose` file | one byte flipped | `request.cbor`, manifest of `request.cbor` | correspondence step 2 (content mismatch) ⇒ `S3-FAIL(packaging)`; the chain is not consulted |
+| N-P2 | `request.cbor` | one `leaves` record's bytes altered consistently with its manifest hash | capture files | correspondence step 2 ⇒ `S3-FAIL(packaging)` |
+| N-P3 | `request.cbor` | one leaf record removed | capture files | correspondence step 3 (unmatched file) ⇒ `S3-FAIL(packaging)` |
+| N-P4 | `request.cbor` | one leaf record duplicated (same index) | capture files | correspondence step 3 (duplicate not deduplicated) ⇒ `S3-FAIL(packaging)` |
+| N-P5 | capture directory | an extra file added in `prefix/` | `request.cbor` | correspondence step 3 ⇒ `S3-FAIL(packaging)` |
+| N-P6 | retained Receipt file | one byte flipped | `request.cbor` | correspondence step 2 ⇒ `S3-FAIL(packaging)` (this is a packaging mismatch; Receipt authentication faults are covered by S2b references) |
+| N-P7 | `pB`, `inst`, `iB`, target payload or `request.cbor` | file replaced by another consistent file whose hash is not in the manifest | other files | correspondence step 4 ⇒ `S3-FAIL(packaging)` |
+| N-D1 (positive control) | a derived request built from the same capture files | `leaves` records delivered in a permuted order, indices unchanged | all bytes | frozen chain result `Verified` with `tB` byte-identical to the committed run (analogue of S2b `M7b`) |
+
+For N-P1..N-P7 the case fails closed before the chain; none of them produces a P10 verdict. They exist to show the S3 checker cannot be bypassed by a stale or edited packaging layer, not to test P10 rules.
+
+### 7.3 Runner propagation controls (existing fixtures)
+
+The S3 runner (Section 6; `spec/acceptance-runner-map.md`) MUST be exercised on ratified fixtures that already exist, run with each fixture's own bound profile inputs, not S3's:
+
+| Control | Ratified fixture (S2b `8eaa91c`) | Frozen expectation (as recorded in the fixture) | Path exercised |
+|---|---|---|---|
+| C-ACC | `vectors/s2a-post/POST-BASE-match` | S2b Verified; S2a accept; post-S2a `BINDING_MATCH` | full path |
+| C-POST-REJ | `vectors/s2a-post/BIND-A10-mismatch` | S2a accept; post-S2a `REJECT` (rule A10) | post-S2a REJECT |
+| C-POST-HALT | `vectors/s2a-post/T13-T5-closureAt-none` | S2a accept; post-S2a `HALT` (rule T5) | post-S2a HALT incl. closureAt helper |
+| C-S2A-REJ | `vectors/s2a-t11/N13b` | S2a `.reject .c3_profileAfterFirstAdmission` | S2a REJECT |
+| C-S2A-HALT | `vectors/s2a-t11/N7a` | S2a `.halt .c2_subjectPayloadUnavailable` | S2a HALT |
+| C-S2B-REJ | `vectors/E/E10-unprotected` | `Invalid(binding, LeafInputDomainViolation)` ⇒ REJECT | S2b REJECT, no S2a call |
+| C-S2B-HALT | `vectors/M/M1` | `Invalid(replay, RootMismatch)` ⇒ HALT | S2b HALT, no S2a call |
+| C-S2B-UNAV | `vectors/M/M8` | `Unavailable(material, MissingIndex)` ⇒ HALT | S2b HALT, no S2a call |
+
+The runner MUST reproduce each fixture's recorded expectation unchanged. `[OPEN]` fixture adequacy: the above are candidates and must be confirmed against the actual runner interface (some fixture directories hold only a request, the S2a vectors hold bound `pB`/`inst`). A minimal disposable-key fixture is created only if a required runner path cannot be exercised by an existing ratified fixture. Such a fixture has its own TS key, its own `LogIdentityV0` and its own instance; it is not a mutation of the committed S3 capture; only public material enters it; its keys are generated outside the repository and never committed; it is labelled as test infrastructure and is not S3 live-capture evidence.
+
+### 7.4 Rule coverage by reference (not regenerated)
+
+The six categories originally preregistered map to ratified S2b vectors. The recipe column records what the ratified vector does, from its generator (`tests/differential/gen_corpus.py`) and prereg r7 §17.6; the reason depends on that recipe, so no family is assigned a single generic reason.
+
+| Category | Ratified vector | Recipe in the ratified vector | Phase / reason / composed |
+|---|---|---|---|
+| one changed registered Statement byte | `M1` | one byte of the leaf at index 1 changed; selected target leaf and Receipt unchanged | P6 `Invalid(replay, RootMismatch)` ⇒ HALT |
+| same, but the **selected target** leaf altered | (no ratified vector of this exact shape identified; behavior read from `replay.rs`, phase P5) | target leaf bytes differ from `target_registered_statement_bytes` | P5 `TargetStatementMismatch` is established before P6 and is the reported reason; composed HALT. A "changed byte" recipe MUST therefore state whether the target or a non-selected leaf is altered |
+| incorrect Receipt / inclusion proof | `M11` (Receipt root changed, re-signed); `C5-attached`/`C5-detached`, `C6-attached`/`C6-detached` (bad Receipt signature); `M27-attached`/`M27-detached` (validly signed Receipt for a different leaf) | as named | `M11` `Invalid(replay, RootMismatch)`; `C5`/`C6` `-attached` `ReceiptBadSignature`, `-detached` `ReceiptTargetAuthenticationFailure`; `M27-attached` `ReceiptTargetBindingFailure`, `M27-detached` `ReceiptTargetAuthenticationFailure`; all composed HALT. Which of the attached/detached variants applies depends on the Receipt payload form of the selected TS `[OPEN]` |
+| missing prefix leaf | `M8` (index 2 omitted), `M8b` (last leaf omitted), `C2` (Receipt `tree_size` larger than the delivered leaves) | as named | P4 `Unavailable(material, MissingIndex)` ⇒ HALT |
+| reordered lifecycle: transport-level | `M7` (contents of two leaves swapped, indices unchanged) | changed content-to-index assignment | `RootMismatch` ⇒ HALT (transport corruption) |
+| reordered lifecycle: delivery order only | `M7b` | permuted delivery, indices correct | `Verified`, identical `tB` (positive invariance control; S3 analogue N-D1) |
+| reordered lifecycle: semantically invalid but authenticated | S2a `N13b`, `X3`, `N5` mirrored as S2b logs in `vectors/s2a-t11` | an authenticated log in which profile commitment / instance commitment follows the first admission, or a relevant admission follows the closure | S2a `.reject .c3_profileAfterFirstAdmission` / `.c4_commitmentAfterFirstAdmission` / `.c10_relevantAdmissionAfterClosure` ⇒ REJECT (semantic negative; needs a consistent tree and a validly signed Receipt) |
+| substituted Receipt key | `M13` | supplied `receipt_key` fingerprint ≠ committed | P0 `Invalid(request, KeyMaterialFingerprintMismatch)` ⇒ HALT |
+| `ts_iss` / LogIdentity mismatch | `I2-ts-iss` | Receipt TS identity ≠ `frozen.ts_iss` | P7 `Invalid(binding, TsIssuerMismatch)` ⇒ REJECT |
+| non-empty unprotected header in the log | `E10-unprotected`, `M4` (in-log flavour) | an authenticated leaf with a non-empty unprotected map | P7 `Invalid(binding, LeafInputDomainViolation)` ⇒ REJECT |
+| same registered bytes altered after the fact | `M1`, `M3`, `M4` (transport flavour) | bytes changed with an unchanged log | `RootMismatch` ⇒ HALT |
+| empty unprotected header | `E10b-empty-unprotected` | unprotected map is `{}` | `Verified` (positive control for I4) |
+
+Consequences recorded for S3:
+
+- A post-hoc byte alteration of the committed capture can only yield `RootMismatch` (HALT) or an `S3-FAIL`; it cannot reach a semantic REJECT. Semantic REJECT paths (S2a lifecycle order, `LeafInputDomainViolation`) require a log that actually hashes the offending leaf under a validly signed Receipt, so S3 does not test them on the capture. They are covered by the ratified vectors above.
+- A conformant TS may normalize or reject a statement with a non-empty unprotected header (RFC 9943 requires it empty before inclusion); S3 does not ask a live TS to violate that rule to produce a negative log.
+- M1 (byte-level binding of the registered bytes) and the unprotected-header domain boundary stay distinct in intent: M1 tests cryptographic binding of the registered bytes to the root; `E10`/`E10b` test the registered-form boundary.
 
 ---
 
@@ -112,33 +208,40 @@ Preregistered negative tests, each applied to a copy of the frozen capture and r
 - S3-B is a live, one-time capture event. It is not required to reproduce identical bytes across repeated executions: ES256 signatures are randomized unless deterministic nonces (RFC 6979) are used, Receipts may carry time-dependent claims, and the TS assigns indices.
 - A repeated S3-B demonstrates procedural repeatability only: another conforming capture should independently satisfy the acceptance oracle. It is not byte-reproduction.
 - The frozen S3 capture is the reproducible object.
-- S3-C verification over the frozen capture MUST be byte-reproducible and network-independent, on any machine.
+- S3-C verification over the frozen capture MUST be byte-reproducible and network-independent **within the declared pinned environment** (Section 6.4); no claim is made outside it.
+- Byte-reproducible outputs (MUST be identical across runs in the pinned environment): the exact `tB` bytes; the S2a runner's per-job result lines (outcome, evidence digest and repr); the post-S2a verdict and its rule/code; the correspondence checker's pass/fail result; the SHA-256 of each of these outputs.
+- Excluded from the byte-reproducibility requirement: log text, timestamps, temporary or build directory paths, build progress output, and any other incidental output. Build-identity facts that the frozen tooling itself records and that depend on the host (e.g. compiler or link substitution logs) are recorded, not compared. `[OPEN]` the exact list of recorded-but-not-compared fields once the glue exists.
 - Private keys never enter the capture; S3-C passing without them is the completeness test (I11, I12).
 
 ---
 
 ## 9. Committed artifacts
 
+Candidate documents present now (manifest-covered; manifest coverage is provenance only, not normative authority): `S3_PREREG_v0.1.md`, `README.md`, `spec/acceptance-runner-map.md`, `spec/CLOSURE_REPORT_OPEN_1_4_6.md`.
+
 Planned (none of the S3-B outputs exist at this stage):
 
-- `S3_PREREG_v0.1.md`, `README.md`
 - `spec/` — `deployment-profile.md`, `registration-policy.md`, `capture-format.md` (not yet written)
 - `ts/` — deployment configuration for the selected TS (not yet chosen)
-- `capture/` — frozen live capture (not yet produced)
+- `capture/` — frozen live capture, including `request.cbor`, `pB`, `inst`, `iB`, target payload, public configuration, provenance (not yet produced)
 - `vectors/` — committed S3 vectors derived from the capture (not yet produced)
-- `verifier/` — thin runner for the frozen chain, e.g. `run_s2_chain.sh` (not yet written)
-- `tests/live/`, `tests/offline/`, `tests/mutations/`
-- `MANIFEST.sha256` — hashes of committed artifacts; the current one covers only the candidate documents.
+- `verifier/` — `PINNED_INPUTS.json`, runner and correspondence-checker glue (not yet written; see `spec/acceptance-runner-map.md` §3)
+- `tests/live/`, `tests/offline/`, `tests/mutations/` (Section 7.2–7.3 cases)
+- `MANIFEST.sha256`
 
 Excluded from the repository and manifest: private keys, secrets, and any artifact not yet produced.
 
 ---
 
-## Unresolved items (`[OPEN]` summary)
+## Remaining OPEN items
 
-1. Non-target `sub` namespace value(s) (I2).
+1. Non-target `sub` value(s) (I2).
 2. Bootstrap mechanism and index-0 content (Section 4).
-3. Lifecycle sequence and capture format (Section 5).
-4. Expected failing stage/code per mutation (Section 7).
-5. Selection of the TS implementation to adapt (Option A).
-6. How the frozen S1/S2a/S2b specifications and verifier are referenced (vendored, pinned by hash, or external) — they are not present in this repository.
+3. TS implementation selection (Option A).
+4. Lifecycle sequence, capture format, and provenance/decodability of `pB`/`inst`/`iB` for the `volmax-owner` instance (Section 5).
+5. How the Rust entry (`decode_request` / `replay_p0_p9`) is invoked: S3-owned thin binary vs the separately versioned `p10-replay-cli` adapter vs the S2b test harness (`spec/acceptance-runner-map.md` §3).
+6. The S3-owned glue (assembly of post-S2a inputs, correspondence checker): form, review, and how it is shown to add no rule.
+7. Toolchain carriage vs declared host prerequisites (Section 6.4).
+8. `S3-FAIL` reason codes; exact recorded-but-not-compared field list (Section 8).
+9. Receipt payload form (attached vs detached) of the selected TS, which fixes the reason codes for Receipt-fault references (Section 7.4).
+10. Adequacy of the runner-control fixtures (Section 7.3).

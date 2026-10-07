@@ -1,6 +1,8 @@
 # Evidence-only closure report — OPEN #1, #4, #6
 
-Status: EVIDENCE ONLY. Read-only inspection of the frozen chain. `S3_PREREG_v0.1.md` is NOT modified. Nothing here is a decision, freeze, or acceptance. Uncommitted working-tree file.
+Status: EVIDENCE ONLY. Read-only inspection of the frozen chain. Nothing here is a decision, freeze, or acceptance. Committed in `605030c4fcb20d946d8bac124c4f45cb8b212937`; this file is hashed in `MANIFEST.sha256` for provenance only, which confers no normative authority. It was written before the prereg r2 correction pass and is not edited to track it, except for this status line and the notes below. Where it says the prereg is "not modified" or lists corrections as "NOT applied" (§4), that described the state at that commit; the corrections were applied in the r2 candidate of `S3_PREREG_v0.1.md`.
+
+Post-report verification (r2 pass, read-only): `git diff --name-status 8eaa91c 8e89f9a` shows only license/documentation paths (`LICENSE-APACHE`, `LICENSE-MIT`, `NOTICE.md`, `README.md`, `SECURITY.md`, `docs/INTEGRATION.md`); `replay.rs` and `statement.rs` hash identically at both commits. Section 5's first and second "still unverified" items are thereby resolved for the file set compared; the third and fourth remain open (the S1 profile text was reported by the user as checked and not independently re-read here).
 
 Method: shallow clones of the public/attached upstream repos, read-only; no builds, no test runs, no Lean/Rust execution. Claims below are source-reading claims unless marked "executed" (none are).
 

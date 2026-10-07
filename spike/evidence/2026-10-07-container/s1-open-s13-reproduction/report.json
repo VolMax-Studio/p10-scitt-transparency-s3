@@ -1,0 +1,113 @@
+{
+ "capability_proof_digest_candidate": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+ "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+ "cycle_checks": [
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'Certs'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'AxiomAudit'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'Bound'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'Wire'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'proof_digest'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'receipt'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'adjudication'",
+   "pass": true
+  },
+  {
+   "check": "CapabilityProofV0 pre-image does not mention 'S_R'",
+   "pass": true
+  },
+  {
+   "check": "ProofArtifactV0 pre-image does not mention 'proof_digest'",
+   "pass": true
+  },
+  {
+   "check": "ProofArtifactV0 pre-image does not mention 'adjudication'",
+   "pass": true
+  },
+  {
+   "check": "ProofArtifactV0 pre-image does not mention 'receipt'",
+   "pass": true
+  },
+  {
+   "check": "ProofArtifactV0 pre-image does not mention 'S_R'",
+   "pass": true
+  },
+  {
+   "check": "ProofArtifactV0 pre-image does not mention 'capability_proof'",
+   "pass": true
+  },
+  {
+   "check": "no composite contains its own digest",
+   "pass": true
+  },
+  {
+   "check": "the two composite digests are distinct",
+   "pass": true
+  }
+ ],
+ "olean_evidence": [
+  {
+   "byte_length": 150592,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Certificate.olean",
+   "expected_raw_sha256_frozen_manifest": "0ec9015b820be3b332c82d76476fe244352418e702df569c01f22496eaf91a01",
+   "lean_olean_artifact_digest": "6cdade6c32aca2cd69b85939fbdd5f5bfc0f090e2868fa5f973e1730cecdb7b4",
+   "manifest_path": ".lake/build/lib/lean/P10/Certificate.olean",
+   "raw_sha256": "0ec9015b820be3b332c82d76476fe244352418e702df569c01f22496eaf91a01"
+  },
+  {
+   "byte_length": 106968,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Core.olean",
+   "expected_raw_sha256_frozen_manifest": "4207d9303553fa105465b4da2be428ca2346edb9dcd88c51d15834d000e42d1d",
+   "lean_olean_artifact_digest": "84d2b6b5b6142f1c6256b1c278eaa5fffa7566eeb861417e9219b10e08e0f6a4",
+   "manifest_path": ".lake/build/lib/lean/P10/Core.olean",
+   "raw_sha256": "4207d9303553fa105465b4da2be428ca2346edb9dcd88c51d15834d000e42d1d"
+  },
+  {
+   "byte_length": 618288,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Fixtures.olean",
+   "expected_raw_sha256_frozen_manifest": "f7c5748a55ca2ff3e6665f98ffecb9e4a61a89d68721361cbe90df2475b13f87",
+   "lean_olean_artifact_digest": "fba48b7d2b8ece50a82c42f2378d6cb26301b418f743ab53134eea43d23e1505",
+   "manifest_path": ".lake/build/lib/lean/P10/Fixtures.olean",
+   "raw_sha256": "f7c5748a55ca2ff3e6665f98ffecb9e4a61a89d68721361cbe90df2475b13f87"
+  },
+  {
+   "byte_length": 344408,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Certs/P1.olean",
+   "expected_raw_sha256_frozen_manifest": "0856d3e85dd912a3313025fa31f9d42b1b7259efe2c812f30b2c542b85378cd8",
+   "lean_olean_artifact_digest": "319f94ce3860c2b888f3076fb5dc754c6235b3b28ec41c2f2361de5a9d43e2cf",
+   "manifest_path": ".lake/build/lib/lean/P10/Certs/P1.olean",
+   "raw_sha256": "0856d3e85dd912a3313025fa31f9d42b1b7259efe2c812f30b2c542b85378cd8"
+  }
+ ],
+ "proof_digest_candidate": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696",
+ "provenance": {
+  "harness_dir_clean": true,
+  "harness_helper_sha256": "2db8cdf3460c011d0ac762310d319b8693220bb88966926440945aec4a9a5ba1",
+  "harness_repo_head": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+  "harness_script_sha256": "7ea71e19658f92d745254c9df672a7335f594e0b105c9d714f2bec1c0e6751de",
+  "s1_commit": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1",
+  "s1_manifest_sha256": "06bf9129bf480c79ed5281ec2e944ac5613d1c340552ce5a415f5bf4c8965907",
+  "schema_commit": "4431d33e363d1684743f457eb709789e38568c8f",
+  "schema_revision": "r9",
+  "schema_sha256": "7fc847ea66114f87b22e79b5c93f55d80d3e92923b613a9ad8efee17df92a455"
+ },
+ "status": "EVIDENCE ONLY -- not a gate verdict; OPEN-S13 not closed"
+}

@@ -1,0 +1,19 @@
+Acquisition of the pinned Lean executable (preparation step; network used; performed in the Claude Code container, 2026-10-07)
+
+source:   https://conda.anaconda.org/conda-forge/linux-64/lean4-4.33.0-h6c1889d_0.conda   (HTTP 200)
+file:     lean4.conda  600175991 bytes
+sha256:   cb623d648243b9668c8753fb2efd61a00163cf92eb133ccdfd51bc48c2023f29
+extract:  python -I scratchpad/extract_conda.py (zipfile + zstandard + tarfile, paths confined to the destination; script sha256 5c7f557cc0e814dc79cd97c03a1fa8f800472c5c2425e9df7e6e614b470705e5)
+          17422 members extracted into a fresh empty directory
+
+binary hashes after extraction, each against its OWN frozen manifest pin:
+  lean         9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847
+  lake         8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2
+  leanchecker  612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33
+  libleanshared.so 0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d
+  pins: lean 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S2a manifest lean_toolchain_artifact_digest AND S1 manifest lean_toolchain_artifact_sha256)
+        lake 8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2 (S1 manifest) ; leanchecker 612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33 (S1 manifest)
+        libleanshared.so 0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d (S1 manifest)
+version:  Lean (version 4.33.0, commit 5da8a13c67369827303c441170d2f4051339df4c, Release)
+
+additional host prerequisite found (not in the frozen scripts): libuv1-dev 1.48.0-1.1build1 (Ubuntu 24.04); without it the final link of the Lean executables fails with "ld: cannot find -luv".

@@ -1,0 +1,75 @@
+{
+ "audit_output_digest": "03510fd313495b2048a21371f723939ee0c05c88fd4e1db6697db2da63975177",
+ "checker_owned_output_digest": "433a4e9b6e70046ffec745dafe1f1bb1abeb99a830222e140207dacf4e850f9a",
+ "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+ "codec_jcs": "{\"files\":{\"P10/Bytes.lean\":\"1c6e642ef91778f816aad2ad8190a7edf529ca80874a75c604275fb3d8b9a19e\",\"P10/Certificate.lean\":\"f5c491f97cacbdb98e168b4f4d1ccd2661ff83b2f3e4ce0cdcec759a93e65782\",\"P10/Core.lean\":\"1e7e6ac75044c1d28b97ff08d9f54c1f0aac13945da20bc79b0c4f612056f579\",\"P10/Fixtures.lean\":\"95090a34bf3f61751ebf27c41d9c1f1e2c710f557d009516b68742a6b2ec583f\",\"P10/Wire.lean\":\"add1a2ef886e8b57c32acedff4d2b910ea9673b3c898867d3013951c0ed429a1\"},\"type\":\"CodecArtifactV0\"}",
+ "helper_digest": "346f6fd5841a723d07959fd28ef1a72d711261915bc9033f43c2f97cb8279d71",
+ "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+ "olean_artifact_digests": {
+  ".lake/build/lib/lean/P10/Certificate.olean": "6cdade6c32aca2cd69b85939fbdd5f5bfc0f090e2868fa5f973e1730cecdb7b4",
+  ".lake/build/lib/lean/P10/Certs/P1.olean": "319f94ce3860c2b888f3076fb5dc754c6235b3b28ec41c2f2361de5a9d43e2cf",
+  ".lake/build/lib/lean/P10/Core.olean": "84d2b6b5b6142f1c6256b1c278eaa5fffa7566eeb861417e9219b10e08e0f6a4",
+  ".lake/build/lib/lean/P10/Fixtures.olean": "fba48b7d2b8ece50a82c42f2378d6cb26301b418f743ab53134eea43d23e1505"
+ },
+ "olean_evidence": [
+  {
+   "byte_length": 150592,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Certificate.olean",
+   "expected_raw_sha256_frozen_manifest": "0ec9015b820be3b332c82d76476fe244352418e702df569c01f22496eaf91a01",
+   "lean_olean_artifact_digest": "6cdade6c32aca2cd69b85939fbdd5f5bfc0f090e2868fa5f973e1730cecdb7b4",
+   "manifest_path": ".lake/build/lib/lean/P10/Certificate.olean",
+   "raw_sha256": "0ec9015b820be3b332c82d76476fe244352418e702df569c01f22496eaf91a01"
+  },
+  {
+   "byte_length": 106968,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Core.olean",
+   "expected_raw_sha256_frozen_manifest": "4207d9303553fa105465b4da2be428ca2346edb9dcd88c51d15834d000e42d1d",
+   "lean_olean_artifact_digest": "84d2b6b5b6142f1c6256b1c278eaa5fffa7566eeb861417e9219b10e08e0f6a4",
+   "manifest_path": ".lake/build/lib/lean/P10/Core.olean",
+   "raw_sha256": "4207d9303553fa105465b4da2be428ca2346edb9dcd88c51d15834d000e42d1d"
+  },
+  {
+   "byte_length": 618288,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Fixtures.olean",
+   "expected_raw_sha256_frozen_manifest": "f7c5748a55ca2ff3e6665f98ffecb9e4a61a89d68721361cbe90df2475b13f87",
+   "lean_olean_artifact_digest": "fba48b7d2b8ece50a82c42f2378d6cb26301b418f743ab53134eea43d23e1505",
+   "manifest_path": ".lake/build/lib/lean/P10/Fixtures.olean",
+   "raw_sha256": "f7c5748a55ca2ff3e6665f98ffecb9e4a61a89d68721361cbe90df2475b13f87"
+  },
+  {
+   "byte_length": 344408,
+   "evidence_path": "oleans/.lake/build/lib/lean/P10/Certs/P1.olean",
+   "expected_raw_sha256_frozen_manifest": "0856d3e85dd912a3313025fa31f9d42b1b7259efe2c812f30b2c542b85378cd8",
+   "lean_olean_artifact_digest": "319f94ce3860c2b888f3076fb5dc754c6235b3b28ec41c2f2361de5a9d43e2cf",
+   "manifest_path": ".lake/build/lib/lean/P10/Certs/P1.olean",
+   "raw_sha256": "0856d3e85dd912a3313025fa31f9d42b1b7259efe2c812f30b2c542b85378cd8"
+  }
+ ],
+ "olean_raw_observed": {
+  ".lake/build/lib/lean/P10.olean": "542121d08ea64cd7e221092f96c8629ac39904bf8bdd325a5d1a7a7b461b387a",
+  ".lake/build/lib/lean/P10/AxiomAudit.olean": "2b57aea1372af8fe04a5041ec1a742ef6b8a0fed25d176e0e611f14b4ff1eda6",
+  ".lake/build/lib/lean/P10/Bound.olean": "d1410ecda0ecb40709435423b08392a339ab683c9eee52a364c89b945579b96c",
+  ".lake/build/lib/lean/P10/Bytes.olean": "345d49c2ff5dbc8fa202bf51a99ee0d6482f8adbceb645edf7c8860caf047de7",
+  ".lake/build/lib/lean/P10/Certificate.olean": "0ec9015b820be3b332c82d76476fe244352418e702df569c01f22496eaf91a01",
+  ".lake/build/lib/lean/P10/Certs/P1.olean": "0856d3e85dd912a3313025fa31f9d42b1b7259efe2c812f30b2c542b85378cd8",
+  ".lake/build/lib/lean/P10/Core.olean": "4207d9303553fa105465b4da2be428ca2346edb9dcd88c51d15834d000e42d1d",
+  ".lake/build/lib/lean/P10/Fixtures.olean": "f7c5748a55ca2ff3e6665f98ffecb9e4a61a89d68721361cbe90df2475b13f87",
+  ".lake/build/lib/lean/P10/Sha256.olean": "2f4d46f0cf9c1bc2e4c3a738959f80305602b09a4f69f838917b5fce99d12435",
+  ".lake/build/lib/lean/P10/Wire.olean": "3443f1288ce3062d313c040e055326733d6ef079c89d298c049e5187132b5cc1"
+ },
+ "s1_commit": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1",
+ "s1_manifest_sha256": "06bf9129bf480c79ed5281ec2e944ac5613d1c340552ce5a415f5bf4c8965907",
+ "source_artifact_digests": {
+  "P10/Certificate.lean": "f5c491f97cacbdb98e168b4f4d1ccd2661ff83b2f3e4ce0cdcec759a93e65782",
+  "P10/Certs/P1.lean": "b110425ebc71a3d916c7d6b12b6961ed7117c46d10bcf23cd9c715535dfdbf2a",
+  "P10/Core.lean": "1e7e6ac75044c1d28b97ff08d9f54c1f0aac13945da20bc79b0c4f612056f579",
+  "P10/Fixtures.lean": "95090a34bf3f61751ebf27c41d9c1f1e2c710f557d009516b68742a6b2ec583f"
+ },
+ "toolchain": {
+  "executable_sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "lake_sha256": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2",
+  "leanchecker_sha256": "612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33",
+  "shared_lib_sha256": "0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d",
+  "version_string": "Lean (version 4.33.0, commit 5da8a13c67369827303c441170d2f4051339df4c, Release)"
+ }
+}

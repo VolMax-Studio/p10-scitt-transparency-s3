@@ -1,6 +1,6 @@
 # S3-C runner map, S3-owned glue, and supported-runtime contract
 
-Status: DRAFT CANDIDATE, supporting `S3_PREREG_v0.1.md` r2. Not normative, not frozen. Derived by reading the frozen sources (S2b `8eaa91c`, S2a `741d56d`); **nothing in this document was executed**. Manifest coverage confers no normative authority.
+Status: DRAFT CANDIDATE, supporting `S3_PREREG_v0.1.md` r3. Not normative, not frozen. Sections 1-7 were derived by reading the frozen sources (S2b `8eaa91c`, S2a `741d56d`); the experimental spike under `spike/` later executed the traced path, and its executed findings are recorded in §8 and in `spike/FEASIBILITY_REPORT.md`, clearly separated from source inspection. Manifest coverage confers no normative authority.
 
 ## 1. Implementation acceptance is not capture acceptance
 
@@ -29,7 +29,7 @@ Therefore S3-C needs the following **S3-owned code**, which is part of the S3-C 
 | G1 Rust entry | call `decode_request` then `replay_p0_p9` on `request.cbor`, emit `tB` and the S2b result | `[OPEN]` a thin S3 binary vs `p10-replay-cli` vs a harness; must call the pinned S2b crate unchanged |
 | G2 composer | apply prereg r7 §16.6 to the S2b result; stop on non-`Verified` | table-driven copy of the frozen table; no new mapping |
 | G3 S2a job writer | write `jobs.tsv` for `tb`, `inst`, `pb`, `cov`, `e2e` over the exact `tB`, `pB`, `inst`, `iB` files | exact-bytes; no re-encoding |
-| G4 post-S2a input assembler | build `PostS2aInputs` from `tB`, `pB`, `iB`, the S2b evidence (`leaf_index`), the target payload bytes, the target's protected `sub`, the S2a `cov`/`e2e` results and the frozen A12–A14 digests | mirrors the assembly in `tests/s2a/run_post.py`; `[OPEN]` source of the target's protected `sub` and of the A12–A14 digests for a non-toy instance |
+| G4 post-S2a input assembler | build `PostS2aInputs` from the **actual** `tB`, `pB`, `iB`, the authenticated Receipt `leaf_index`, the target payload and protected `sub` extracted from the authenticated target (frozen `parse_cose_sign1` and `read_protected`; detached payloads from the exact request material), the actual S2a `cov`/`e2e` results and the frozen A12–A14 digests (read from the S2b schema freeze record) | does NOT copy the assembly in `tests/s2a/run_post.py`, which uses the expected transcript and generator-known subject/payload values; `[OPEN]` A12–A14 digests for a non-toy instance |
 | G5 correspondence checker | prereg §6.1 | limited to artifact correspondence |
 
 Guardrail proposed for G1–G5: run the same glue over the ratified runner-control fixtures (prereg §7.3) and require each recorded expectation to reproduce unchanged, so any divergence of the glue from the frozen test tooling is visible. This shows consistency on those fixtures; it does not prove the glue adds no rule.
@@ -69,7 +69,8 @@ Verification is supported only inside the environment below. Dependencies were i
 | Lean toolchain | `leanprover/lean4:v4.33.0`; `lean_build_common.sh` selects the Lean executable by SHA-256 pinned in the S2a verifier manifest (`f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46`) and refuses an unpinned binary | S2a runner, closureAt helper | prep (obtain), run |
 | Native C compiler / linker | `cc_wrapper.sh` uses one native `cc` (`$P10_NATIVE_CC` or `command -v cc`) for the pinned Conda-built Lean's native build, logging path and hash | Lean native build | host prerequisite |
 | Python 3 | interpreter used by `post_s2a.py` and glue; `[OPEN]` exact version not pinned in the sources inspected | G2–G5, post-S2a | host prerequisite |
-| Python package | `zstandard==0.25.0` (listed in S2a `requirements.lock`) | role on the S3-C path not established `[OPEN]` | prep |
+| Python package | `zstandard==0.25.0` (listed in S2a `requirements.lock`) | **not required by the spike chain**: the glue and `post_s2a.py` ran on the standard library only, and the chain ran on an interpreter without `zstandard` | none observed |
+| Native `libuv` development library (`-luv`) | not named in the frozen scripts; `cc_wrapper.sh` repairs libgmp/libssl/libcrypto but not `-luv` | final link of the Lean runner/helper executables (the first spike build failed at `ld: cannot find -luv` until the Ubuntu package `libuv1-dev` was installed) | host prerequisite, `[OPEN]` whether to declare it |
 | `.olean` set | all S1 `olean_digest_set` hashes must reproduce (schema r9 §8.11.11 is an acceptance condition) | A12–A14 composite digests | run |
 | Frozen configuration digests | A12–A14 composites `codec_digest c156965f…6dd9`, `capability_proof_digest 9482c3f7…4928`, `proof_digest 30f49843…8696` as used for the **toy** fixture in `tests/s2a/scenarios.py` | G4 | `[OPEN]` for the S3 instance (`proof_digest` is described as toy-fixture-specific) |
 | Operating system | the sources inspected do not state one | all | `[OPEN]` |
@@ -87,3 +88,12 @@ Verification is supported only inside the environment below. Dependencies were i
 ## 7. Open items specific to this document
 
 G1 form; G4 input sources for a non-toy instance; whether `zstandard` is on the S3-C path; Python version and OS pins; toolchain carriage; the runner-control fixtures' interface adequacy.
+
+## 8. Executed findings of the feasibility spike (separate from the source inspection above)
+
+Executed in a Claude Code cloud container (Ubuntu 24.04, x86_64, gcc 13.3.0, Python 3.13.16, Rust 1.82.0 via rustup), network-isolated chain runs via `unshare -n`. Detail, commands, outputs and hashes: `spike/FEASIBILITY_REPORT.md` and `spike/evidence/`. Nothing here adopts the spike code.
+
+- The public items needed (`request::decode_request`, `finalize::replay_p0_p9`, `cose::parse_cose_sign1`, `statement::read_protected`) and the supporting types compile and link from an external crate against `8eaa91c` under Rust 1.82.0. The spike lock was started from the S2b `Cargo.lock`; cargo dropped the eight packages that only the dev-dependencies need (ciborium, ciborium-io, ciborium-ll, coset, crunchy, half, zerocopy, zerocopy-derive) and added the entry itself; every remaining package is identical (name, version, checksum) to the S2b lock, which `spike/host/preflight.py` checks.
+- The pinned Lean executable was obtained and matched: conda-forge `lean4-4.33.0-h6c1889d_0`, `lean` SHA-256 `9842f89b…2847` equal to the S2a manifest pin and the S1 manifest pin; `lake`, `leanchecker` and `libleanshared.so` equal to the S1 manifest pins. The S2b launchers then built the S2a runner and the closureAt helper fresh and accepted the executable by hash.
+- All eight runner controls and the `volmax-owner` fixture passed with their recorded expectations in two consecutive network-isolated runs, with identical verdict projections, `tB` bytes and helper-binary hashes.
+- The S1 OPEN-S13 reproduction (run mode) under the pinned toolchain reproduced the three frozen composite digests used as A12–A14.

@@ -1,0 +1,44 @@
+[
+ {
+  "id": "SENS-retained-payload-mismatch",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/request.cbor",
+  "source": "s2a-post/POST-BASE-match",
+  "tb_expected": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/tB.expected",
+  "pb": "/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json",
+  "inst": "/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin",
+  "ib": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/iB.json",
+  "retained_target_payload": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/iB.json",
+  "expect": {
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2a": ".accept",
+   "e2e": "some",
+   "post": {
+    "rule": null,
+    "verdict": "BINDING_MATCH"
+   }
+  }
+ },
+ {
+  "id": "SENS-wrong-expectation",
+  "request": "spike/fixtures/volmax-owner/request.cbor",
+  "source": "spike/fixtures/volmax-owner",
+  "pb": "spike/fixtures/volmax-owner/pB.json",
+  "inst": "spike/fixtures/volmax-owner/inst.bin",
+  "ib": "spike/fixtures/volmax-owner/iB.json",
+  "retained_target_payload": "spike/fixtures/volmax-owner/target_payload.json",
+  "tb_expected": "spike/fixtures/volmax-owner/tB.expected",
+  "expect": {
+   "e2e": "some",
+   "post": {
+    "verdict": "REJECT",
+    "rule": "A10"
+   },
+   "s2a": ".accept",
+   "s2b": {
+    "status": "Verified"
+   }
+  }
+ }
+]

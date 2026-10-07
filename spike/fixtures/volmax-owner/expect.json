@@ -1,0 +1,11 @@
+{
+ "e2e": "some",
+ "post": {
+  "rule": null,
+  "verdict": "BINDING_MATCH"
+ },
+ "s2a": ".accept",
+ "s2b": {
+  "status": "Verified"
+ }
+}

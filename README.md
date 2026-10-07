@@ -2,7 +2,7 @@
 
 P10 S3 — SCITT Transparency Service Deployment and Offline Capture Verification.
 
-**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r2). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
+**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r3). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
 
 ## Layers
 
@@ -19,15 +19,20 @@ These are different properties.
 
 A service can be fully RFC 9943-compliant and still not be P10 S3-compatible. S3 makes no claim about arbitrary RFC 9943 services, no claim of independence between issuer and operator, and no claim that the live TS enforced the declared Registration Policy (the frozen chain authenticates policy-statement bytes as prefix members but does not verify their signatures or payload semantics).
 
+## Feasibility spike
+
+`spike/` is a non-normative feasibility spike (experimental entry and glue, host script, a test-key fixture, executed evidence). It is not the S3 acceptance runner and is not adopted by the preregistration. See `spike/README.md` and `spike/FEASIBILITY_REPORT.md`.
+
 ## Layout
 
 ```
-S3_PREREG_v0.1.md   draft preregistration (r2)
+S3_PREREG_v0.1.md   draft preregistration (r3)
 spec/               acceptance-runner-map.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: deployment profile, registration policy, capture format
 ts/                 TS deployment (planned)
 capture/            frozen live capture (planned)
 vectors/            committed vectors (planned)
 verifier/           pinned inputs and S3-owned glue for the frozen chain (planned)
+spike/              non-normative feasibility spike
 tests/{live,offline,mutations}/
 MANIFEST.sha256
 ```

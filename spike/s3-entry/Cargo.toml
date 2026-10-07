@@ -1,0 +1,17 @@
+# NON-NORMATIVE FEASIBILITY SPIKE. Not the S3 acceptance runner; adoption requires review against the completed S3 preregistration.
+[package]
+name = "s3-spike-entry"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.82"
+publish = false
+description = "Feasibility spike: thin S3 entry over the unchanged pinned S2b crate. Non-normative."
+
+[[bin]]
+name = "s3-spike-entry"
+path = "src/main.rs"
+
+# The pinned S2b checkout (commit 8eaa91cad1ffa963158b365c6d0d7316f4965e89) is linked at ../.deps/s2b by the host script
+# (not committed). No other dependency: every parse goes through p10_replay.
+[dependencies]
+p10_replay = { path = "../.deps/s2b" }

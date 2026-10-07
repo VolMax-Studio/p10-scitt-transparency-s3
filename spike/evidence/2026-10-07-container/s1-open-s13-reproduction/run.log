@@ -1,0 +1,21 @@
+[1] S1 checkout is exactly e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1 and clean: PASS
+[2] S1 verifier-manifest SHA-256 matches the external pin: PASS
+/home/user/volmax-studio/s2b-8eaa91c/harness/repro_open_s13.py:301: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tf.extractall(work)
+[4] clean work copy of the exact S1 tree at /tmp/p10-s1-repro-eqxm93sx
+[3] pinned toolchain identities match the S1 manifest: PASS
+[5] lake build --wfail: clean build + idempotence pass (S1 verify.sh shape; no lake update): PASS
+[6] raw SHA-256 of all 10 .olean files equal the frozen olean_digest_set: PASS
+[7] LeanOlean artifact digests computed for the 4 required .olean files
+[7b] 4 .olean evidence copies written under oleans/ and re-verified from the copied bytes: PASS
+[8-9] targeted CapabilityAuditV0 validated; canonical output digest 03510fd313495b2048a21371f723939ee0c05c88fd4e1db6697db2da63975177
+[10-11] frozen S1 checker-owned path succeeded (exact-type check + kernel replay); canonical digest 433a4e9b6e70046ffec745dafe1f1bb1abeb99a830222e140207dacf4e850f9a
+[14] CodecArtifactV0 regression: c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9: PASS
+[12-13] CapabilityProofV0 SHA-256 9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928
+[12-13] ProofArtifactV0   SHA-256 30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696
+[13] cycle/binding checks: all PASS
+REPRODUCTION COMPLETED -- evidence only; submit /tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/s13 to the independent gate. OPEN-S13 is NOT closed by this tool.
+
+real	0m56.431s
+user	0m36.944s
+sys	0m36.994s

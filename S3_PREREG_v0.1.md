@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r2 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r3 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r3 (feasibility-spike pass, relative to r2 at `fcb1efa`): the fixed toy semantics are distinguished from configurable identity/key data (I13); the sentence that post-hoc corruption could only yield `RootMismatch` or `S3-FAIL` is removed and replaced by an accurate statement (Section 7.4); post-S2a target payload and protected `sub` must originate from the authenticated target (Section 6.1a); open items updated. The non-normative spike under `spike/` supports these corrections with executed evidence (`spike/FEASIBILITY_REPORT.md`); nothing in the spike is adopted by this document.
 
 Revision r2 changes (relative to the first candidate commit `ba54cd4`): I2/I4/I10 corrected against the frozen sources; policy non-claim added; negative testing narrowed to new S3 behavior with exact recipes; `request.cbor` made a committed capture artifact with a limited correspondence check; execution path traced; supported-runtime contract replaces "any machine"; S2b baseline pin proposed.
 
@@ -54,6 +56,7 @@ An instance is P10 S3-compatible only if all of the following hold.
 - **I8 — Original Receipts retained.** The Receipt obtained at the time of each registration is a capture artifact, hashed in the manifest. A later "fresh" Receipt for the same statement (which RFC 9943 permits to be signed with a different key or algorithm) MUST NOT replace it. The Receipt selected for the replay is the one for the target (the adjudication Statement, Section 6).
 - **I9 — Full-prefix export is a P10 requirement.** Exact full `[0,n)` Statement byte export is a P10 compatibility requirement, not a generic RFC 9943 requirement (RFC 9943 permits hash-only VDS). A SCITT-compliant TS that cannot export it fails the P10 S3 gate; that is not a statement about its SCITT compliance.
 - **I10 — Profile parameters and identity path.** VDS = 1 (`RFC9162_SHA256`); inclusion proof carries `tree_size`, `leaf_index`, `inclusion_path` in a tagged COSE_Sign1 Receipt; ES256 for Receipts and Statements; no X.509 headers. `kid` is the selected SCITT header path for statements (RFC 9943: `kid` is required when neither `x5t` nor `x5chain` is present). The frozen verifier does not read `kid`: it resolves statement-signing keys through the statement's protected `iss`, the frozen-configuration table `key_resolution` (`iss` → key fingerprint) and `key_material` (`iss` → COSE_Key). The instance issuer's `iss` is `volmax-owner`, which the frozen S2a token-alphabet rule (`[A-Za-z0-9_.:-]`, applied to the instance issuer only) accepts. `ts_iss` and the `iss` of non-target leaves are not alphabet-restricted by the frozen chain.
+- **I13 — Fixed semantics vs configurable data (frozen toy profile).** Fixed by the frozen semantics and artifacts: the profile-artifact constants (`fixture_id`, `s1_profile_token`, `leaf_encoding`, `log_identity_scheme`, `checkpoint_vds`), the rule identifiers and descriptor digests, the verifier-manifest digest, the S1 instance bytes `iB` (claim, evidence, witnesses), and the A12–A14 composite digests. Read as data from the profile artifact and instance commitment: the authorized-admitter names and the `key_resolution` table in `pB`; and `issuer_id`, `instance_owner_iss`, `request_id`, `instance_subject` (derived by `SubjectDeriveV0`), `profile_digest` and `log_identity_digest` in `inst`; plus the signing keys and the TS issuer string. Changing the instance owner name or any key therefore changes `pB`, `inst`, the derived subject, `LogIdentityV0` and all signatures, but not the S1 artifacts or the A12–A14 digests. The S2a identity constraints remain: owner equals issuer, issuer inside the token alphabet, owner not in the admitter set, subject equal to `SubjectDeriveV0(issuer, request_id)`. That a `volmax-owner` instance with independently generated test keys passes the unchanged chain is feasibility evidence from the non-normative spike (`spike/FEASIBILITY_REPORT.md`); it is not a decision to adopt that profile material.
 - **I11 — Keys.** Private issuer and TS keys MUST NOT appear in the capture or the manifest.
 - **I12 — Public-material sufficiency.** S3-C MUST succeed using public verification material only. This also serves as a completeness test of the capture.
 
@@ -111,6 +114,18 @@ The acceptance path MUST NOT contain: S3-specific semantic assistance, transform
 It does not re-encode any signed object, and it does not check configuration, identity, fingerprint, lifecycle, or coverage rules: `key_resolution`, `ts_iss`, `LogIdentityV0` against the commitment and `pB`, and key-fingerprint binding are checked by the frozen chain (S2b phases P0/P7, S2a C1/C1b), and re-implementing them would create a second implementation of the same rules. This delegation is deliberate.
 
 The checker is S3-owned code in the acceptance path and therefore part of the trusted computing base of S3-C. Its role is artifact correspondence, not P10 semantics. `[OPEN]` its implementation form and where it runs relative to the chain.
+
+### 6.1a Provenance of post-S2a inputs
+
+The inputs of the post-S2a stage are derived from actual outputs of the preceding stages, never from expected artifacts or from values known to a fixture generator:
+
+- the transcript `tB` is the exact byte string produced by S2b for this capture; it is not a retained or expected copy;
+- the Receipt target `leaf_index` is the authenticated checkpoint's `leaf_index` established by S2b;
+- the target payload and the target's protected `sub` are taken from the **authenticated target** itself: after S2b returns `Verified`, parse the exact `target_registered_statement_bytes` with the frozen `parse_cose_sign1` and read the protected header with the frozen `read_protected`; an attached payload is used as is, and a detached payload is taken from the corresponding exact request material (`detached_statement_payloads` at that index). No new CBOR/COSE parser is introduced;
+- a separately retained target-payload file, if kept, is not an input: it MUST equal the extracted payload byte for byte, and any difference is an S3 acceptance failure of the packaging layer (`S3-FAIL`), not a P10 verdict;
+- the S2a evidence digest and the S1 end-to-end result come from the actual S2a runner output for this capture; the A12–A14 digests are the frozen values read from the S2b schema freeze record.
+
+The S2b test tooling (`tests/s2a/run_post.py`) assembles these inputs from the expected transcript and generator-known subject and payload values; that assembly is not acceptable in S3-C.
 
 ### 6.2 Outputs recorded
 
@@ -197,7 +212,7 @@ The six categories originally preregistered map to ratified S2b vectors. The rec
 
 Consequences recorded for S3:
 
-- A post-hoc byte alteration of the committed capture can only yield `RootMismatch` (HALT) or an `S3-FAIL`; it cannot reach a semantic REJECT. Semantic REJECT paths (S2a lifecycle order, `LeafInputDomainViolation`) require a log that actually hashes the offending leaf under a validly signed Receipt, so S3 does not test them on the capture. They are covered by the ratified vectors above.
+- The outcome of a post-hoc alteration of the committed capture depends on what is altered, and the recipe MUST say which object is changed: a non-selected prefix leaf gives P6 `RootMismatch`; the selected target leaf gives P5 `TargetStatementMismatch` (established before P6 and reported as the reason; `RootMismatch` may appear among the diagnostics); a missing leaf gives `MissingIndex`; Receipt, key or configuration alterations give the P0/P2/P3/P7 reasons listed above; all of these compose to HALT except `Invalid(binding)` reasons, which compose to REJECT. Alteration of `request.cbor` or a capture file relative to the other is an S3 packaging failure caught before the chain. A semantic S2a REJECT (lifecycle order) or a `LeafInputDomainViolation` REJECT cannot be reached by altering the committed capture bytes, because that requires a log that actually hashes the offending leaf under a validly signed Receipt; those paths are covered by the ratified vectors above.
 - A conformant TS may normalize or reject a statement with a non-empty unprotected header (RFC 9943 requires it empty before inclusion); S3 does not ask a live TS to violate that rule to produce a negative log.
 - M1 (byte-level binding of the registered bytes) and the unprotected-header domain boundary stay distinct in intent: M1 tests cryptographic binding of the registered bytes to the root; `E10`/`E10b` test the registered-form boundary.
 
@@ -217,7 +232,7 @@ Consequences recorded for S3:
 
 ## 9. Committed artifacts
 
-Candidate documents present now (manifest-covered; manifest coverage is provenance only, not normative authority): `S3_PREREG_v0.1.md`, `README.md`, `spec/acceptance-runner-map.md`, `spec/CLOSURE_REPORT_OPEN_1_4_6.md`.
+Candidate documents present now (`MANIFEST.sha256` hashes every tracked file except `.gitkeep` placeholders and itself; manifest coverage is provenance only, not normative authority): `S3_PREREG_v0.1.md`, `README.md`, `spec/acceptance-runner-map.md`, `spec/CLOSURE_REPORT_OPEN_1_4_6.md`. The directory `spike/` holds a non-normative feasibility spike (experimental entry, glue, host script, public fixture, executed evidence); it is not an S3 artifact in the sense of this section, and its adoption requires explicit review against the completed preregistration.
 
 Planned (none of the S3-B outputs exist at this stage):
 
@@ -238,10 +253,11 @@ Excluded from the repository and manifest: private keys, secrets, and any artifa
 1. Non-target `sub` value(s) (I2).
 2. Bootstrap mechanism and index-0 content (Section 4).
 3. TS implementation selection (Option A).
-4. Lifecycle sequence, capture format, and provenance/decodability of `pB`/`inst`/`iB` for the `volmax-owner` instance (Section 5).
-5. How the Rust entry (`decode_request` / `replay_p0_p9`) is invoked: S3-owned thin binary vs the separately versioned `p10-replay-cli` adapter vs the S2b test harness (`spec/acceptance-runner-map.md` §3).
-6. The S3-owned glue (assembly of post-S2a inputs, correspondence checker): form, review, and how it is shown to add no rule.
-7. Toolchain carriage vs declared host prerequisites (Section 6.4).
+4. Lifecycle sequence and capture format (Section 5). Provenance of `pB`/`inst`/`iB` for the S3 instance: a `volmax-owner` fixture with generated test keys was accepted by the unchanged chain in the spike (feasibility only); whether S3 adopts this profile material, and how its keys are governed, is not decided.
+5. Form of the Rust entry: the spike uses a thin S3-owned binary over the unchanged pinned S2b crate; adoption versus the separately versioned `p10-replay-cli` adapter is not decided (`spec/acceptance-runner-map.md` §3).
+6. The S3-owned glue (post-S2a input assembly, composer, correspondence checker): the spike contains experimental code; form, review against this preregistration, and how it is shown to add no rule are not decided. G4 inputs for a non-toy instance (A12–A14 digests) remain open; for the toy semantics the frozen values were reproduced by the spike (`spike/A12_A14_APPLICABILITY.md`).
+7. Toolchain carriage vs declared host prerequisites (Section 6.4); the spike found one prerequisite not covered by the frozen scripts (a native `libuv` development library for the Lean link step).
 8. `S3-FAIL` reason codes; exact recorded-but-not-compared field list (Section 8).
 9. Receipt payload form (attached vs detached) of the selected TS, which fixes the reason codes for Receipt-fault references (Section 7.4).
-10. Adequacy of the runner-control fixtures (Section 7.3).
+10. Adequacy of the runner-control fixtures (Section 7.3): the eight candidates were exercised in the spike with their own bound inputs; whether they suffice for the adopted runner is not decided.
+11. Python version and operating system pins for S3-C (the spike glue used only the standard library).

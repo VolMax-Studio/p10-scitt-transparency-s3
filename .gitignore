@@ -1,0 +1,4 @@
+spike/.deps/
+spike/s3-entry/target/
+__pycache__/
+*.pyc

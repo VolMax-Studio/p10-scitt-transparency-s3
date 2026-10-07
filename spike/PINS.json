@@ -1,0 +1,13 @@
+{
+  "status": "NON-NORMATIVE FEASIBILITY SPIKE pins; not a freeze",
+  "s1":  {"repository": "VolMax-Studio/p10-underdetermination-lean-s1", "tag": "v0.1.0-s1-ratified", "peeled_commit": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1", "verifier_manifest_sha256": "06bf9129bf480c79ed5281ec2e944ac5613d1c340552ce5a415f5bf4c8965907"},
+  "s2a": {"repository": "VolMax-Studio/p10-coverage-lean-s2", "tag": "v0.1.0-s2a-ratified", "peeled_commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da"},
+  "s2b": {"repository": "VolMax-Studio/p10-replay-verifier", "tag": "v0.1.0-s2b-complete", "peeled_commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+          "public_tag_compared": {"tag": "v0.1.1-s2b-public", "peeled_commit": "8e89f9a4192bdd0ab280556701dc595eb55539d2", "differs_in": ["LICENSE-APACHE", "LICENSE-MIT", "NOTICE.md", "README.md", "SECURITY.md", "docs/INTEGRATION.md"]}},
+  "lean": {"toolchain": "leanprover/lean4:v4.33.0", "package": "conda-forge lean4 4.33.0 build h6c1889d_0",
+           "lean_sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847", "lean_pinned_by": ["S2a manifest lean_toolchain_artifact_digest", "S1 manifest lean_toolchain_artifact_sha256"],
+           "lake_sha256": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2", "leanchecker_sha256": "612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33",
+           "libleanshared_sha256": "0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d", "those_three_pinned_by": "S1 manifest"},
+  "rust": {"toolchain": "1.82.0", "lock": "spike/s3-entry/Cargo.lock (every package except s3-spike-entry identical to S2b Cargo.lock)"},
+  "a12_a14_source": "S2b frozen/StatementPayloadSchemaV0_r9_FREEZE.txt (CodecArtifactV0, CapabilityProofV0, ProofArtifactV0)"
+}

@@ -91,5 +91,5 @@ On any G5 failure none of the following may be invoked: the S2b replay (`replay_
 
 - The `role` values and the provenance file set are not specified beyond "informational".
 - Whether `origin="ts"` statements (bootstrap policy) are required to have a recorded TS-side source file is not decided.
-- Real S3-B capture tooling (an independent source for submissions, exports and Receipts) does not exist yet; the tested materialization derives all files from one request and therefore exercises mechanics, not source independence.
+- Candidate S3-B capture tooling now exists (`ts-prototype/`): submissions, returned Receipts/checkpoints and the HTTP public export are retained by separate client invocations, and the exploratory captures (`ts-prototype/evidence/lifecycle-run2`, `lifecycle-run3-ml2`, `exploratory-ml1-detached-closure`) were assembled from those retained sources and passed G5 and the unchanged chain. The G5 test materialization (`tests/offline/g5/materialize_capture.py`) still derives all files from one request and exercises mechanics only. Independence of the tooling from the facade, and adoption, are not decided.
 - Reason-code stability and the exit-code contract are candidate.

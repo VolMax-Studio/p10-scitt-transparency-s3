@@ -2,7 +2,7 @@
 
 P10 S3 — SCITT Transparency Service Deployment and Offline Capture Verification.
 
-**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r10). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
+**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r11). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
 
 ## Layers
 
@@ -26,15 +26,16 @@ A service can be fully RFC 9943-compliant and still not be P10 S3-compatible. S3
 ## Layout
 
 ```
-S3_PREREG_v0.1.md   draft preregistration (r10)
+S3_PREREG_v0.1.md   draft preregistration (r11)
 spec/               acceptance-runner-map.md, capture-format.md, mixed-log-test-plan.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: deployment profile, registration policy
 ts/                 TS deployment (planned)
 capture/            frozen live capture (planned)
 vectors/            committed vectors (planned)
-verifier/g5/        candidate G5 capture-correspondence checker (candidate code, not adopted); pinned inputs and the rest of the runner: planned
+verifier/g5/        candidate G5 capture-correspondence checker (candidate code, not adopted)
+verifier/runner/    candidate standalone S3-C runner: contract, pinned inputs, code (candidate; reuses spike code as candidate TCB; not adopted)
 spike/              non-normative feasibility spike
 ts-selection/       non-normative TS selection pass: recommendation, probe, procedure dry run, evidence
 ts-prototype/       non-normative candidate Go facade over Tessera v1.0.4, HTTP-only capture client, tests, results, evidence
-tests/{live,offline,mutations}/   tests/offline/g5/ holds G5 test tooling, a test capture and executed evidence; tests/offline/ml/ the mixed-log test ML-1
+tests/{live,offline,mutations}/   tests/offline/g5/ holds G5 test tooling, a test capture and executed evidence; tests/offline/ml/ the mixed-log test ML-1; tests/offline/runner/ the candidate runner's validation harness
 MANIFEST.sha256
 ```

@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r10 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r11 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r11 (relative to r10 at `aa9fc1b`): factual corrections only, no new adoption. Stale statements were corrected: `spec/capture-format.md` exists (candidate, executed against the candidate checker; Section 5 and Section 9); ML-2 was executed (Remaining OPEN item 12); new exploratory captures (`ts-prototype/evidence/`) collect submissions, returned Receipts/checkpoints and the HTTP public export from separate interfaces (Remaining OPEN item 13), while the G5 test materialization still derives all files from one request. Existence and execution of these candidates are distinguished from adoption, which remains open for every item listed here. A candidate standalone S3-C runner with its own contract is introduced under `verifier/runner/` (candidate code, not adopted).
 
 Revision r10 (relative to r9 at `7376af8`): one focused producer-index test (`ts-prototype/RESULTS.md` §F): producer role ordinal, actual log index and authenticated prefix size are separated (next position derived from the verified public checkpoint, returned index validated); one operator TEST note was registered between the profile and instance statements (the previously unexecuted ML-2 shape, 8 leaves); the instance producer ordinal differs from its returned index; closure and adjudication references and the preclosure digest follow the actual indices; prototype checks, G5 and the unchanged chain pass. Reported as S3 producer/orchestration evidence. Nothing is adopted; selection, bootstrap, policy enforcement, glue, G5 and the acceptance path remain OPEN.
 
@@ -97,7 +99,7 @@ RFC 9943 permits (a) preconfigured Registration Policy and trust anchors, (b) a 
 7. Assemble `request.cbor` (Section 6.1) from the exported files, before S3-C and after the capture is complete.
 8. Hash all artifacts into the manifest and freeze the capture.
 
-`[OPEN]` The lifecycle sequence content (statement count, which P10 statements), the capture file layout (`spec/capture-format.md`, not yet written), and the provenance of `pB`/`inst`/`iB` for this instance. The ratified toy profile (`profile/pB.json`, `profile/inst.bin` in S2b) binds fixed issuer names and keys; whether S3 uses a new profile artifact for `volmax-owner` and whether S2a's strict `pB` decoder accepts it was not established.
+`[OPEN]` The lifecycle sequence content (statement count, which P10 statements), the capture file layout (`spec/capture-format.md`: a candidate exists and was executed against the candidate checker; not adopted), and the provenance of `pB`/`inst`/`iB` for this instance. The ratified toy profile (`profile/pB.json`, `profile/inst.bin` in S2b) binds fixed issuer names and keys; whether S3 uses a new profile artifact for `volmax-owner` and whether S2a's strict `pB` decoder accepts it was not established.
 
 ---
 
@@ -246,16 +248,23 @@ Consequences recorded for S3:
 
 ## 9. Committed artifacts
 
-Candidate documents present now (`MANIFEST.sha256` hashes every tracked file except `.gitkeep` placeholders and itself; manifest coverage is provenance only, not normative authority): `S3_PREREG_v0.1.md`, `README.md`, `spec/acceptance-runner-map.md`, `spec/CLOSURE_REPORT_OPEN_1_4_6.md`. The directory `spike/` holds a non-normative feasibility spike (experimental entry, glue, host script, public fixture, executed evidence); it is not an S3 artifact in the sense of this section, and its adoption requires explicit review against the completed preregistration.
+Candidate material present now (`MANIFEST.sha256` hashes every tracked file except `.gitkeep` placeholders and itself; manifest coverage is provenance only, not normative authority). Presence and successful execution of the items below do not adopt them; adoption of each remains open (Remaining OPEN items).
 
-Planned (none of the S3-B outputs exist at this stage):
+- `S3_PREREG_v0.1.md`, `README.md`.
+- `spec/` — `acceptance-runner-map.md`, `capture-format.md` (candidate capture layout, index and G5 reason codes), `mixed-log-test-plan.md` (ML-1, ML-2 and ML-6 executed; ML-3 to ML-5 not), `CLOSURE_REPORT_OPEN_1_4_6.md`.
+- `verifier/g5/` — candidate G5 correspondence checker; `verifier/runner/` — candidate standalone S3-C runner contract and code (see `verifier/runner/CONTRACT.md`), reusing spike code that is reported there as candidate TCB code requiring review.
+- `tests/offline/g5/`, `tests/offline/ml/`, `tests/offline/runner/` — test tooling, test captures and executed evidence for G5, the mixed log and the candidate runner (expectation comparisons live in these harnesses, not in the runner).
+- `spike/` — non-normative feasibility spike (experimental entry, glue, host script, public fixture, executed evidence); its adoption requires explicit review against the completed preregistration.
+- `ts-selection/`, `ts-prototype/` — non-normative TS selection pass and a candidate Go facade over Tessera v1.0.4 with a separate HTTP-only capture client, runtime issuer tooling, tests and exploratory captures. These captures (run2, run3/ML-2, detached-closure) are exploratory runs through a prototype, not the frozen S3-B capture.
 
-- `spec/` — `deployment-profile.md`, `registration-policy.md`, `capture-format.md` (not yet written)
+Planned (the frozen S3-B outputs do not exist at this stage):
+
+- `spec/` — `deployment-profile.md`, `registration-policy.md` (not yet written)
 - `ts/` — deployment configuration for the selected TS (not yet chosen)
 - `capture/` — frozen live capture, including `request.cbor`, `pB`, `inst`, `iB`, target payload, public configuration, provenance (not yet produced)
 - `vectors/` — committed S3 vectors derived from the capture (not yet produced)
-- `verifier/` — `PINNED_INPUTS.json`, runner and correspondence-checker glue (not yet written; see `spec/acceptance-runner-map.md` §3)
-- `tests/live/`, `tests/offline/`, `tests/mutations/` (Section 7.2–7.3 cases)
+- `verifier/PINNED_INPUTS.json` — a candidate exists (`verifier/runner/PINNED_INPUTS.json`); the adopted pin file is not decided
+- `tests/live/`, `tests/mutations/` (Section 7.2–7.3 cases; the packaging cases and controls are executed offline for the candidate runner under `tests/offline/`)
 - `MANIFEST.sha256`
 
 Excluded from the repository and manifest: private keys, secrets, and any artifact not yet produced.
@@ -275,5 +284,5 @@ Excluded from the repository and manifest: private keys, secrets, and any artifa
 9. Receipt payload form (attached vs detached) of the selected TS (the prototype issues detached Receipts, the frozen S2b form; not adopted), which fixes the reason codes for Receipt-fault references (Section 7.4).
 10. Adequacy of the runner-control fixtures (Section 7.3): the eight candidates were exercised in the spike with their own bound inputs; whether they suffice for the adopted runner is not decided.
 11. Python version and operating system pins for S3-C (the spike glue used only the standard library).
-12. Mixed-log test: ML-1 (two leading synthetic non-target test statements, then the lifecycle at shifted indices) and ML-6 (its capture packaging with `origin="ts"` leaves) were built and executed through the anchored path and the unchanged chain (`spec/mixed-log-test-plan.md` §8); they say nothing about Registration Policy content, bootstrap, enforcement or a live TS. ML-2 to ML-5 are not built (ML-3 to ML-5 are optional rule-coverage checks that reuse ratified vectors).
-13. Real capture tooling with independent sources for submissions, exports and Receipts; the tested materialization derives all files from one request.
+12. Mixed-log test: ML-1 (two leading synthetic non-target test statements, then the lifecycle at shifted indices) and ML-6 (its capture packaging with `origin="ts"` leaves) were built and executed through the anchored path and the unchanged chain (`spec/mixed-log-test-plan.md` §8); they say nothing about Registration Policy content, bootstrap, enforcement or a live TS. ML-2 (an operator TEST note between the profile and instance statements, 8 leaves) was executed in the r10 pass as producer/orchestration evidence through the prototype facade, with `BINDING_MATCH` from the unchanged chain (`ts-prototype/RESULTS.md` §F); ML-3 to ML-5 are not built (optional rule-coverage checks that reuse ratified vectors).
+13. Real capture tooling with independent sources for submissions, exports and Receipts: candidate tooling exists (`ts-prototype/`: the submission/Receipt/checkpoint retention and the HTTP-only public export are separate client invocations and interfaces, and the exploratory captures run2, run3/ML-2 and detached-closure were assembled from those separately retained sources). The G5 test materialization (`tests/offline/g5/`, `tests/offline/ml/`) still derives all files from one request. Independence of the capture tooling from the facade code, and its adoption, are not decided.

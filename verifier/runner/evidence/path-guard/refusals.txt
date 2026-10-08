@@ -1,0 +1,6 @@
+usage: --out must be a directory separate from the capture: the resolved output $SP/pgc/capture equals, lies inside or contains the resolved capture $SP/pgc/capture
+exit=2 out=capture
+usage: --out must be a directory separate from the capture: the resolved output $SP/pgc/capture/runner-output equals, lies inside or contains the resolved capture $SP/pgc/capture
+exit=2 out=capture/runner-output
+usage: --out must be a directory separate from the capture: the resolved output $SP/pgc/capture/x equals, lies inside or contains the resolved capture $SP/pgc/capture
+exit=2 out=alias/x

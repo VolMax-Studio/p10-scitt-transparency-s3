@@ -113,4 +113,4 @@ Candidate G5 runs on each capture listed in `spike/host/anchored_captures.json` 
 
 A candidate standalone runner implementing the map of §4 exists under `verifier/runner/` (contract `CONTRACT.md`, validation record `VALIDATION.md`). It adapts the spike glue (reused functions are marked and hash-compared), takes only a capture and an external anchor, and reports `BINDING_MATCH | REJECT | HALT | S3-FAIL(packaging) | S3-FAIL(infrastructure)`. Existence and successful execution do not adopt it; the open items of §3 remain open.
 
-The r13 pass amended the candidate runner (measured isolation, capture snapshot before G5, strict stage readers, per-input codec diagnostics, optional executable identity pins); see `verifier/runner/CONTRACT.md` and `VALIDATION.md`.
+The r13 pass amended the candidate runner (measured isolation, capture snapshot before G5, strict stage readers, per-input codec diagnostics, optional executable identity pins); see `verifier/runner/CONTRACT.md` and `VALIDATION.md`. The r14 pass added the output-path guard (`--out` separate from the capture).

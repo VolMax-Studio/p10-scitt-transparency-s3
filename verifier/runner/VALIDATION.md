@@ -71,3 +71,8 @@ Review of `7b4d466` found four defects. The corrected source was pinned at commi
 - The S2A/closureAt launchers and the Lean build remain the frozen scripts; the harness's stub-based tests do not authenticate the real helper.
 - Transcript/instance decode failure handling (infrastructure) is a candidate classification pending a preregistered decision.
 - Nothing is adopted; the first-validation limits that this pass did not touch still apply.
+
+## r14: output-path guard
+
+Review of `fa970d2` found one more defect: `--out` equal to or inside `--capture` made `snapshot_capture()` copy its own output recursively (observed: depth 173, 4537 files, ~60 MB, exit 40 `SNAPSHOT_IO`). Correction pinned at commit `4bd215ef137b776517c34f8a74674494d61628e4`: the resolved `--out` must not equal, lie inside or contain the resolved capture (checked in `main()`, `outer()` and `inner()` before any output; exit 2), and `snapshot_capture()` refuses an overlapping destination. `PINNED_INPUTS.json` and the TCB are unchanged; no stage logic changed. Regressions: equal, nested (also several levels, `--_inner`, `--no-offline`), symlink aliases (of the capture, of a subdirectory, as a parent of a not-yet-existing output), output containing the capture, and valid separate outputs (including a name sharing a string prefix with the capture and an alias to a separate directory); invalid cases exit 2 and leave the capture byte-identical; snapshot-level equivalents. Evidence: `evidence/path-guard/` (suite outputs, refusals, one anchored smoke run: BINDING_MATCH). Earlier evidence directories are unchanged and were not re-run. Limit: a dangling symlink given as `--out` is not specially handled (it fails at directory creation, outside the guard's scope). Nothing is adopted.
+

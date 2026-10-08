@@ -1,0 +1,27 @@
+test_attested_well_formed_answer_is_read (__main__.Stages.test_attested_well_formed_answer_is_read) ... ok
+test_binding_invalid_is_reject_and_stops (__main__.Stages.test_binding_invalid_is_reject_and_stops) ... ok
+test_closureat_not_run_or_malformed_is_infrastructure (__main__.Stages.test_closureat_not_run_or_malformed_is_infrastructure) ... ok
+test_contradictory_helper_outputs (__main__.Stages.test_contradictory_helper_outputs) ... ok
+test_duplicate_json_key_in_result_is_infrastructure (__main__.Stages.test_duplicate_json_key_in_result_is_infrastructure) ... ok
+test_e2e_must_be_explicit (__main__.Stages.test_e2e_must_be_explicit) ... ok
+test_entry_exit_must_match_status (__main__.Stages.test_entry_exit_must_match_status) ... ok
+test_entry_without_result_is_infrastructure (__main__.Stages.test_entry_without_result_is_infrastructure) ... ok
+test_profile_decode_failure_keeps_the_frozen_coverage_reject (__main__.Stages.test_profile_decode_failure_keeps_the_frozen_coverage_reject) ... ok
+test_reencode_false_with_a_reject_is_recorded_not_preempting (__main__.Stages.test_reencode_false_with_a_reject_is_recorded_not_preempting) ... ok
+test_replay_invalid_and_unavailable_are_halt (__main__.Stages.test_replay_invalid_and_unavailable_are_halt) ... ok
+test_s2a_json_structure_is_strict (__main__.Stages.test_s2a_json_structure_is_strict) ... ok
+test_s2a_outcome_and_reason_representation_must_be_consistent (__main__.Stages.test_s2a_outcome_and_reason_representation_must_be_consistent) ... ok
+test_s2a_reject_and_halt_are_frozen_outcomes (__main__.Stages.test_s2a_reject_and_halt_are_frozen_outcomes) ... ok
+test_s2a_runner_failure_is_infrastructure (__main__.Stages.test_s2a_runner_failure_is_infrastructure) ... ok
+test_s2a_short_output (__main__.Stages.test_s2a_short_output) ... ok
+test_target_failure_is_packaging (__main__.Stages.test_target_failure_is_packaging) ... ok
+test_transcript_and_instance_decode_failures_have_no_frozen_outcome (__main__.Stages.test_transcript_and_instance_decode_failures_have_no_frozen_outcome) ... ok
+test_transcript_must_match_the_result_hash (__main__.Stages.test_transcript_must_match_the_result_hash) ... ok
+test_unattested_closureat_answer_is_not_accepted (__main__.Stages.test_unattested_closureat_answer_is_not_accepted) ... ok
+test_unknown_status_is_infrastructure (__main__.Stages.test_unknown_status_is_infrastructure) ... ok
+test_unknown_unlisted_and_missing_reason_are_infrastructure (__main__.Stages.test_unknown_unlisted_and_missing_reason_are_infrastructure) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 2.595s
+
+OK

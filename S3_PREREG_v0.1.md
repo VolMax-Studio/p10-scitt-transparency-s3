@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 Transparency Log Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r17 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r18 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r18 (relative to r17 at `fa0baf2`): the operator reported local custody verification (`ALL PASS`; recorded as operator-reported, not a chain execution; nothing deleted) and an external source review of the entry, G5, runner, preflight and glue. One infrastructure defect it found was corrected in the candidate runner (executable-copy failure and unexpected chain exceptions are `S3-FAIL(infrastructure)`, exit 40, with a diagnostic; `verifier/runner/VALIDATION.md` r18, evidence `verifier/runner/evidence/fault-guard/`); the normative S3-C invocation is stated (`CONTRACT.md` §4a); the S2b result reader is no longer described as a closed schema. No lifecycle capture, no key or Rust-artifact change, nothing adopted.
 
 Revision r17 (relative to r16 at `c89510e`): the target claim is the operator-supplied sentence, verbatim, with the RFC 9943 / SCRAPI non-claims in a separate paragraph and the placeholder note removed; `verify_custody.py` fails closed (both package hashes are checked before `age` or `tar` runs) and has a focused test; `spec/open-items-resolution.md` item 8 lists the complete field set and item 6 states the pending TCB review explicitly. Keys and packages were not regenerated; nothing deleted or adopted.
 

@@ -5,6 +5,11 @@
   "a copy of the encrypted packages in the session scratchpad (staged for file transfer to the operator)",
   "encrypted packages delivered to the operator by file transfer, and every copy he makes of them"
  ],
+ "custody_confirmation": {
+  "consequence": "Packages and the operator's identity file are to be kept by the operator. Nothing is deleted: the plaintext originals in the session container, the transit copies and all packages remain until the operator separately decides; the one-use retirement is a later, manual step after capture and acceptance.",
+  "statement": "The operator reported that verify_custody.py from commit fa0baf2, run locally on his HP with his age identity, returned ALL PASS: both encrypted-package SHA-256 values, both file inventories, all issuer and Receipt-key fingerprints and the checkpoint signing-key binding matched the candidate definition.",
+  "status": "OPERATOR-REPORTED (not independently observed by Claude; not a P10 chain execution)"
+ },
  "deleted": "nothing. No key copy has been deleted; deletion waits for the operator's confirmation of successful local decryption and matching public fingerprints (verify_custody.py).",
  "encryption": "age 1.1.1, X25519 recipient; `tar --sort=name --owner=0 --group=0 --numeric-owner -cf - DIRS | age -r RECIPIENT -o PACKAGE` (streamed; no plaintext archive was created)",
  "packages": {

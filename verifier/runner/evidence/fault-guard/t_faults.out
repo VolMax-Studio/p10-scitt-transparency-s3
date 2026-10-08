@@ -1,0 +1,10 @@
+test_control_fake_successful_chain_is_binding_match (__main__.Faults.test_control_fake_successful_chain_is_binding_match) ... ok
+test_executable_copy_failure_is_infrastructure (__main__.Faults.test_executable_copy_failure_is_infrastructure) ... ok
+test_unexpected_chain_exception_is_infrastructure_without_a_p10_reason (__main__.Faults.test_unexpected_chain_exception_is_infrastructure_without_a_p10_reason) ... ok
+test_unexpected_oserror_from_the_chain_is_infrastructure (__main__.Faults.test_unexpected_oserror_from_the_chain_is_infrastructure) ... ok
+test_usage_error_keeps_exit_2 (__main__.Faults.test_usage_error_keeps_exit_2) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.033s
+
+OK

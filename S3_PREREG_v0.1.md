@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r8 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r9 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r9 (relative to r8 at `aa2c592`): one fresh exploratory lifecycle with runtime issuer tooling (`ts-prototype/producer/`, `ts-prototype/RESULTS.md` §E): fresh keys and public configuration, statements created and signed during the run from the authenticated prefix and the indices actually returned, capture assembled from separately retained sources, anchor recorded before verification; prototype checks, G5 and the unchanged chain all pass. Producer/configuration changes are reported apart from verifier results. Nothing is adopted; selection, bootstrap, policy enforcement, glue, G5 and the acceptance path remain OPEN.
 
 Revision r8 (relative to r7 at `a7f3f0c`): two prototype corrections (`ts-prototype/RESULTS.md` §D): public HTTP reads during facade finalization and the capture client's checkpoint wait are now bounded by explicit deadlines (a stalled-response defect was reproduced first), and the detached-closure chain path was re-run against a detached-specific expected `tB` derived from retained exported bytes; the original FAIL report is preserved. Nothing is adopted; selection, bootstrap, policy enforcement, glue, G5 and the acceptance path remain OPEN.
 

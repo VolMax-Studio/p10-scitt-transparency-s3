@@ -1,0 +1,8 @@
+{"event":"start","log_entries":0,"t":"2026-10-08T07:12:15.869184389Z"}
+{"event":"intent","leaf_input_sha256":"2bafb815be98258072dca6ff1e19b92bca18adf04d2c38344509bddd56d2c6c0","t":"2026-10-08T07:12:15.968911189Z"}
+{"event":"integrated","index":0,"leaf_input_sha256":"2bafb815be98258072dca6ff1e19b92bca18adf04d2c38344509bddd56d2c6c0","t":"2026-10-08T07:12:15.973958001Z","tessera_is_dup":false}
+{"event":"receipt","index":0,"recovered":false,"t":"2026-10-08T07:12:15.980282722Z","tree_size":1}
+{"event":"intent","leaf_input_sha256":"f85cbeabc961ad918a5e18dd3fdbd32889aae11dfdf7733d5ad90e139bff46da","t":"2026-10-08T07:12:15.985393419Z"}
+{"event":"integrated","index":1,"leaf_input_sha256":"f85cbeabc961ad918a5e18dd3fdbd32889aae11dfdf7733d5ad90e139bff46da","t":"2026-10-08T07:12:15.99001894Z","tessera_is_dup":false}
+{"code":"E_PUBLIC_READ_TIMEOUT","event":"finalize-failed","http":504,"index":1,"t":"2026-10-08T07:12:18.991477268Z"}
+{"event":"duplicate","index":0,"leaf_input_sha256":"2bafb815be98258072dca6ff1e19b92bca18adf04d2c38344509bddd56d2c6c0","t":"2026-10-08T07:12:21.488499422Z"}

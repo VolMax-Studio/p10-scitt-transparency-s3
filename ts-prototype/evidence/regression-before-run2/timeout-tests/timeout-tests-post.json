@@ -1,0 +1,163 @@
+{
+ "mode": "post",
+ "publish_timeout_s": 3.0,
+ "fetch_timeout_s": 1.0,
+ "checkpoint": {
+  "ok": true,
+  "seconds": 4.0,
+  "stalled_resource": "checkpoint",
+  "stalled_request_withheld_by_proxy": 3,
+  "first_registration": {
+   "http": 504,
+   "error": "E_PUBLIC_READ_TIMEOUT",
+   "elapsed_s": 3.01
+  },
+  "probe_stored_receipt_resubmission": {
+   "http": 200,
+   "elapsed_s": 2.01
+  },
+  "receipt_files_for_index_1 (receipt,checkpoint,meta)": [
+   false,
+   false,
+   false
+  ],
+  "bounded_failure": true,
+  "mutex_released_probe_answered": true,
+  "no_receipt_stored": true,
+  "retry_after_restore": {
+   "client_rc": 0,
+   "index": 1,
+   "duplicate": true,
+   "recovered": true,
+   "intents_before": 2,
+   "intents_after": 2,
+   "checks": "s3check ALL OK"
+  },
+  "journal_events": [
+   "start",
+   "intent",
+   "integrated",
+   "receipt",
+   "intent",
+   "integrated",
+   "finalize-failed",
+   "duplicate",
+   "duplicate",
+   "receipt"
+  ]
+ },
+ "tile": {
+  "ok": true,
+  "seconds": 2.0,
+  "stalled_resource": "tile",
+  "stalled_request_withheld_by_proxy": 1,
+  "first_registration": {
+   "http": 504,
+   "error": "E_PUBLIC_READ_FAILED",
+   "elapsed_s": 1.11
+  },
+  "probe_stored_receipt_resubmission": {
+   "http": 200,
+   "elapsed_s": 0.11
+  },
+  "receipt_files_for_index_1 (receipt,checkpoint,meta)": [
+   false,
+   false,
+   false
+  ],
+  "bounded_failure": true,
+  "mutex_released_probe_answered": true,
+  "no_receipt_stored": true,
+  "retry_after_restore": {
+   "client_rc": 0,
+   "index": 1,
+   "duplicate": true,
+   "recovered": true,
+   "intents_before": 2,
+   "intents_after": 2,
+   "checks": "s3check ALL OK"
+  },
+  "journal_events": [
+   "start",
+   "intent",
+   "integrated",
+   "receipt",
+   "intent",
+   "integrated",
+   "finalize-failed",
+   "duplicate",
+   "duplicate",
+   "receipt"
+  ]
+ },
+ "entries": {
+  "ok": true,
+  "seconds": 2.1,
+  "stalled_resource": "entries",
+  "stalled_request_withheld_by_proxy": 1,
+  "first_registration": {
+   "http": 504,
+   "error": "E_PUBLIC_READ_FAILED",
+   "elapsed_s": 1.11
+  },
+  "probe_stored_receipt_resubmission": {
+   "http": 200,
+   "elapsed_s": 0.11
+  },
+  "receipt_files_for_index_1 (receipt,checkpoint,meta)": [
+   false,
+   false,
+   false
+  ],
+  "bounded_failure": true,
+  "mutex_released_probe_answered": true,
+  "no_receipt_stored": true,
+  "retry_after_restore": {
+   "client_rc": 0,
+   "index": 1,
+   "duplicate": true,
+   "recovered": true,
+   "intents_before": 2,
+   "intents_after": 2,
+   "checks": "s3check ALL OK"
+  },
+  "journal_events": [
+   "start",
+   "intent",
+   "integrated",
+   "receipt",
+   "intent",
+   "integrated",
+   "finalize-failed",
+   "duplicate",
+   "duplicate",
+   "receipt"
+  ]
+ },
+ "disconnect": {
+  "ok": true,
+  "seconds": 5.7,
+  "client": {
+   "http": null,
+   "client_error": "TimeoutError('timed out')",
+   "elapsed_s": 1.0
+  },
+  "facade_kept_going_after_disconnect_until_its_own_deadline": true,
+  "integrated_to_finalize_failed_s": 3.0,
+  "finalize_failed_code": "E_PUBLIC_READ_TIMEOUT",
+  "mutex_released_probe": {
+   "http": 200,
+   "elapsed_s": 0.0
+  },
+  "no_receipt_stored": true
+ },
+ "client": {
+  "ok": true,
+  "seconds": 3.1,
+  "export_with_stalled_checkpoint": {
+   "rc": 1,
+   "elapsed_s": 3.0,
+   "out": "point of size 1 within 3s (last: Get \"http://127.0.0.1:35381/checkpoint\": context deadline exceeded)"
+  }
+ }
+}

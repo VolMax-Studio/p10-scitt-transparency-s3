@@ -1,0 +1,4 @@
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/admit	0.009s
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/cborx	0.003s
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/leafenc	0.002s
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/receipt	0.009s

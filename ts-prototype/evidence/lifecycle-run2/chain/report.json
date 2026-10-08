@@ -1,0 +1,213 @@
+{
+ "a12_a14": {
+  "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+  "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+  "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+ },
+ "a12_a14_source": "S2b frozen/StatementPayloadSchemaV0_r9_FREEZE.txt",
+ "artifact_hashes": {
+  "EXPLORATORY-RUN2/ib": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "EXPLORATORY-RUN2/inst": "81238e495727a9ffcc58a4ae3f617bde20c742911fb5e0cb70c171a697827221",
+  "EXPLORATORY-RUN2/pb": "733512cb4dc4561980757c3dcee444d35eb5dfb0dc8442dd4ff5a3280de4de50",
+  "EXPLORATORY-RUN2/request.cbor": "7503d8f5ca2fbd1c46e9fface4cb77b18c5fc5a9a9604d0426ab1b12dbac9459",
+  "EXPLORATORY-RUN2/retained_target_payload": "0c92a5a882722058031d235598a65753f5044624324e5f13fbd98c7d2bef2595",
+  "EXPLORATORY-RUN2/tB.actual": "31df5d55c2a69036c51e0327fca737fb137e07bb66a759e7c995a0977fe11824"
+ },
+ "cases": {
+  "EXPLORATORY-RUN2": {
+   "checks": [
+    {
+     "check": "s2b-result",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "s2b-structure",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "target-extracted-from-authenticated-target",
+     "detail": "exit=0 target={'leaf_index': 6, 'sub': 'p10s2sub:dfef11ffabb0972bf268c18e436d91e93a87d6082a746910e4a91341df99f501', 'payload_len': 7316, 'payload_equals_retained_file': True}",
+     "ok": true
+    },
+    {
+     "check": "tB-actual-equals-tB.expected (comparison only)",
+     "detail": "31df5d55c2a69036 vs 31df5d55c2a69036",
+     "ok": true
+    },
+    {
+     "check": "s2a-outcome",
+     "detail": "('accept', None) vs ('accept', None)",
+     "ok": true
+    },
+    {
+     "check": "s1-e2e",
+     "detail": "some vs some",
+     "ok": true
+    },
+    {
+     "check": "post-s2a-result-code-rule",
+     "detail": "BINDING_MATCH/BindingMatch/None",
+     "ok": true
+    },
+    {
+     "check": "no-infrastructure-failure",
+     "detail": "",
+     "ok": true
+    }
+   ],
+   "composed_after_s2b": "continue",
+   "infra_failures": [],
+   "not_run": [],
+   "pass": true,
+   "post": {
+    "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+    "code": "BindingMatch",
+    "detail": "T1-T6 and A1-A15 hold",
+    "result": "BINDING_MATCH",
+    "rows": {
+     "A1": "match",
+     "A10": "match",
+     "A11": "match",
+     "A12": "match",
+     "A13": "match",
+     "A14": "match",
+     "A15": "match",
+     "A2": "match",
+     "A3": "match",
+     "A4": "match",
+     "A5": "match",
+     "A6": "match",
+     "A7": "match",
+     "A8": "match",
+     "A9": "match"
+    },
+    "rule": null
+   },
+   "s2a": {
+    "actual": [
+     "accept",
+     null
+    ],
+    "codec_ok": true
+   },
+   "s2b": {
+    "checkpoint_size": 7,
+    "log_identity_digest": "204b17c8c1316e67f4a3cf22fd22776cef5f6991597db7f632abc14b44601405",
+    "root": "23b50f581bddc920ed5cd15449c13184d83d63bd0fec2b20b1d07afa41d3a9bb",
+    "stage": "s2b",
+    "status": "Verified",
+    "subject_observations": [
+     {
+      "idx": 2,
+      "kind": "ProfileCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 3,
+      "kind": "InstanceCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 4,
+      "kind": "Admission",
+      "sig": "Verified"
+     },
+     {
+      "idx": 5,
+      "kind": "Closure",
+      "sig": "Verified"
+     },
+     {
+      "idx": 6,
+      "kind": "Adjudication",
+      "sig": "Verified"
+     }
+    ],
+    "target": {
+     "leaf_index": 6,
+     "payload_equals_retained_file": true,
+     "payload_len": 7316,
+     "sub": "p10s2sub:dfef11ffabb0972bf268c18e436d91e93a87d6082a746910e4a91341df99f501"
+    },
+    "tb_len": 1271,
+    "transcript_sha256": "31df5d55c2a69036c51e0327fca737fb137e07bb66a759e7c995a0977fe11824",
+    "unreadable_rows": []
+   }
+  }
+ },
+ "closureat_helper": {
+  "helper-binary-sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "helper-source-sha256": "bcf18c4eccdfcf5176a16df62980c1760ad529351bce5ba826701d8ae919313f",
+  "lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/home/user/p10-scitt-transparency-s3/spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run2/capture/request.cbor",
+    "--out",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run2/chain/cases/EXPLORATORY-RUN2/s2b",
+    "--expect-target-payload",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run2/capture/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "s2b-EXPLORATORY-RUN2",
+   "seconds": 0.03,
+   "stderr": "logs/001-s2b-EXPLORATORY-RUN2.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-s2b-EXPLORATORY-RUN2.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run2/chain/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "s2a-runner",
+   "seconds": 11.43,
+   "stderr": "logs/002-s2a-runner.stderr",
+   "stderr_sha256": "cf17dce3aa32b3d58e5c7a3c047840e1439ac57a526a0174729fa3796a3d683f",
+   "stdout": "logs/002-s2a-runner.stdout",
+   "stdout_sha256": "361d0aa7a4d18520a55b7319c82fde499ff04ab7e349b9409ef285aa07c9a062"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_closureat.sh",
+    "--batch",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/tmpiowf3gvd/jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "closureat-batch",
+   "seconds": 9.9,
+   "stderr": "logs/003-closureat-batch.stderr",
+   "stderr_sha256": "b79cbbfa8ebb657f638d579f5c4144f8b146cf4244285971a79169699acad107",
+   "stdout": "logs/003-closureat-batch.stdout",
+   "stdout_sha256": "125118160c0edeede4680ca9158edf98813accfddad39c2ceeaa6a6d759993be"
+  }
+ ],
+ "s2a_runner": {
+  "exit": 0,
+  "info": {
+   "helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+   "helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+   "helper-target": "s2a-runner",
+   "lean-executable": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin/lean",
+   "lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "lean-pinned-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "lean-toolchain": "leanprover/lean4:v4.33.0"
+  }
+ }
+}

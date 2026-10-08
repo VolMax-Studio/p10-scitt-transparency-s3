@@ -56,6 +56,8 @@ class SnapshotError(Exception):
 def snapshot_capture(src, dst):
     """Copy the capture into a private directory WITHOUT interpreting it: regular files byte-for-byte, directories, symlinks recreated as symlinks (not followed), FIFOs recreated
     as FIFOs; file names are handled as raw bytes so unsafe names are preserved for G5 to reject. Other special files cannot be reproduced and are refused (they could never pass G5)."""
+    if out_overlaps_capture(src, dst):
+        raise SnapshotError("SNAPSHOT_DESTINATION_OVERLAPS_SOURCE", f"destination {os.path.realpath(dst)} equals, lies inside or contains the source {os.path.realpath(src)}")
     s, d = os.fsencode(src), os.fsencode(dst)
     os.makedirs(d, mode=0o700)
     for root, dirs, files in os.walk(s, followlinks=False):
@@ -125,6 +127,19 @@ def read_anchor(a):
     return raw
 
 
+def out_overlaps_capture(capture, out):
+    """True if the RESOLVED output path equals the capture, lies inside it, or contains it (symlinks resolved, also in the parents of a not-yet-existing output)."""
+    c, o = os.path.realpath(capture), os.path.realpath(out)
+    cp = os.path.commonpath([c, o])
+    return cp == c or cp == o
+
+
+def require_separate_out(capture, out):
+    """Refuse an output directory that overlaps the capture, before ANY output is created (an output inside the capture would be copied into its own snapshot)."""
+    if out_overlaps_capture(capture, out):
+        usage(f"--out must be a directory separate from the capture: the resolved output {os.path.realpath(out)} equals, lies inside or contains the resolved capture {os.path.realpath(capture)}")
+
+
 def require_empty_out(out):
     if os.path.exists(out) and (not os.path.isdir(out) or os.listdir(out)):
         usage("--out must be new or empty")
@@ -154,6 +169,7 @@ def isolation_prefix():
 
 def outer(a, anchor):
     out = os.path.abspath(a.out)
+    require_separate_out(a.capture, out)
     require_empty_out(out)
     if a.no_offline:
         return inner(a, anchor, "none (--no-offline)")
@@ -195,6 +211,7 @@ def inner(a, anchor, launcher_claim):
     Isolation is tested HERE, in this process, whatever the argument says."""
     t0 = time.time()
     out = os.path.abspath(a.out)
+    require_separate_out(a.capture, out)
     require_empty_out(out)          # every invocation path, including a direct --_inner call
     os.makedirs(out, exist_ok=True)
     log = C.Log(out)
@@ -321,6 +338,7 @@ def main(argv=None):
     for k in ("entry", "g5"):
         if not os.path.isfile(getattr(a, k)):
             usage(f"--{k} is not a file")
+    require_separate_out(a.capture, a.out)        # every invocation path (outer, direct --_inner, --no-offline) passes through here, before anything is written
     if a._inner is not None:
         return inner(a, anchor, a._inner)
     return outer(a, anchor)

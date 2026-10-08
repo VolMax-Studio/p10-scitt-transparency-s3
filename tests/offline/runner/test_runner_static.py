@@ -8,7 +8,7 @@
 
 usage: test_runner_static.py --s1 D --s2a D --s2b D --entry BIN --g5 BIN --capture D --anchor-file F [--lean-bin-dir D]
 """
-import argparse, ast, hashlib, json, os, re, subprocess, sys, tempfile, unittest
+import argparse, ast, hashlib, json, os, re, shutil, subprocess, sys, tempfile, unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 RUNNER = os.path.join(REPO, "verifier", "runner")
@@ -108,6 +108,63 @@ class Cli(unittest.TestCase):
         v = json.load(open(os.path.join(self.tmp, "x1", "verdict.json"))); info = json.load(open(os.path.join(self.tmp, "x1", "run-info.json")))
         self.assertEqual((v["stage"], v["reason"]["code"]), ("preflight", "EXECUTABLE_HASH"))
         self.assertNotIn("g5", [c["name"] for c in info["commands"]])                     # G5 never ran
+
+    # ---- r14: the output directory must not overlap the capture (an output inside the capture used to be copied into its own snapshot, recursively)
+    def _capture_copy(self):
+        cap = os.path.join(self.tmp, "cap"); shutil.copytree(A.capture, cap, symlinks=True); return cap
+
+    @staticmethod
+    def _tree(root):
+        out = {}
+        for r, ds, fs in os.walk(root, followlinks=False):
+            for n in ds + fs:
+                p = os.path.join(r, n); rel = os.path.relpath(p, root)
+                out[rel] = "dir" if os.path.isdir(p) and not os.path.islink(p) else "link:" + os.readlink(p) if os.path.islink(p) else hashlib.sha256(open(p, "rb").read()).hexdigest()
+        return out
+
+    def _overlap_case(self, cap, out, extra=()):
+        before = self._tree(cap)
+        r = subprocess.run(self._base(out, capture=cap, extra=extra), capture_output=True, text=True)
+        self.assertEqual(r.returncode, 2, (out, extra, r.stdout, r.stderr))
+        self.assertIn("separate from the capture", r.stderr)
+        self.assertEqual(self._tree(cap), before, "the capture was modified")
+        self.assertFalse(os.path.exists(os.path.join(cap, "runner-output")), "output was created inside the capture")
+        self.assertNotIn("S3-FAIL", r.stdout)                                              # no verdict, no stage
+
+    def test_out_equal_to_capture_is_refused_before_any_write(self):
+        cap = self._capture_copy(); self._overlap_case(cap, cap)
+
+    def test_out_nested_in_capture_is_refused_on_every_invocation_path(self):
+        cap = self._capture_copy()
+        for extra in ([], ["--_inner", "unshare -n"], ["--no-offline"]):
+            self._overlap_case(cap, os.path.join(cap, "runner-output"), extra)
+        self._overlap_case(cap, os.path.join(cap, "prefix", "deeper", "out"))                # nested several levels, not yet existing
+
+    def test_out_through_symlink_aliases_into_the_capture_is_refused(self):
+        cap = self._capture_copy()
+        os.symlink(cap, os.path.join(self.tmp, "alias"))                                     # alias of the capture itself
+        os.symlink(os.path.join(cap, "prefix"), os.path.join(self.tmp, "alias-prefix"))      # alias of a subdirectory
+        self._overlap_case(cap, os.path.join(self.tmp, "alias"))
+        self._overlap_case(cap, os.path.join(self.tmp, "alias", "runner-output"))
+        self._overlap_case(cap, os.path.join(self.tmp, "alias-prefix", "x"))
+        self._overlap_case(cap, os.path.join(self.tmp, "alias", "new", "deeper"))            # parent is an alias, tail does not exist
+        # and the capture supplied through an alias with the output given directly
+        self._overlap_case(os.path.join(self.tmp, "alias"), os.path.join(cap, "runner-output"))
+
+    def test_out_containing_the_capture_is_refused(self):
+        cap = self._capture_copy(); self._overlap_case(cap, self.tmp)
+
+    def test_separate_output_directories_are_accepted(self):
+        cap = self._capture_copy(); before = self._tree(cap)
+        for name in ("elsewhere", "cap-out"):                                                # "cap-out" shares a string prefix with "cap": components, not strings, are compared
+            out = os.path.join(self.tmp, name)
+            r = subprocess.run(self._base(out, capture=cap), capture_output=True, text=True)
+            self.assertEqual(r.returncode, 30, (name, r.stdout, r.stderr))               # wrong anchor: it ran as far as G5
+            self.assertTrue(os.path.exists(os.path.join(out, "snapshot", "capture.json")))
+            self.assertEqual(self._tree(cap), before)
+        os.makedirs(os.path.join(self.tmp, "elsewhere2")); os.symlink(os.path.join(self.tmp, "elsewhere2"), os.path.join(self.tmp, "alias-out"))    # an alias to a separate place is fine too
+        r = subprocess.run(self._base(os.path.join(self.tmp, "alias-out"), capture=cap), capture_output=True, text=True)
+        self.assertEqual(r.returncode, 30, r.stdout + r.stderr)
 
     def test_wrong_pin_is_infrastructure_and_runs_no_stage(self):
         r = subprocess.run([sys.executable, "-B", os.path.join(RUNNER, "s3c_verify.py"), "--capture", A.capture, "--anchor-file", A.anchor_file, "--out", os.path.join(self.tmp, "o4"),

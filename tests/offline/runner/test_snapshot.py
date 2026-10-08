@@ -52,5 +52,28 @@ class Snap(unittest.TestCase):
         self.assertEqual(open(os.path.join(dst, "capture.json"), "rb").read(), b'{"x":1}\n')
 
 
+class Overlap(unittest.TestCase):
+    """r14: a direct call must not recurse into its own destination."""
+    def setUp(self):
+        self.t = tempfile.mkdtemp(); self.src = os.path.join(self.t, "cap"); os.makedirs(os.path.join(self.src, "prefix"))
+        open(os.path.join(self.src, "capture.json"), "wb").write(b"{}\n")
+
+    def refuse(self, dst):
+        with self.assertRaises(V.SnapshotError) as cm: V.snapshot_capture(self.src, dst)
+        self.assertEqual(cm.exception.code, "SNAPSHOT_DESTINATION_OVERLAPS_SOURCE")
+        self.assertEqual(sorted(os.listdir(self.src)), ["capture.json", "prefix"])         # nothing was created inside the source
+
+    def test_destination_equal_inside_alias_or_ancestor_is_refused(self):
+        self.refuse(self.src)
+        self.refuse(os.path.join(self.src, "snap"))
+        self.refuse(os.path.join(self.src, "prefix", "a", "b"))
+        os.symlink(self.src, os.path.join(self.t, "alias")); self.refuse(os.path.join(self.t, "alias", "snap")); self.refuse(os.path.join(self.t, "alias"))
+        self.refuse(self.t)                                                                  # destination containing the source
+
+    def test_separate_destination_with_a_shared_name_prefix_is_accepted(self):
+        V.snapshot_capture(self.src, os.path.join(self.t, "cap-snap"))
+        self.assertEqual(open(os.path.join(self.t, "cap-snap", "capture.json"), "rb").read(), b"{}\n")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

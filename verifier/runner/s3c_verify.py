@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """CANDIDATE S3-C acceptance runner (non-normative; contract: CONTRACT.md). One command verifies one capture:
 
-    preflight + isolation -> G5 (anchored) -> [only on G5 PASS, with G5-returned paths only] S2b entry -> composition -> S2a runner -> post-S2a (real closureAt)
+    isolation test (in this process) + preflight -> private snapshot of the capture -> G5 (anchored, on the snapshot) ->
+    [only on G5 PASS, with G5-returned snapshot paths only] S2b entry -> composition -> S2a runner -> post-S2a (real closureAt)
 
 It has no input for expected verdicts, expected tB, fixtures or producer tooling, and it reads none. Outcomes: BINDING_MATCH | REJECT | HALT | S3-FAIL(packaging) |
 S3-FAIL(infrastructure); usage errors exit 2. Candidate TCB code; reuses spike code reported in CONTRACT.md; successful execution adopts nothing.
@@ -9,7 +10,7 @@ S3-FAIL(infrastructure); usage errors exit 2. Candidate TCB code; reuses spike c
 usage: s3c_verify.py --capture DIR (--anchor HEX64 | --anchor-file FILE) --out DIR --s1 DIR --s2a DIR --s2b DIR --entry BIN --g5 BIN
                      [--lean-bin-dir DIR] [--pinned FILE] [--no-offline]
 """
-import argparse, hashlib, json, os, platform, re, shutil, subprocess, sys, time
+import argparse, hashlib, json, os, platform, re, shutil, socket, stat, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
@@ -30,6 +31,56 @@ for fam, addr in ((socket.AF_INET, ('1.1.1.1', 53)), (socket.AF_INET6, ('2606:47
     sys.exit(1)
 sys.exit(0)
 """
+
+
+def isolation_here():
+    """Is THIS process (the one that runs every stage; children inherit its network namespace) network-isolated? Interfaces other than loopback, or a successful external
+    connection, mean no. Returns (bool, detail). Never inferred from an argument."""
+    names = [n for _, n in socket.if_nameindex()]
+    if any(n != "lo" for n in names):
+        return False, {"interfaces": names}
+    for fam, addr in ((socket.AF_INET, ("1.1.1.1", 53)), (socket.AF_INET6, ("2606:4700:4700::1111", 53))):
+        try:
+            s = socket.socket(fam, socket.SOCK_STREAM); s.settimeout(3); s.connect(addr); s.close()
+        except OSError:
+            continue
+        return False, {"interfaces": names, "external_connection_succeeded": addr[0]}
+    return True, {"interfaces": names}
+
+
+class SnapshotError(Exception):
+    def __init__(self, code, msg):
+        super().__init__(msg); self.code = code
+
+
+def snapshot_capture(src, dst):
+    """Copy the capture into a private directory WITHOUT interpreting it: regular files byte-for-byte, directories, symlinks recreated as symlinks (not followed), FIFOs recreated
+    as FIFOs; file names are handled as raw bytes so unsafe names are preserved for G5 to reject. Other special files cannot be reproduced and are refused (they could never pass G5)."""
+    s, d = os.fsencode(src), os.fsencode(dst)
+    os.makedirs(d, mode=0o700)
+    for root, dirs, files in os.walk(s, followlinks=False):
+        rel = os.path.relpath(root, s)
+        droot = d if rel == b"." else os.path.join(d, rel)
+        for name in dirs + files:
+            sp, dp = os.path.join(root, name), os.path.join(droot, name)
+            try:
+                m = os.lstat(sp).st_mode
+                if stat.S_ISLNK(m):
+                    os.symlink(os.readlink(sp), dp)
+                elif stat.S_ISDIR(m):
+                    os.mkdir(dp, 0o700)
+                elif stat.S_ISREG(m):
+                    with open(sp, "rb") as fi, open(dp, "xb") as fo:
+                        shutil.copyfileobj(fi, fo, 1 << 20)
+                    os.chmod(dp, 0o400)
+                elif stat.S_ISFIFO(m):
+                    os.mkfifo(dp, 0o400)
+                else:
+                    raise SnapshotError("SNAPSHOT_SPECIAL_FILE", f"{os.fsdecode(sp)!r} is a socket or device")
+            except SnapshotError:
+                raise
+            except OSError as e:
+                raise SnapshotError("SNAPSHOT_IO", f"{os.fsdecode(sp)!r}: {e}")
 
 
 def usage(msg):
@@ -74,6 +125,11 @@ def read_anchor(a):
     return raw
 
 
+def require_empty_out(out):
+    if os.path.exists(out) and (not os.path.isdir(out) or os.listdir(out)):
+        usage("--out must be new or empty")
+
+
 def write_outputs(out, verdict, info):
     os.makedirs(out, exist_ok=True)
     open(os.path.join(out, "verdict.json"), "wb").write(canonical(verdict))
@@ -82,7 +138,8 @@ def write_outputs(out, verdict, info):
 
 def new_verdict(anchor):
     return {"format": C.FORMAT, "outcome": None, "stage": None, "reason": None, "anchor_sha256": anchor, "g5": {"result": "NOT RUN", "reason": None},
-            "request_sha256": None, "tB_sha256": None, "s2b": None, "s2a": None, "s2a_result_lines_sha256": None, "post": None, "frozen_a12_a14": None}
+            "request_sha256": None, "tB_sha256": None, "s2b": None, "s2a": None, "s2a_result_lines_sha256": None, "post": None, "frozen_a12_a14": None,
+            "executables_pinned": None}
 
 
 def isolation_prefix():
@@ -97,8 +154,7 @@ def isolation_prefix():
 
 def outer(a, anchor):
     out = os.path.abspath(a.out)
-    if os.path.exists(out) and os.listdir(out):
-        usage("--out must be new or empty")
+    require_empty_out(out)
     if a.no_offline:
         return inner(a, anchor, "none (--no-offline)")
     pre = isolation_prefix()
@@ -134,15 +190,19 @@ def check_pins(a, pinned, info):
     return None
 
 
-def inner(a, anchor, isolation):
+def inner(a, anchor, launcher_claim):
+    """The process that runs every stage. `launcher_claim` is only the label the outer process (or a direct caller) gave: it proves nothing and is recorded as such.
+    Isolation is tested HERE, in this process, whatever the argument says."""
     t0 = time.time()
     out = os.path.abspath(a.out)
+    require_empty_out(out)          # every invocation path, including a direct --_inner call
     os.makedirs(out, exist_ok=True)
     log = C.Log(out)
     v = new_verdict(anchor)
-    info = {"network_isolated": not a.no_offline and isolation != "none (--no-offline)", "isolation": isolation, "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "host": {"platform": platform.platform(), "python": sys.version.split()[0]}, "capture": os.path.abspath(a.capture),
-            "runner_source_sha256": {f: C.sha256_file(os.path.join(HERE, f)) for f in ("s3c_verify.py", "s3c_chain.py")}}
+    iso_ok, iso_detail = isolation_here()
+    info = {"network_isolated": iso_ok, "isolation_test": iso_detail, "launcher_claim_not_evidence": launcher_claim,
+            "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "host": {"platform": platform.platform(), "python": sys.version.split()[0]},
+            "capture": os.path.abspath(a.capture), "runner_source_sha256": {f: C.sha256_file(os.path.join(HERE, f)) for f in ("s3c_verify.py", "s3c_chain.py")}}
 
     def finish(outcome, stage, reason, res=None):
         v["outcome"], v["stage"], v["reason"] = outcome, stage, reason
@@ -155,59 +215,83 @@ def inner(a, anchor, isolation):
         print(f"{outcome}  stage={stage}  reason={json.dumps(reason, sort_keys=True)}\n  verdict: {os.path.join(out, 'verdict.json')}")
         return EXIT[outcome]
 
+    def infra(stage, code, msg):
+        info["problems"] = [msg]
+        return finish("S3-FAIL(infrastructure)", stage, {"code": code})
+
+    if not iso_ok and not a.no_offline:
+        return infra("preflight", "NETWORK_ISOLATION", f"this process is not network-isolated ({iso_detail}); stages are not run (pass --no-offline to accept a CONNECTED run)")
+
     # ---- P: pins, TCB hashes, preflight
     try:
-        pinned = json.load(open(a.pinned, encoding="utf-8"))
+        pinned = C.strict_loads(open(a.pinned, encoding="utf-8").read())
     except (OSError, ValueError) as e:
-        info["problems"] = [f"pinned inputs unreadable: {e}"]
-        return finish("S3-FAIL(infrastructure)", "preflight", {"code": "PINNED_INPUTS"})
+        return infra("preflight", "PINNED_INPUTS", f"pinned inputs unreadable: {e}")
     err = check_pins(a, pinned, info)
     if err:
-        info["problems"] = [err[1]]
-        return finish("S3-FAIL(infrastructure)", "preflight", {"code": err[0]})
+        return infra("preflight", err[0], err[1])
     pf = [sys.executable, "-B", os.path.join(REPO, "spike", "host", "preflight.py"), "--s1", a.s1, "--s2a", a.s2a, "--s2b", a.s2b, "--out", os.path.join(out, "preflight.json")]
     if a.lean_bin_dir:
         pf += ["--lean-bin-dir", a.lean_bin_dir]
     rc, so, se = log.run(pf, "preflight")
     if rc != 0:
-        info["problems"] = ["preflight failed: " + (so + se)[-400:]]
-        return finish("S3-FAIL(infrastructure)", "preflight", {"code": "PREFLIGHT"})
+        return infra("preflight", "PREFLIGHT", "preflight failed: " + (so + se)[-400:])
     try:
-        sel = json.load(open(os.path.join(out, "preflight.json")))["selected_lean_bin_dir"]
-    except (OSError, ValueError, KeyError):
+        sel = C.strict_loads(open(os.path.join(out, "preflight.json"), encoding="utf-8").read())["selected_lean_bin_dir"]
+    except (OSError, ValueError, KeyError, TypeError):
         sel = None
     if not sel:
-        info["problems"] = ["preflight selected no Lean directory"]
-        return finish("S3-FAIL(infrastructure)", "preflight", {"code": "NO_LEAN"})
+        return infra("preflight", "NO_LEAN", "preflight selected no Lean directory")
     os.environ["P10_LEAN_BIN_DIR"] = sel
     info["lean_bin_dir"] = sel
-    for lab, p in (("entry", a.entry), ("g5", a.g5)):
-        info[lab + "_binary_sha256"] = C.sha256_file(p) if os.path.exists(p) else None
 
-    # ---- G5 (nothing else may run before it passes)
-    rc, so, se = log.run([a.g5, "--capture", a.capture, "--index-sha256", anchor], "g5")
+    # ---- executables: private copies, identity checked against the pins when pinned (identity, not reproducible compilation), and the copies are what runs
+    bindir = os.path.join(out, "bin"); os.makedirs(bindir)
+    exe, pinned_flags = {}, {}
+    for lab, src in (("entry", a.entry), ("g5", a.g5)):
+        dst = os.path.join(bindir, lab)
+        shutil.copyfile(src, dst); os.chmod(dst, 0o500)
+        got = C.sha256_file(dst); info[lab + "_binary_sha256"] = got
+        want = (pinned.get("executables") or {}).get(lab, {}).get("sha256")
+        pinned_flags[lab] = want is not None
+        if want is not None and want != got:
+            v["executables_pinned"] = pinned_flags
+            return infra("preflight", "EXECUTABLE_HASH", f"{lab} binary hash {got} differs from the pinned {want}")
+        exe[lab] = dst
+    v["executables_pinned"] = pinned_flags
+
+    # ---- private snapshot of the capture: G5 and every later stage see only this copy
+    snap = os.path.join(out, "snapshot")
     try:
-        g = json.loads(so)
+        snapshot_capture(a.capture, snap)
+    except SnapshotError as e:
+        info["problems"] = [str(e)]
+        if e.code == "SNAPSHOT_SPECIAL_FILE":
+            return finish("S3-FAIL(packaging)", "snapshot", {"code": e.code})
+        return finish("S3-FAIL(infrastructure)", "snapshot", {"code": e.code})
+    except OSError as e:
+        return infra("snapshot", "SNAPSHOT_IO", str(e))
+
+    # ---- G5 on the snapshot (nothing else may run before it passes)
+    rc, so, se = log.run([exe["g5"], "--capture", snap, "--index-sha256", anchor], "g5")
+    try:
+        g = C.strict_loads(so)
         assert isinstance(g, dict)
     except (ValueError, AssertionError):
-        info["problems"] = [f"G5 output is not one JSON object (exit {rc}): {so[:200]} {se[:200]}"]
-        return finish("S3-FAIL(infrastructure)", "g5", {"code": "G5_OUTPUT"})
+        return infra("g5", "G5_OUTPUT", f"G5 output is not one strict JSON object (exit {rc}): {so[:200]} {se[:200]}")
     info["g5_output"] = g
     if rc == 30 and g.get("g5") == "FAIL" and isinstance(g.get("reason"), str):
         v["g5"] = {"result": "FAIL", "reason": g["reason"]}
         info["problems"] = [str(g.get("detail"))]
         return finish("S3-FAIL(packaging)", "g5", {"code": g["reason"]})
     if rc != 0 or g.get("g5") != "PASS":
-        info["problems"] = [f"G5 exit {rc} with result {g.get('g5')!r}"]
-        return finish("S3-FAIL(infrastructure)", "g5", {"code": "G5_EXIT"})
+        return infra("g5", "G5_EXIT", f"G5 exit {rc} with result {g.get('g5')!r}")
     if g.get("anchor_checked") is not True:
-        info["problems"] = ["G5 PASS without anchor_checked=true is not an anchored capture"]
-        return finish("S3-FAIL(infrastructure)", "g5", {"code": "G5_UNANCHORED"})
+        return infra("g5", "G5_UNANCHORED", "G5 PASS without anchor_checked=true is not an anchored capture")
     v["g5"] = {"result": "PASS", "reason": None}
-    root = os.path.realpath(g["root"])
-    if root != os.path.realpath(a.capture):
-        info["problems"] = ["G5 checked a different root than --capture"]
-        return finish("S3-FAIL(infrastructure)", "g5", {"code": "G5_ROOT"})
+    root = os.path.realpath(g["root"]) if isinstance(g.get("root"), str) else None
+    if root != os.path.realpath(snap):
+        return infra("g5", "G5_ROOT", "G5 checked a different root than the private snapshot")
     paths = {}
     for k in ("request", "profile_artifact", "instance_commitment", "s1_instance", "retained_target_payload"):
         val = g.get(k)
@@ -215,17 +299,15 @@ def inner(a, anchor, isolation):
             if k == "retained_target_payload":
                 paths[k] = None
                 continue
-            info["problems"] = [f"G5 result has no {k}"]
-            return finish("S3-FAIL(infrastructure)", "g5", {"code": "G5_MISSING_PATH"})
-        rp = os.path.realpath(val)
-        if os.path.commonpath([root, rp]) != root or not os.path.isfile(rp):
-            info["problems"] = [f"G5-returned path {val} is not a file under the checked capture root"]
-            return finish("S3-FAIL(infrastructure)", "g5", {"code": "G5_PATH_OUTSIDE"})
+            return infra("g5", "G5_MISSING_PATH", f"G5 result has no {k}")
+        rp = os.path.realpath(val) if isinstance(val, str) else ""
+        if not rp or os.path.commonpath([root, rp]) != root or not os.path.isfile(rp):
+            return infra("g5", "G5_PATH_OUTSIDE", f"G5-returned path {val} is not a file under the checked snapshot")
         paths[k] = rp
 
-    # ---- chain, from G5-returned paths only
+    # ---- chain, from G5-returned snapshot paths only
     inp = C.ChainInputs(paths["request"], paths["profile_artifact"], paths["instance_commitment"], paths["s1_instance"], paths["retained_target_payload"])
-    res = C.run_chain(inp, out, a.s2b, a.s2a, a.entry, log)
+    res = C.run_chain(inp, out, a.s2b, a.s2a, exe["entry"], log)
     info["input_sha256"] = {k: C.sha256_file(p) for k, p in paths.items() if p}
     return finish(res["outcome"], res["stage"], res["reason"], res)
 

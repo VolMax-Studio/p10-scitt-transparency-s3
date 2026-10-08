@@ -8,7 +8,8 @@ usage: test_stages.py --s2b DIR       (unittest; exits non-zero on failure)
 import argparse, json, os, shutil, stat, sys, tempfile, unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
-sys.path.insert(0, os.path.join(REPO, "verifier", "runner"))
+RUNNER_DIR = os.environ.get("S3C_RUNNER_DIR", os.path.join(REPO, "verifier", "runner"))   # lets the same tests run against an older runner for before/after comparisons
+sys.path.insert(0, RUNNER_DIR)
 import s3c_chain as C
 
 RUN2 = os.path.join(REPO, "ts-prototype", "evidence", "lifecycle-run2")
@@ -105,33 +106,116 @@ class Stages(unittest.TestCase):
         self.f.set_entry(rc=11, result={"status": "Unavailable", "reason": {"class": "Material", "reason": "MissingIndex"}}, files=False)
         self.check(self.f.run("b"), "HALT", "s2b")
 
+    # ---- S2B reader strictness (r13)
+    def test_unknown_unlisted_and_missing_reason_are_infrastructure(self):
+        cases = {
+            "S2B_UNKNOWN_CLASS": (10, {"status": "Invalid", "reason": {"class": "Typo", "reason": "X"}}),
+            "S2B_REASON_MISSING": (11, {"status": "Unavailable"}),
+            "S2B_REASON_MISSING ": (10, {"status": "Invalid", "reason": {"class": "Replay", "reason": "  "}}),
+            "S2B_UNLISTED_COMBINATION": (10, {"status": "Invalid", "reason": {"class": "Material", "reason": "MissingIndex"}}),
+            "S2B_UNLISTED_COMBINATION ": (11, {"status": "Unavailable", "reason": {"class": "Binding", "reason": "TsIssuerMismatch"}}),
+        }
+        for n, (code, (rc, res)) in enumerate(cases.items()):
+            self.f.set_entry(rc=rc, result=res, files=False)
+            self.check(self.f.run(f"c{n}"), "S3-FAIL(infrastructure)", "s2b", code.strip())
+
+    def test_duplicate_json_key_in_result_is_infrastructure(self):
+        d = os.path.join(self.tmp, "dup.json")
+        with open(d, "w") as fh: fh.write('{"status":"Verified","status":"Invalid","reason":{"class":"Binding","reason":"X"}}')
+        with open(self.f.entry, "w") as fh:
+            fh.write(f"#!{sys.executable}\nimport shutil, sys, os\na = sys.argv; out = a[a.index('--out') + 1]; os.makedirs(out, exist_ok=True)\nshutil.copy({json.dumps(d)}, os.path.join(out, 'result.json'))\nsys.exit(10)\n")
+        self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2b", "ENTRY_RESULT")
+
+    def test_transcript_must_match_the_result_hash(self):
+        src = json.load(open(os.path.join(RUN2, "chain/cases/EXPLORATORY-RUN2/s2b/result.json")))
+        src["transcript_sha256"] = "0" * 64
+        self.f.set_entry(rc=0, result=src)
+        self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2b", "ENTRY_TB_MISMATCH")
+
     # ---- S2A
     def test_s2a_runner_failure_is_infrastructure(self):
         self.f.set_s2a([], rc=1); self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2a", "S2A_RUNNER_NOT_RUN")
 
-    def test_s2a_short_or_non_json_output(self):
+    def test_s2a_short_output(self):
         self.f.set_s2a(self.f.base_lines[:4]); self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2a", "S2A_OUTPUT_COUNT")
-        self.f.set_s2a(self.f.base_lines[:4] + ["not json"]); self.check(self.f.run("b"), "S3-FAIL(infrastructure)", "s2a", "S2A_OUTPUT_NOT_JSON")
 
-    def test_s2a_codec_and_cov_errors(self):
-        L = list(self.f.base_lines); L[0] = json.dumps({"op": "tb", "decode": True, "reencode_identical": False})
-        self.f.set_s2a(L); self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2a", "S2A_CODEC")
-        L = list(self.f.base_lines); L[1] = json.dumps({"error": "boom"})
-        self.f.set_s2a(L); self.check(self.f.run("b"), "S3-FAIL(infrastructure)", "s2a", "S2A_CODEC")
-        L = list(self.f.base_lines); L[3] = json.dumps({"op": "cov", "result": {"outcome": "accept", "repr": "x"}})      # accept without evidence digest
-        self.f.set_s2a(L); self.check(self.f.run("c"), "S3-FAIL(infrastructure)", "s2a", "S2A_COV_MALFORMED")
+    def lines(self, **over):
+        L = list(self.f.base_lines)
+        for k, v in over.items(): L[{"tb": 0, "inst": 1, "pb": 2, "cov": 3, "e2e": 4}[k]] = v if isinstance(v, str) else json.dumps(v)
+        return L
+
+    def covr(self, outcome, token=None, kind=None, **extra):
+        kind = kind or {"reject": "RejectReason", "halt": "HaltReason"}.get(outcome)
+        rep = f"P10S2.CoverageOutcome.{outcome}" + (f" (P10S2.{kind}.{token})" if token else " (P10.S1.Evidence.obs false none)")
+        return {"op": "cov", "result": {"outcome": outcome, "repr": rep, **extra}}
+
+    def test_s2a_json_structure_is_strict(self):
+        bad = {
+            "S2A_TB_JOB": self.lines(tb="not json"),
+            "S2A_INST_JOB": self.lines(inst={"error": "boom"}),
+            "S2A_PB_JOB": self.lines(pb={"op": "pb", "decode": False, "reencode_identical": False}),     # decode=false with a reencode member
+            "S2A_TB_JOB ": self.lines(tb={"op": "tb", "decode": True}),                                    # decode=true without reencode flag
+            "S2A_PB_JOB ": self.lines(pb={"op": "pb", "decode": True, "reencode_identical": True, "extra": 1}),   # unknown member
+            "S2A_COV_MALFORMED": self.lines(cov='{"op":"cov","result":{"outcome":"reject","outcome":"accept","repr":"x"}}'),   # duplicate key
+            "S2A_COV_MALFORMED ": self.lines(cov={"op": "cov", "result": {"outcome": "accept", "repr": "P10S2.CoverageOutcome.accept (x)"}}),   # accept without evidence digest
+            "S2A_COV_MALFORMED  ": self.lines(cov={"op": "cov", "result": self.covr("reject", "c3_x")["result"], "error": "e"}),               # result and error together
+        }
+        for n, (code, L) in enumerate(bad.items()):
+            self.f.set_s2a(L); self.check(self.f.run(f"c{n}"), "S3-FAIL(infrastructure)", "s2a", code.strip())
+
+    def test_s2a_outcome_and_reason_representation_must_be_consistent(self):
+        reprs = [
+            self.covr("reject", None),                                                                     # reject without a reason
+            {"op": "cov", "result": {"outcome": "reject", "repr": "garbage"}},
+            self.covr("reject", "c3_x", kind="HaltReason"),                                                # reject with a HaltReason
+            self.covr("halt", "c2_x", kind="RejectReason"),                                                # halt with a RejectReason
+            self.covr("reject", "weird token"),                                                            # token shape
+            {"op": "cov", "result": {"outcome": "reject", "repr": "P10S2.CoverageOutcome.halt (P10S2.HaltReason.c2_x)"}},     # outcome and repr disagree
+            self.covr("reject", "c3_x", evidence_digest="a" * 64),                                         # reject with an evidence digest
+        ]
+        for n, cov in enumerate(reprs):
+            self.f.set_s2a(self.lines(cov=cov)); self.check(self.f.run(f"c{n}"), "S3-FAIL(infrastructure)", "s2a", "S2A_COV_MALFORMED")
 
     def test_s2a_reject_and_halt_are_frozen_outcomes(self):
-        L = list(self.f.base_lines); L[3] = json.dumps({"op": "cov", "result": {"outcome": "reject", "repr": "P10S2.CoverageOutcome.reject .c3_profileAfterFirstAdmission"}})
-        self.f.set_s2a(L); r = self.f.run("a"); self.check(r, "REJECT", "s2a"); self.assertEqual(r["reason"], {"token": "c3_profileAfterFirstAdmission"})
-        L = list(self.f.base_lines); L[3] = json.dumps({"op": "cov", "result": {"outcome": "halt", "repr": "P10S2.CoverageOutcome.halt .c2_subjectPayloadUnavailable"}})
-        self.f.set_s2a(L); r = self.f.run("b"); self.check(r, "HALT", "s2a"); self.assertEqual(r["reason"], {"token": "c2_subjectPayloadUnavailable"})
+        self.f.set_s2a(self.lines(cov=self.covr("reject", "c3_profileAfterFirstAdmission")))
+        r = self.f.run("a"); self.check(r, "REJECT", "s2a"); self.assertEqual(r["reason"], {"token": "c3_profileAfterFirstAdmission"})
+        self.f.set_s2a(self.lines(cov=self.covr("halt", "c2_subjectPayloadUnavailable")))
+        r = self.f.run("b"); self.check(r, "HALT", "s2a"); self.assertEqual(r["reason"], {"token": "c2_subjectPayloadUnavailable"})
+
+    # ---- codec diagnostics per input and stage (r13): a frozen coverage outcome is never preempted
+    def test_profile_decode_failure_keeps_the_frozen_coverage_reject(self):
+        for tok in ("c1_profileDecode", "c1_profileDigest"):
+            self.f.set_s2a(self.lines(pb={"op": "pb", "decode": False}, cov=self.covr("reject", tok)))
+            r = self.f.run(tok); self.check(r, "REJECT", "s2a"); self.assertEqual(r["reason"], {"token": tok})
+            self.assertEqual(r["s2a"]["codec"]["pb"], {"decode": False, "reencode_identical": None})      # the diagnostic is kept, per input
+
+    def test_reencode_false_with_a_reject_is_recorded_not_preempting(self):
+        self.f.set_s2a(self.lines(inst={"op": "inst", "decode": True, "reencode_identical": False}, cov=self.covr("reject", "c1_logIdentity")))
+        r = self.f.run("a"); self.check(r, "REJECT", "s2a"); self.assertFalse(r["s2a"]["codec"]["inst"]["reencode_identical"])
+
+    def test_transcript_and_instance_decode_failures_have_no_frozen_outcome(self):
+        self.f.set_s2a(self.lines(tb={"op": "tb", "decode": False}, cov={"op": "cov", "error": "tB does not strict-decode"}))
+        self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2a", "S2A_TRANSCRIPT_DECODE")
+        self.f.set_s2a(self.lines(inst={"op": "inst", "decode": False}, cov={"op": "cov", "error": "instB does not strict-decode"}))
+        self.check(self.f.run("b"), "S3-FAIL(infrastructure)", "s2a", "S2A_INSTANCE_DECODE")
+        self.f.set_s2a(self.lines(cov={"op": "cov", "error": "something else"}))
+        self.check(self.f.run("c"), "S3-FAIL(infrastructure)", "s2a", "S2A_COV_JOB_ERROR")
+
+    def test_contradictory_helper_outputs(self):
+        cases = {
+            "tb decode true but cov says it cannot decode": self.lines(cov={"op": "cov", "error": "tB does not strict-decode"}),
+            "inst decode true but cov says it cannot decode": self.lines(cov={"op": "cov", "error": "instB does not strict-decode"}),
+            "cov outcome although tb did not decode": self.lines(tb={"op": "tb", "decode": False}),
+            "cov outcome although inst did not decode": self.lines(inst={"op": "inst", "decode": False}),
+            "accept although pb did not decode": self.lines(pb={"op": "pb", "decode": False}),
+            "accept although pb re-encode differs": self.lines(pb={"op": "pb", "decode": True, "reencode_identical": False}),
+        }
+        for n, (why, L) in enumerate(cases.items()):
+            self.f.set_s2a(L); self.check(self.f.run(f"c{n}"), "S3-FAIL(infrastructure)", "s2a", "S2A_CONTRADICTION")
 
     def test_e2e_must_be_explicit(self):
-        L = list(self.f.base_lines); L[4] = json.dumps({"op": "e2e", "result": "maybe"})
-        self.f.set_s2a(L); self.check(self.f.run("a"), "S3-FAIL(infrastructure)", "s2a", "S2A_E2E_MALFORMED")
-        L = list(self.f.base_lines); L[4] = json.dumps({"op": "e2e", "result": False})
-        self.f.set_s2a(L); self.check(self.f.run("b"), "S3-FAIL(infrastructure)", "s2a", "S2A_E2E_MALFORMED")
+        for n, e in enumerate(({"op": "e2e", "result": "maybe"}, {"op": "e2e", "result": False}, {"op": "e2e", "result": "none", "evidence_repr": "x"}, {"op": "e2e", "result": "some"})):
+            self.f.set_s2a(self.lines(e2e=e)); self.check(self.f.run(f"c{n}"), "S3-FAIL(infrastructure)", "s2a", "S2A_E2E_MALFORMED")
 
     # ---- closureAt (the S2A stub is the real recorded output, so the post stage reaches T5)
     def test_closureat_not_run_or_malformed_is_infrastructure(self):

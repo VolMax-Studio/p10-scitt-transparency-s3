@@ -1,5 +1,15 @@
 {
  "a12_a14_source": "S2b frozen/StatementPayloadSchemaV0_r9_FREEZE.txt (read at run time; not duplicated here)",
+ "executables": {
+  "entry": {
+   "meaning": "EXECUTABLE IDENTITY of the binary the candidate was validated with, checked before the binary runs (the runner executes a private copy). This is not a claim of reproducible compilation: the pin is host/build specific; deciding how adopted binaries are produced and pinned (reproducible build, vendored binary or attested builder) is an adoption prerequisite.",
+   "sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863"
+  },
+  "g5": {
+   "meaning": "EXECUTABLE IDENTITY of the binary the candidate was validated with, checked before the binary runs (the runner executes a private copy). This is not a claim of reproducible compilation: the pin is host/build specific; deciding how adopted binaries are produced and pinned (reproducible build, vendored binary or attested builder) is an adoption prerequisite.",
+   "sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd"
+  }
+ },
  "lean": {
   "lake_sha256": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2",
   "lean_pinned_by": [

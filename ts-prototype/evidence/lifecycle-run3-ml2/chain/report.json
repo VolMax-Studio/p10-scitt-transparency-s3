@@ -1,0 +1,213 @@
+{
+ "a12_a14": {
+  "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+  "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+  "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+ },
+ "a12_a14_source": "S2b frozen/StatementPayloadSchemaV0_r9_FREEZE.txt",
+ "artifact_hashes": {
+  "EXPLORATORY-RUN3-ML2/ib": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "EXPLORATORY-RUN3-ML2/inst": "e42f46ffe6016047aca29563919bdbeab04e3f0c31d2bfe7ab2f0f7ac1110453",
+  "EXPLORATORY-RUN3-ML2/pb": "8ecc7fcf64e95cab13555a7675b835b4bad193c767f3f0c7858d720d1a090653",
+  "EXPLORATORY-RUN3-ML2/request.cbor": "ef293c29a478cefcf8304338df1ffd5cdd4da958f0d2028a190a12376c07e16c",
+  "EXPLORATORY-RUN3-ML2/retained_target_payload": "817f84e4fc853a85076dd380633c2fbf510ab11007b12675e02ba766149fb3d2",
+  "EXPLORATORY-RUN3-ML2/tB.actual": "304c16329c93be9ad90e877aa7eb915d955fa1005094a322b2426c4123bc5db8"
+ },
+ "cases": {
+  "EXPLORATORY-RUN3-ML2": {
+   "checks": [
+    {
+     "check": "s2b-result",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "s2b-structure",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "target-extracted-from-authenticated-target",
+     "detail": "exit=0 target={'leaf_index': 7, 'sub': 'p10s2sub:8312aedef03f23f6f94524e3f842b97ac8d4fbcf145aeeb0f2fd74a988f5aaa7', 'payload_len': 7316, 'payload_equals_retained_file': True}",
+     "ok": true
+    },
+    {
+     "check": "tB-actual-equals-tB.expected (comparison only)",
+     "detail": "304c16329c93be9a vs 304c16329c93be9a",
+     "ok": true
+    },
+    {
+     "check": "s2a-outcome",
+     "detail": "('accept', None) vs ('accept', None)",
+     "ok": true
+    },
+    {
+     "check": "s1-e2e",
+     "detail": "some vs some",
+     "ok": true
+    },
+    {
+     "check": "post-s2a-result-code-rule",
+     "detail": "BINDING_MATCH/BindingMatch/None",
+     "ok": true
+    },
+    {
+     "check": "no-infrastructure-failure",
+     "detail": "",
+     "ok": true
+    }
+   ],
+   "composed_after_s2b": "continue",
+   "infra_failures": [],
+   "not_run": [],
+   "pass": true,
+   "post": {
+    "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+    "code": "BindingMatch",
+    "detail": "T1-T6 and A1-A15 hold",
+    "result": "BINDING_MATCH",
+    "rows": {
+     "A1": "match",
+     "A10": "match",
+     "A11": "match",
+     "A12": "match",
+     "A13": "match",
+     "A14": "match",
+     "A15": "match",
+     "A2": "match",
+     "A3": "match",
+     "A4": "match",
+     "A5": "match",
+     "A6": "match",
+     "A7": "match",
+     "A8": "match",
+     "A9": "match"
+    },
+    "rule": null
+   },
+   "s2a": {
+    "actual": [
+     "accept",
+     null
+    ],
+    "codec_ok": true
+   },
+   "s2b": {
+    "checkpoint_size": 8,
+    "log_identity_digest": "62b338012a3d343b746dd62e2a511447f0a3e6a3de4b0354e9ce250f486678ea",
+    "root": "6c1e7cc4335a9ee2f3418ddfe4d7db1958ab7a870f5831d6d7374408f57d8152",
+    "stage": "s2b",
+    "status": "Verified",
+    "subject_observations": [
+     {
+      "idx": 2,
+      "kind": "ProfileCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 4,
+      "kind": "InstanceCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 5,
+      "kind": "Admission",
+      "sig": "Verified"
+     },
+     {
+      "idx": 6,
+      "kind": "Closure",
+      "sig": "Verified"
+     },
+     {
+      "idx": 7,
+      "kind": "Adjudication",
+      "sig": "Verified"
+     }
+    ],
+    "target": {
+     "leaf_index": 7,
+     "payload_equals_retained_file": true,
+     "payload_len": 7316,
+     "sub": "p10s2sub:8312aedef03f23f6f94524e3f842b97ac8d4fbcf145aeeb0f2fd74a988f5aaa7"
+    },
+    "tb_len": 1298,
+    "transcript_sha256": "304c16329c93be9ad90e877aa7eb915d955fa1005094a322b2426c4123bc5db8",
+    "unreadable_rows": []
+   }
+  }
+ },
+ "closureat_helper": {
+  "helper-binary-sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "helper-source-sha256": "bcf18c4eccdfcf5176a16df62980c1760ad529351bce5ba826701d8ae919313f",
+  "lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/home/user/p10-scitt-transparency-s3/spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run3-ml2/capture/request.cbor",
+    "--out",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run3-ml2/chain/cases/EXPLORATORY-RUN3-ML2/s2b",
+    "--expect-target-payload",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run3-ml2/capture/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "s2b-EXPLORATORY-RUN3-ML2",
+   "seconds": 0.03,
+   "stderr": "logs/001-s2b-EXPLORATORY-RUN3-ML2.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-s2b-EXPLORATORY-RUN3-ML2.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run3-ml2/chain/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "s2a-runner",
+   "seconds": 10.11,
+   "stderr": "logs/002-s2a-runner.stderr",
+   "stderr_sha256": "bd69197e0f55eeed57730e41028f29be878297403daa625ce70a5659d86a7f3d",
+   "stdout": "logs/002-s2a-runner.stdout",
+   "stdout_sha256": "361d0aa7a4d18520a55b7319c82fde499ff04ab7e349b9409ef285aa07c9a062"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_closureat.sh",
+    "--batch",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/tmpb1ioq4tr/jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "closureat-batch",
+   "seconds": 9.11,
+   "stderr": "logs/003-closureat-batch.stderr",
+   "stderr_sha256": "e7473a5b4463dba193ba273fa295d9b6ca08a4c79bd923565de432a9ba9dc5ae",
+   "stdout": "logs/003-closureat-batch.stdout",
+   "stdout_sha256": "6abc1e810fc11b9715e535cfad211fba305bf76735cf3179f11d574e15c70f77"
+  }
+ ],
+ "s2a_runner": {
+  "exit": 0,
+  "info": {
+   "helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+   "helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+   "helper-target": "s2a-runner",
+   "lean-executable": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin/lean",
+   "lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "lean-pinned-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "lean-toolchain": "leanprover/lean4:v4.33.0"
+  }
+ }
+}

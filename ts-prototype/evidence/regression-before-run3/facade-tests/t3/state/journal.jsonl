@@ -1,0 +1,13 @@
+{"event":"start","log_entries":0,"t":"2026-10-08T07:21:43.661511696Z"}
+{"event":"intent","leaf_input_sha256":"d5049dd12a7a6804049529b72b2cde508266102d8c1cf95b8637d6916e01ab09","t":"2026-10-08T07:21:43.755621725Z"}
+{"event":"integrated","index":0,"leaf_input_sha256":"d5049dd12a7a6804049529b72b2cde508266102d8c1cf95b8637d6916e01ab09","t":"2026-10-08T07:21:43.761293086Z","tessera_is_dup":false}
+{"event":"receipt","index":0,"recovered":false,"t":"2026-10-08T07:21:43.968918655Z","tree_size":1}
+{"event":"intent","leaf_input_sha256":"c4d9f963ee83ef62e6f445018e0a247117e0bd8dc2e6cf54be6a0a659f719d68","t":"2026-10-08T07:21:43.970224803Z"}
+{"event":"integrated","index":1,"leaf_input_sha256":"c4d9f963ee83ef62e6f445018e0a247117e0bd8dc2e6cf54be6a0a659f719d68","t":"2026-10-08T07:21:43.973100163Z","tessera_is_dup":false}
+{"event":"receipt","index":1,"recovered":false,"t":"2026-10-08T07:21:44.18235477Z","tree_size":2}
+{"event":"intent","leaf_input_sha256":"81afe6a384e558303abccf351897bcec0f4b00a06944854e8a774e3f1178cff3","t":"2026-10-08T07:21:44.18382856Z"}
+{"event":"integrated","index":2,"leaf_input_sha256":"81afe6a384e558303abccf351897bcec0f4b00a06944854e8a774e3f1178cff3","t":"2026-10-08T07:21:44.189741418Z","tessera_is_dup":false}
+{"event":"receipt","index":2,"recovered":false,"t":"2026-10-08T07:21:44.39784311Z","tree_size":3}
+{"event":"duplicate","index":1,"leaf_input_sha256":"c4d9f963ee83ef62e6f445018e0a247117e0bd8dc2e6cf54be6a0a659f719d68","t":"2026-10-08T07:21:44.399093534Z"}
+{"event":"start","log_entries":3,"t":"2026-10-08T07:21:44.409602302Z"}
+{"event":"duplicate","index":0,"leaf_input_sha256":"d5049dd12a7a6804049529b72b2cde508266102d8c1cf95b8637d6916e01ab09","t":"2026-10-08T07:21:44.506191149Z"}

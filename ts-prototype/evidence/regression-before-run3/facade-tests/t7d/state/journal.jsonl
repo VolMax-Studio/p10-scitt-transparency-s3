@@ -1,0 +1,4 @@
+{"event":"start","log_entries":0,"t":"2026-10-08T07:22:55.740273386Z"}
+{"event":"intent","leaf_input_sha256":"2125c717bd76a776ae0d31c4276b23259c7afaf09e2dfd996c4d83b37d3a2c0d","t":"2026-10-08T07:22:55.840885732Z"}
+{"event":"integrated","index":0,"leaf_input_sha256":"2125c717bd76a776ae0d31c4276b23259c7afaf09e2dfd996c4d83b37d3a2c0d","t":"2026-10-08T07:22:55.845146367Z","tessera_is_dup":false}
+{"event":"receipt","index":0,"recovered":false,"t":"2026-10-08T07:22:56.052340865Z","tree_size":1}

@@ -1,0 +1,16 @@
+{"event":"start","log_entries":0,"t":"2026-10-08T07:22:53.757173973Z"}
+{"event":"intent","leaf_input_sha256":"4f7e752ffa52e9e629cd50fefc1525c40e7281ede676a5d127bb7daecc906eaf","t":"2026-10-08T07:22:53.866673548Z"}
+{"event":"integrated","index":0,"leaf_input_sha256":"4f7e752ffa52e9e629cd50fefc1525c40e7281ede676a5d127bb7daecc906eaf","t":"2026-10-08T07:22:53.870719159Z","tessera_is_dup":false}
+{"event":"receipt","index":0,"recovered":false,"t":"2026-10-08T07:22:54.078338866Z","tree_size":1}
+{"event":"intent","leaf_input_sha256":"602c84e0757c773a148ad7024ee5fed8de507945abfdb8304df53e8bb46cdf82","t":"2026-10-08T07:22:54.087555186Z"}
+{"event":"integrated","index":1,"leaf_input_sha256":"602c84e0757c773a148ad7024ee5fed8de507945abfdb8304df53e8bb46cdf82","t":"2026-10-08T07:22:54.090413944Z","tessera_is_dup":false}
+{"event":"receipt","index":1,"recovered":false,"t":"2026-10-08T07:22:54.297777505Z","tree_size":2}
+{"event":"intent","leaf_input_sha256":"f5b55dc8ceb463efc6d7be48f678a640a6ccd33e3318c3435965aab993da8e4f","t":"2026-10-08T07:22:54.300258382Z"}
+{"event":"integrated","index":2,"leaf_input_sha256":"f5b55dc8ceb463efc6d7be48f678a640a6ccd33e3318c3435965aab993da8e4f","t":"2026-10-08T07:22:54.303101882Z","tessera_is_dup":false}
+{"event":"receipt","index":2,"recovered":false,"t":"2026-10-08T07:22:54.510032601Z","tree_size":3}
+{"event":"intent","leaf_input_sha256":"dfff919ae456fba411c63e3984f40508b0a3189aec66a82a0ecfa392ebfced3c","t":"2026-10-08T07:22:54.519388868Z"}
+{"event":"integrated","index":3,"leaf_input_sha256":"dfff919ae456fba411c63e3984f40508b0a3189aec66a82a0ecfa392ebfced3c","t":"2026-10-08T07:22:54.52222777Z","tessera_is_dup":false}
+{"event":"receipt","index":3,"recovered":false,"t":"2026-10-08T07:22:54.731614256Z","tree_size":4}
+{"event":"intent","leaf_input_sha256":"87454f58acd8e237a7605eca0fa8459f2c90883ba7316b8aebb5c587d72ccbb8","t":"2026-10-08T07:22:54.741304791Z"}
+{"event":"integrated","index":4,"leaf_input_sha256":"87454f58acd8e237a7605eca0fa8459f2c90883ba7316b8aebb5c587d72ccbb8","t":"2026-10-08T07:22:54.745366361Z","tessera_is_dup":false}
+{"event":"receipt","index":4,"recovered":false,"t":"2026-10-08T07:22:54.952046978Z","tree_size":5}

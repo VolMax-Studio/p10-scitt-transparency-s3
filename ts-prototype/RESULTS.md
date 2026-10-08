@@ -124,3 +124,31 @@ F0-F8 all OK over the retained run (`facade-checks.out`): public export equals `
 G5 PASS (anchor checked, 7 leaves, 49 files). Chain on G5-returned paths, network-isolated: S2b Verified (continue), S2a accept, S1 e2e `some`, post-S2a `BINDING_MATCH`/`BindingMatch`, A1-A15 `match`; `tB.actual == tB.expected` exactly (`31df5d55c2a69036…`), where the expectation was derived independently from the retained authenticated prefix with the reference transcript model of the ratified S2b test tooling (`expected/derivation.json`; the chain output is not an input); run PASS. Receipts use Go's randomized ECDSA; verdicts do not depend on it.
 
 Not shown: issuer signatures are not verified by the facade (the producer verifies them for its own derivations); no policy is enforced; the single-writer run does not exercise index divergence; no witnesses, rotation, X.509 or operator independence.
+
+## F. Producer-index separation: ML-2 layout with an operator insert (run3; exploratory, S3 producer/orchestration evidence)
+
+Reported in three parts: producer/orchestration changes (F1), prototype checks (F2), frozen-chain verdicts (F3). Run2 evidence (§E) is untouched.
+
+### F1. Producer and orchestration changes and the pre-verification record
+
+- **Pinned source:** commit `f50e7aa660ceaf4708f1a8f489fa7a92cc911074` (tree clean under `ts-prototype/`, enforced by the capture phase; pin and hashes in `evidence/lifecycle-run3-ml2/extra/`). One unpinned dry run of the same layout with throwaway keys passed before pinning and is not evidence.
+- **Three quantities are now separate.** *Producer role ordinal*: position in the configured role sequence (counts producer roles only). *Next expected append position*: derived by the client from the verified public checkpoint (its size) before every registration. *Authenticated prefix size*: the same N, used by the producer to fetch and verify the prefix over the public endpoint. The producer is called as `--ordinal K --next-index N`; the facade's returned index is validated against N (T7: a rogue concurrent writer is detected as `registered at index 2, expected 1`). The strict fixture-submit mode (`--statements`, file number == expected index) is retained and tested (T7: `registered at index 0, expected 5`). The run2 `--step` interface remains accepted by the tool but is no longer used by the client; run2 is reproduced by its own pinned commit.
+- **Controlled operator insert:** after producer ordinal 2 (profile) the client pauses production and the same operator registers one classifiable non-target TEST note (`operator_note.py`, subject `urn:volmax:s3-test:note`, experimental, signed by the operator's policy-test key) through the same facade, sequentially (no concurrent writer). It is not a producer role; production resumes at ordinal 3. Submission, Receipt, response and public checkpoint are retained like every other registration.
+- **Fresh configuration for the run:** fresh keys outside the repository (owner `s3-owner-run3`, ts_iss `https://ts.example/volmax-s3-run3`, origin `s3-proto/run3`); subject `p10s2sub:8312aede…`, LogIdentityV0 `62b33801…`, same unchanged toy `iB`/A12-A14 as before. Candidate run configuration, including the preregistered expected layout, is `evidence/lifecycle-run3-ml2/run-config.json`.
+- **Layout registered (0-1 bootstrap TEST, 2 profile, 3 non-target TEST note, 4 instance, 5 admission, 6 closure, 7 adjudication)** and the record made before verification (`producer-index-record.json`, built only from retained data; committed with the anchor in `823ccf1`; all nine checks true):
+  - the instance producer ordinal (3) differs from its returned index (4); every other producer ordinal after the insert is likewise shifted by one;
+  - closure (index 6) references admission 5 (`ordered_admission_refs ["5"]`) and its preclosure digest `6f9ec0c7…99ff`, recomputed from the retained authenticated subject view `[(2, profile), (4, instance), (5, admission)]` with the ratified S2b reference definition, equals the digest in the statement (the note at 3 is outside the subject view);
+  - adjudication (index 7) references profile 2, instance 4, closure 6;
+  - retention includes all eight leaves (submission, Receipt, response, public checkpoint, public export).
+- **Anchor recorded before verification:** `4f07a989879741e57b311b7ec004e08a1ed74b49f24ff3fb774af23330a405da` (commit `823ccf1`; same repository and session, a timestamped record rather than an independent channel). The expected `tB` was derived from the retained public export and the retained final public checkpoint with the reference transcript model; chain output is not an input.
+- **Regression before the run** (`evidence/regression-before-run3/`): unit tests, T1-T7 and the timeout tests PASS on the pinned build.
+
+### F2. Prototype checks (facade/public read; not a frozen-chain verdict)
+
+F0-F8 all OK for the eight registrations (export == `LeafEncodeV0(submitted)` byte for byte, including the operator note; no duplicates; every retained public checkpoint verified with the pinned key and expected origin; every Receipt verified against the public checkpoint root; all registrations fresh).
+
+### F3. Unchanged frozen chain
+
+G5 PASS (anchor checked, 8 leaves, 53 files; the note is recorded as `origin="ts"` with no submission file, as for the bootstrap leaves). Chain, network-isolated: S2b Verified (subject observations at 2, 4, 5, 6, 7 all signature-verified, rows 0 and 3 non-subject), S2a accept, S1 e2e `some`, `BINDING_MATCH`/`BindingMatch`, A1-A15 `match`; `tB.actual == tB.expected` exactly (`304c16329c93be9a…`); run PASS.
+
+Not shown: concurrent writers, retries inside a producer-driven run, issuer-signature verification by the facade, policy enforcement; the single operator insert exercises one divergence only. Nothing is adopted.

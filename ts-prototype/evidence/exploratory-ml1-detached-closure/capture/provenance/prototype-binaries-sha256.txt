@@ -1,0 +1,2 @@
+ab329b27025bee9f4a217c6f32aa223b081aafb7d37de8915eaf900d14767b4a  /tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/bin/s3-facade
+aa7e1ef9680cb12f6c9f951c76da4d422c3769957b600f6edba4e3be40b4d51e  /tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/bin/s3-capture

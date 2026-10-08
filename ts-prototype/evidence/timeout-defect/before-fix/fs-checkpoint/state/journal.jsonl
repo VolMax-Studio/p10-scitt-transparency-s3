@@ -1,0 +1,7 @@
+{"event":"start","log_entries":0,"t":"2026-10-08T06:55:49.930995155Z"}
+{"event":"intent","leaf_input_sha256":"d71bbee34db1cf98bce488470d6332560a2d3c8b2a5521db9fcc187c34c6bbe3","t":"2026-10-08T06:55:49.944672991Z"}
+{"event":"integrated","index":0,"leaf_input_sha256":"d71bbee34db1cf98bce488470d6332560a2d3c8b2a5521db9fcc187c34c6bbe3","t":"2026-10-08T06:55:49.948419712Z","tessera_is_dup":false}
+{"event":"receipt","index":0,"recovered":false,"t":"2026-10-08T06:55:50.059107283Z","tree_size":1}
+{"event":"intent","leaf_input_sha256":"cd6d76c9eea917919c1d8bfbcf287dd1cf0ed38228c09db7449c40e01b7c16c0","t":"2026-10-08T06:55:50.063675309Z"}
+{"event":"integrated","index":1,"leaf_input_sha256":"cd6d76c9eea917919c1d8bfbcf287dd1cf0ed38228c09db7449c40e01b7c16c0","t":"2026-10-08T06:55:50.066042947Z","tessera_is_dup":false}
+{"event":"duplicate","index":0,"leaf_input_sha256":"d71bbee34db1cf98bce488470d6332560a2d3c8b2a5521db9fcc187c34c6bbe3","t":"2026-10-08T06:56:03.073752514Z"}

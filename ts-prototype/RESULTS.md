@@ -50,3 +50,52 @@ Receipts are issued with Go's randomized ECDSA, so `request.cbor` differs from t
 - A Receipt issued after recovery covers the first verified checkpoint larger than its index; the sequential client makes that size `index+1`, and `s3check` requires it.
 - No witnesses; no rotation; no X.509; no operator independence; no SCRAPI/RFC 9943 compliance claim. RFC 9943 requires registration before a Receipt is issued; binding the Receipt to a verified, published Tessera checkpoint is this prototype's additional operational invariant.
 - Receipt payload form: detached, as in the frozen S2b form (consistent with RFC 9942's recommendation); whether S3 adopts it is still OPEN item 9.
+
+## D. Public-read timeout correction (r8)
+
+**Defect (found by source review, then reproduced).** The facade read its public log through `NewHTTPFetcher(u, nil)` (default HTTP client, no timeout) after `context.WithoutCancel`
+(no deadline), and `PublishTimeout` was only compared between calls. A public endpoint that accepts a request and withholds the response therefore held the registration mutex without bound.
+Reproduced on the unfixed build (commit `a7958d9`, which adds only the `--public-read-url` test hook; `scripts/stall_proxy.py` + `scripts/timeout_tests.py --mode pre`,
+`evidence/timeout-defect/before-fix/`), with `--publish-timeout 3s`:
+
+| Stalled resource | Registration (client waits 12 s) | Resubmission of an already registered statement (needs only the mutex) | Receipt stored |
+|---|---|---|---|
+| checkpoint | no answer in 12 s | no answer in 12 s | no |
+| hash tile | no answer in 12 s | no answer in 12 s | no |
+| entry bundle | no answer in 12 s | no answer in 12 s | no |
+
+`s3-capture export` against a stalled checkpoint took 40.1 s (two 20 s per-request timeouts; no overall deadline).
+
+**Correction.** `finalizeBounded` creates a new bounded context after `WithoutCancel` (client disconnects still do not abort a half-done registration, but the operation now ends at `--publish-timeout`);
+every public read of the finalization (checkpoint, hash tiles, entry bundle) runs under it, and each single read also has `--fetch-timeout` (default 10 s). Read failures are recorded by a tracker
+and answered as 504 `E_PUBLIC_READ_TIMEOUT` / `E_PUBLIC_READ_FAILED`; only a checkpoint that was read and then failed signature/origin verification is `E_CHECKPOINT_UNVERIFIED`.
+Failure releases the mutex, stores nothing, journals `finalize-failed`, and leaves the entry in the log, so the same statement finalizes at its existing index on retry.
+`WaitCheckpointSize` now runs under a real context deadline; `s3-capture` has `--timeout` for `submit` and `export`.
+The first post-fix run of the new tests **failed** (a single stalled read was reported as 502 `E_CHECKPOINT_UNVERIFIED` for the checkpoint and as 500 `E_PROOF`/`E_PUBLIC_ENTRY_MISMATCH` for tiles and bundle,
+because the library wraps read errors without their cause); the read tracker fixed that, and the results below are from the corrected build.
+
+**After the fix** (`scripts/timeout_tests.py --mode post`, `evidence/timeout-defect/after-fix/`; publish-timeout 3 s, fetch-timeout 1 s):
+
+| Scenario | Result |
+|---|---|
+| checkpoint stalled | 504 `E_PUBLIC_READ_TIMEOUT` after 3.0 s; no Receipt/checkpoint/meta stored; a stored-Receipt resubmission sent 1 s into the stall is answered 200 as soon as the mutex is released (2.0 s: it waited for the bounded period, not forever); after restoring the endpoint the real client retries the same statement: index 1, `duplicate:true, recovered:true`, intents before = after (no second append), independent checks F0-F8 all OK |
+| hash tile stalled | 504 `E_PUBLIC_READ_FAILED` after 1.1 s; same storage, mutex and retry results |
+| entry bundle stalled | same as tile |
+| client disconnects after 1 s (checkpoint stalled) | the facade keeps going to its own deadline (`integrated` to `finalize-failed` 3.0 s, `E_PUBLIC_READ_TIMEOUT`), stores nothing, and the next request is answered in 0.0 s |
+| `s3-capture export --timeout 3s`, checkpoint stalled | exit 1 after 3.0 s |
+
+Re-run of the affected facade tests on the corrected build (`evidence/after-timeout-fix/`): unit tests, T1-T6, T5 seeds 2 and 3: all PASS (the earlier evidence directories are unchanged).
+Not changed: the Tessera append and its future are not under a deadline; tile/bundle reads fail at the first failed read (no retry inside the deadline), so a caller must retry.
+
+**Detached-closure chain re-run.** The original report (`evidence/exploratory-ml1-detached-closure/`, glue FAIL on the comparison-only `tB == tB.expected`) is preserved byte-for-byte.
+The corrected run is stored apart in `evidence/exploratory-ml1-detached-closure-corrected/`; only G5 and the chain were re-run, over the same capture and the same recorded anchor
+(`a21ced91…`, committed in `98bb726`), with a detached-specific expectation:
+
+- `scripts/derive_expected_tb.py` computes the root from the log's **retained exported bytes** (two independent leaf-hash implementations, the S2b recursive MTH), cross-checks it against the
+  root in the retained final public checkpoint (`c4b0417b…1b43`), decodes the independently generated ML-1 expectation with the reference transcript model (`post_s2a.decode_transcript`, byte-identical round trip)
+  and replaces only `root_digest`. The result differs from the ML-1 expectation only inside the encoded root field (`enc_bytes(root)`; in this model its length depends on the value: 34 vs 33 bytes,
+  prefix 87 and suffix 1145 bytes identical). `tB.actual` is not an input (the script refuses chain output). Derived expectation: `tB.expected` sha256 `019ad3aae8b3acd9…`; files and `derivation.json` in `expected/`.
+- Result: G5 PASS (anchor checked, 7 leaves, 50 files); unchanged chain: S2b Verified, S2a accept, S1 e2e `some`, `BINDING_MATCH`/`BindingMatch`, A1-A15 `match`, and the exact comparison
+  `tB.actual == tB.expected` holds (`019ad3aae8b3acd9` both); run PASS. The frozen-chain verdicts were already identical in the original run; only the expectation was wrong there.
+
+The capture itself was made by the pre-fix build (binary hashes in its `extra/`); it was not regenerated, because the corrected path under test is G5 + chain over that capture.

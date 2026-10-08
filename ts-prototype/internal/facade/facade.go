@@ -28,6 +28,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/transparency-dev/formats/log"
 	"github.com/transparency-dev/merkle/proof"
 	"github.com/transparency-dev/merkle/rfc6962"
 	"github.com/transparency-dev/tessera"
@@ -55,7 +56,8 @@ type Config struct {
 	BatchAge             time.Duration
 	CheckpointInterval   time.Duration
 	CheckpointRepublish  time.Duration // 0: Tessera default
-	PublishTimeout       time.Duration
+	PublishTimeout       time.Duration // deadline of the WHOLE finalization (checkpoint wait, tiles, entry bundle), counted from its start
+	FetchTimeout         time.Duration // deadline of each single public HTTP read (0: none; the operation deadline still applies)
 	MaxLeafInput         int
 	FaultPoint           string // TEST ONLY: self-SIGKILL at pre-add | submitted | integrated | receipt-stored | pre-response
 	FaultOnRequest       int    // 1-based count of admitted registration requests in this process
@@ -134,7 +136,7 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	fetch, err := client.NewHTTPFetcher(u, nil)
+	fetch, err := client.NewHTTPFetcher(u, &http.Client{Timeout: cfg.FetchTimeout})
 	if err != nil {
 		return nil, err
 	}
@@ -233,8 +235,7 @@ func (s *Service) Register(ctx context.Context, stmt []byte) (*Result, *HTTPErro
 	hx := hex.EncodeToString(h[:])
 	if idx, ok := s.known[h]; ok {
 		s.journal(map[string]any{"event": "duplicate", "leaf_input_sha256": hx, "index": idx})
-		res, err := s.finalize(ctx, idx, li, true)
-		return res, err
+		return s.finalizeBounded(ctx, idx, li, true)
 	}
 	s.journal(map[string]any{"event": "intent", "leaf_input_sha256": hx})
 	s.fault("pre-add")
@@ -247,7 +248,54 @@ func (s *Service) Register(ctx context.Context, stmt []byte) (*Result, *HTTPErro
 	s.known[h] = ix.Index
 	s.journal(map[string]any{"event": "integrated", "leaf_input_sha256": hx, "index": ix.Index, "tessera_is_dup": ix.IsDup})
 	s.fault("integrated")
-	return s.finalize(ctx, ix.Index, li, false)
+	return s.finalizeBounded(ctx, ix.Index, li, false)
+}
+
+// finalizeBounded runs the finalization under its own deadline. The incoming ctx is already detached from the client connection (WithoutCancel, so a
+// disconnect does not abort a half-done registration), which also removed any request deadline: the bound is created here, explicitly, and covers every public
+// read below. A failure releases the registration mutex (the caller's defer), stores nothing, and leaves the entry in the log so that a retry of the
+// same statement finalizes at its existing index without another append.
+func (s *Service) finalizeBounded(ctx context.Context, idx uint64, li []byte, dup bool) (*Result, *HTTPError) {
+	fctx, cancel := context.WithTimeout(ctx, s.cfg.PublishTimeout)
+	defer cancel()
+	res, herr := s.finalize(fctx, idx, li, dup)
+	if herr != nil {
+		s.journal(map[string]any{"event": "finalize-failed", "index": idx, "code": herr.Code, "http": herr.Status})
+	}
+	return res, herr
+}
+
+// readTracker wraps the public reads of one finalization. A failed read (transport error, per-request timeout, non-200 status other than 404) is recorded
+// here instead of being inferred from error text, because the library wraps such errors with %v and the cause would be lost. A read failure is never
+// reported as a data problem: it is a bounded 504, nothing is stored, and the same statement can be retried.
+type readTracker struct{ err error }
+
+func (t *readTracker) note(err error) error {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		t.err = err
+	}
+	return err
+}
+
+func (t *readTracker) checkpoint(f *client.HTTPFetcher) func(context.Context) ([]byte, error) {
+	return func(ctx context.Context) ([]byte, error) { b, err := f.ReadCheckpoint(ctx); return b, t.note(err) }
+}
+func (t *readTracker) tile(f *client.HTTPFetcher) client.TileFetcherFunc {
+	return func(ctx context.Context, l, i uint64, p uint8) ([]byte, error) { b, err := f.ReadTile(ctx, l, i, p); return b, t.note(err) }
+}
+func (t *readTracker) bundle(f *client.HTTPFetcher) client.EntryBundleFetcherFunc {
+	return func(ctx context.Context, i uint64, p uint8) ([]byte, error) { b, err := f.ReadEntryBundle(ctx, i, p); return b, t.note(err) }
+}
+
+func (t *readTracker) failure(ctx context.Context, stage string) *HTTPError {
+	if t.err == nil && ctx.Err() == nil {
+		return nil
+	}
+	code := "E_PUBLIC_READ_FAILED"
+	if ctx.Err() != nil {
+		code = "E_PUBLIC_READ_TIMEOUT"
+	}
+	return &HTTPError{http.StatusGatewayTimeout, code, fmt.Sprintf("public read failed or timed out (%s): %v", stage, t.err)}
 }
 
 type meta struct {
@@ -305,44 +353,55 @@ func (s *Service) finalize(ctx context.Context, idx uint64, li []byte, dup bool)
 			CheckpointB64: base64.StdEncoding.EncodeToString(cp), Duplicate: dup, ReceiptReused: true}, nil
 	}
 	recovered := dup // known but no stored Receipt: issued after a crash between integration and Receipt storage
-	deadline := time.Now().Add(s.cfg.PublishTimeout)
+	rt := &readTracker{}
 	var cpRaw []byte
 	var size uint64
 	var root []byte
-	for {
-		cp, raw, _, err := client.FetchCheckpoint(ctx, s.fetch.ReadCheckpoint, s.verif, s.cfg.Origin)
-		switch {
-		case err == nil && cp.Size > idx:
-			cpRaw, size, root = raw, cp.Size, cp.Hash
-		case err == nil, errors.Is(err, os.ErrNotExist):
-			// not published yet
-		default:
-			// unreachable endpoint, bad signature or wrong origin: fail closed, never issue a Receipt for an unverified checkpoint
-			if time.Now().After(deadline) || !isTransient(err) {
-				return nil, &HTTPError{http.StatusBadGateway, "E_CHECKPOINT_UNVERIFIED", err.Error()}
+	for cpRaw == nil {
+		rt.err = nil
+		raw, err := rt.checkpoint(s.fetch)(ctx)
+		if err == nil {
+			cp, _, _, perr := log.ParseCheckpoint(raw, s.cfg.Origin, s.verif)
+			if perr != nil { // bad signature, wrong origin, malformed: fail closed, never issue a Receipt for an unverified checkpoint
+				return nil, &HTTPError{http.StatusBadGateway, "E_CHECKPOINT_UNVERIFIED", perr.Error()}
+			}
+			if cp.Size > idx {
+				cpRaw, size, root = raw, cp.Size, cp.Hash
+				continue
 			}
 		}
-		if cpRaw != nil {
-			break
-		}
-		if time.Now().After(deadline) {
+		// not published yet (404 or smaller tree) or a read failure: poll again until the operation deadline
+		select {
+		case <-ctx.Done():
+			if f := rt.failure(ctx, "checkpoint"); f != nil {
+				return nil, f
+			}
 			return nil, &HTTPError{http.StatusGatewayTimeout, "E_PUBLICATION_TIMEOUT", fmt.Sprintf("no verified checkpoint covering index %d within %s", idx, s.cfg.PublishTimeout)}
+		case <-time.After(50 * time.Millisecond):
 		}
-		time.Sleep(50 * time.Millisecond)
 	}
-	pb, err := client.NewProofBuilder(ctx, size, s.fetch.ReadTile)
+	rt.err = nil
+	pb, err := client.NewProofBuilder(ctx, size, rt.tile(s.fetch))
 	if err != nil {
 		return nil, &HTTPError{http.StatusInternalServerError, "E_PROOF", err.Error()}
 	}
 	path, err := pb.InclusionProof(ctx, idx)
 	if err != nil {
+		if f := rt.failure(ctx, "hash tiles"); f != nil {
+			return nil, f
+		}
 		return nil, &HTTPError{http.StatusInternalServerError, "E_PROOF", err.Error()}
 	}
 	got, err := proof.RootFromInclusionProof(rfc6962.DefaultHasher, idx, size, lh, path)
 	if err != nil || !bytes.Equal(got, root) {
 		return nil, &HTTPError{http.StatusInternalServerError, "E_ROOT_MISMATCH", fmt.Sprintf("reconstructed root %x != checkpoint root %x (%v)", got, root, err)}
 	}
-	bundle, err := client.GetEntryBundle(ctx, s.fetch.ReadEntryBundle, idx/layout.EntryBundleWidth, size)
+	bundle, err := client.GetEntryBundle(ctx, rt.bundle(s.fetch), idx/layout.EntryBundleWidth, size)
+	if err != nil {
+		if f := rt.failure(ctx, "entry bundle"); f != nil {
+			return nil, f
+		}
+	}
 	if err != nil || int(idx%layout.EntryBundleWidth) >= len(bundle.Entries) || !bytes.Equal(bundle.Entries[idx%layout.EntryBundleWidth], li) {
 		return nil, &HTTPError{http.StatusInternalServerError, "E_PUBLIC_ENTRY_MISMATCH", fmt.Sprintf("public entry bundle does not hold the submitted bytes at index %d (%v)", idx, err)}
 	}

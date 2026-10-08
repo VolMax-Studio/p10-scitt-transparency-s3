@@ -114,7 +114,8 @@ var ErrCheckpointUnverified = errors.New("checkpoint failed verification")
 
 // WaitCheckpointSize polls until a verified checkpoint of exactly size has been published.
 func (p *Public) WaitCheckpointSize(ctx context.Context, size uint64, timeout time.Duration) (*log.Checkpoint, []byte, error) {
-	deadline := time.Now().Add(timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout) // a real context deadline: it also interrupts a request the server accepted but never answers
+	defer cancel()
 	for {
 		cp, raw, err := p.Checkpoint(ctx)
 		if errors.Is(err, ErrCheckpointUnverified) {
@@ -126,10 +127,11 @@ func (p *Public) WaitCheckpointSize(ctx context.Context, size uint64, timeout ti
 		if err == nil && cp.Size > size {
 			return nil, nil, fmt.Errorf("the log has %d entries, expected %d (an extra writer, or a registration not yet accounted for)", cp.Size, size)
 		}
-		if time.Now().After(deadline) {
+		select {
+		case <-ctx.Done():
 			return nil, nil, fmt.Errorf("no verified checkpoint of size %d within %s (last: %v)", size, timeout, err)
+		case <-time.After(100 * time.Millisecond):
 		}
-		time.Sleep(100 * time.Millisecond)
 	}
 }
 

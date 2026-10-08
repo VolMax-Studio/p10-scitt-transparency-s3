@@ -37,10 +37,12 @@ if [ "$phase" = capture ]; then
   "$PY" -c "import json;print(json.load(open('$OUT/assemble.json'))['capture_json_sha256'])" > "$OUT/ANCHOR.sha256"
   echo "anchor recorded: $(cat "$OUT/ANCHOR.sha256")  ($OUT/ANCHOR.sha256)"
 elif [ "$phase" = accept ]; then
-  ANCHOR="$(cat "$OUT/ANCHOR.sha256")"
-  echo "== G5 with the recorded anchor $ANCHOR"
-  "$G5" --capture "$OUT/capture" --index-sha256 "$ANCHOR" | tee "$OUT/g5.json"; grep -q '"g5":"PASS"' "$OUT/g5.json"
+  # optional overrides (a corrected re-run into a separate OUT, over an earlier capture that stays untouched): CAPTURE, ANCHOR_FILE, EXPECT
+  CAPTURE="${CAPTURE:-$OUT/capture}"; ANCHOR_FILE="${ANCHOR_FILE:-$OUT/ANCHOR.sha256}"; EXPECT="${EXPECT:-$FIXTURE/expect.json}"; mkdir -p "$OUT"
+  ANCHOR="$(cat "$ANCHOR_FILE")"
+  echo "== G5 with the recorded anchor $ANCHOR on $CAPTURE"
+  "$G5" --capture "$CAPTURE" --index-sha256 "$ANCHOR" | tee "$OUT/g5.json"; grep -q '"g5":"PASS"' "$OUT/g5.json"
   echo "== unchanged chain on G5-returned paths (network-isolated)"
-  python3 -B "$REPO/spike/host/make_capture_cases.py" --id "${LABEL:-EXPLORATORY}" --g5-result "$OUT/g5.json" --expect "$FIXTURE/expect.json" --out "$OUT/cases.json"
+  python3 -B "$REPO/spike/host/make_capture_cases.py" --id "${LABEL:-EXPLORATORY}" --g5-result "$OUT/g5.json" --expect "$EXPECT" --out "$OUT/cases.json"
   P10_LEAN_BIN_DIR="${LEAN_BIN:-}" unshare -n python3 -B "$GLUE" --cases "$OUT/cases.json" --out "$OUT/chain" --s2b "$S2B" --s2a "$S2A" --entry "$ENTRY"
 else echo "bad phase" >&2; exit 2; fi

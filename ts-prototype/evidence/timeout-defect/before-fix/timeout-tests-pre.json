@@ -1,0 +1,111 @@
+{
+ "mode": "pre",
+ "publish_timeout_s": 3.0,
+ "fetch_timeout_s": null,
+ "checkpoint": {
+  "ok": true,
+  "seconds": 14.2,
+  "stalled_resource": "checkpoint",
+  "stalled_request_withheld_by_proxy": 1,
+  "first_registration": {
+   "http": null,
+   "error": "TimeoutError('timed out')",
+   "elapsed_s": 12.01
+  },
+  "probe_stored_receipt_resubmission": {
+   "http": null,
+   "elapsed_s": 12.01
+  },
+  "receipt_files_for_index_1 (receipt,checkpoint,meta)": [
+   false,
+   false,
+   false
+  ],
+  "defect_reproduced_no_bounded_failure": true,
+  "defect_reproduced_mutex_held_probe_blocked": true,
+  "after_release_pre_fix_note": "stalled connections were closed by the proxy on release; the facade's blocked finalization could only continue then",
+  "journal_events": [
+   "start",
+   "intent",
+   "integrated",
+   "receipt",
+   "intent",
+   "integrated",
+   "duplicate"
+  ]
+ },
+ "tile": {
+  "ok": true,
+  "seconds": 14.3,
+  "stalled_resource": "tile",
+  "stalled_request_withheld_by_proxy": 1,
+  "first_registration": {
+   "http": null,
+   "error": "TimeoutError('timed out')",
+   "elapsed_s": 12.0
+  },
+  "probe_stored_receipt_resubmission": {
+   "http": null,
+   "elapsed_s": 12.01
+  },
+  "receipt_files_for_index_1 (receipt,checkpoint,meta)": [
+   false,
+   false,
+   false
+  ],
+  "defect_reproduced_no_bounded_failure": true,
+  "defect_reproduced_mutex_held_probe_blocked": true,
+  "after_release_pre_fix_note": "stalled connections were closed by the proxy on release; the facade's blocked finalization could only continue then",
+  "journal_events": [
+   "start",
+   "intent",
+   "integrated",
+   "receipt",
+   "intent",
+   "integrated",
+   "duplicate"
+  ]
+ },
+ "entries": {
+  "ok": true,
+  "seconds": 14.3,
+  "stalled_resource": "entries",
+  "stalled_request_withheld_by_proxy": 1,
+  "first_registration": {
+   "http": null,
+   "error": "TimeoutError('timed out')",
+   "elapsed_s": 12.0
+  },
+  "probe_stored_receipt_resubmission": {
+   "http": null,
+   "elapsed_s": 12.01
+  },
+  "receipt_files_for_index_1 (receipt,checkpoint,meta)": [
+   false,
+   false,
+   false
+  ],
+  "defect_reproduced_no_bounded_failure": true,
+  "defect_reproduced_mutex_held_probe_blocked": true,
+  "after_release_pre_fix_note": "stalled connections were closed by the proxy on release; the facade's blocked finalization could only continue then",
+  "journal_events": [
+   "start",
+   "intent",
+   "integrated",
+   "receipt",
+   "intent",
+   "integrated",
+   "duplicate"
+  ]
+ },
+ "client": {
+  "ok": true,
+  "seconds": 40.3,
+  "export_with_stalled_checkpoint": {
+   "rc": 1,
+   "elapsed_s": 40.11,
+   "out": "0.0.1:39843/checkpoint\": context deadline exceeded (Client.Timeout exceeded while awaiting headers))"
+  },
+  "note": "no --timeout flag in the unfixed build: bounded only by the 20 s per-request HTTP timeout"
+ }
+}

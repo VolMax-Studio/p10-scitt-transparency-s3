@@ -1,0 +1,10 @@
+{"event":"start","log_entries":0,"t":"2026-10-08T06:58:58.338731384Z"}
+{"event":"intent","leaf_input_sha256":"d5049dd12a7a6804049529b72b2cde508266102d8c1cf95b8637d6916e01ab09","t":"2026-10-08T06:58:58.431782991Z"}
+{"event":"integrated","index":0,"leaf_input_sha256":"d5049dd12a7a6804049529b72b2cde508266102d8c1cf95b8637d6916e01ab09","t":"2026-10-08T06:58:58.439017698Z","tessera_is_dup":false}
+{"event":"receipt","index":0,"recovered":false,"t":"2026-10-08T06:58:58.649585359Z","tree_size":1}
+{"code":"E_UNPROTECTED_NOT_EMPTY","event":"reject","t":"2026-10-08T06:58:58.651074624Z"}
+{"code":"E_NOT_COSE_SIGN1","event":"reject","t":"2026-10-08T06:58:58.652212401Z"}
+{"code":"E_NOT_CBOR","event":"reject","t":"2026-10-08T06:58:58.653467413Z"}
+{"code":"E_CWT_CLAIMS_MISSING","event":"reject","t":"2026-10-08T06:58:58.654615824Z"}
+{"code":"E_ISS_SUB_NOT_TEXT","event":"reject","t":"2026-10-08T06:58:58.65572972Z"}
+{"code":"E_NOT_CBOR","event":"reject","t":"2026-10-08T06:58:58.65671584Z"}

@@ -1,0 +1,3 @@
+I1008 06:56:04.093560     589 files.go:496] Initializing directory for POSIX log at "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/to-pre/fs-tile/log" (this should only happen ONCE per log!)
+I1008 06:56:04.094286     589 append_lifecycle.go:732] Failed to fetch old checkpoint: file does not exist
+s3-facade ready: register=http://127.0.0.1:19610 public=http://127.0.0.1:19611/ entries=0

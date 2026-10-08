@@ -1,0 +1,11 @@
+[
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 0,
+  "origin": "issuer",
+  "public_checkpoint_size": 1,
+  "recovered": false,
+  "tree_size_in_receipt": 1
+ }
+]

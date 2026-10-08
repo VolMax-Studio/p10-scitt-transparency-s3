@@ -70,6 +70,7 @@ func submit(args []string) {
 	tsOrigin := fs.String("ts-origin", "", "comma list of indices submitted by the operator (bootstrap), kept apart from issuer submissions")
 	out := fs.String("out", "", "output directory (empty)")
 	retries := fs.Int("retries", 3, "re-POSTs of the same bytes after a transport error")
+	timeout := fs.Duration("timeout", 30*time.Second, "deadline of each wait for a published checkpoint")
 	fs.Parse(args)
 	if *facade == "" || *pub == "" || *vkey == "" || *origin == "" || *stmts == "" || *out == "" {
 		die("submit: missing flag")
@@ -145,7 +146,7 @@ func submit(args []string) {
 		writeFile(filepath.Join(*out, "returned", name+".receipt.cbor"), rec)
 		writeFile(filepath.Join(*out, "returned", name+".facade-checkpoint"), fcp)
 		// the ORIGINAL signed checkpoint from the public read endpoint, retained before the next registration
-		cp, raw, err := p.WaitCheckpointSize(ctx, rs.Index+1, 30*time.Second)
+		cp, raw, err := p.WaitCheckpointSize(ctx, rs.Index+1, *timeout)
 		if err != nil {
 			die("statement %d: %v", i, err)
 		}
@@ -165,6 +166,7 @@ func export(args []string) {
 	origin := fs.String("origin", "", "expected checkpoint origin")
 	size := fs.Uint64("expect-size", 0, "the log must have exactly this many entries")
 	out := fs.String("out", "", "output directory (empty)")
+	timeout := fs.Duration("timeout", 30*time.Second, "deadline of the wait for the checkpoint, and separately of the verified export")
 	fs.Parse(args)
 	if *pub == "" || *vkey == "" || *origin == "" || *size == 0 || *out == "" {
 		die("export: missing flag")
@@ -174,11 +176,13 @@ func export(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	cp, _, err := p.WaitCheckpointSize(ctx, *size, 30*time.Second)
+	cp, _, err := p.WaitCheckpointSize(ctx, *size, *timeout)
 	if err != nil {
 		die("%v", err)
 	}
-	res, err := p.Export(ctx, cp)
+	ectx, cancel := context.WithTimeout(ctx, *timeout)
+	defer cancel()
+	res, err := p.Export(ectx, cp)
 	if err != nil {
 		die("%v", err)
 	}

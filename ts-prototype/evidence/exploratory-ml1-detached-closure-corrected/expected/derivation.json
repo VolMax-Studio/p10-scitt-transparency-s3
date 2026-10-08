@@ -1,0 +1,28 @@
+{
+ "inputs": {
+  "export_leaf_inputs": {
+   "000000.leaf_input": "11dcf4919b4d8259fbce8cbfb8cac064084818b7e2af53ddf58cd772ffeb2353",
+   "000001.leaf_input": "6780e9bd643f4981956137df8e3ee72e2b26751d9f1b2f5d88c8ace5f6321dc7",
+   "000002.leaf_input": "231fc747f20d6a11fbceab24a0a45063b25416c404ecda178b9a819896a2781b",
+   "000003.leaf_input": "97ce831e775320c198b2b38881691cfe64869f4e1d15fe46d79acd23917ea806",
+   "000004.leaf_input": "6b305d9db005a655b7cac8f444ae6ddcae29806956e1ff207e6d78db79253ae1",
+   "000005.leaf_input": "018d9e711b2e797cf439119b179b4b0cf5c73a042ffe48a2f474f9cef3f5e934",
+   "000006.leaf_input": "d7c23de7db8c837e58f0facb9ed5c7eb49ce1321913a6c6d25b085c211aa1105"
+  },
+  "base_tB_expected_sha256": "e716ad43c9adf865416aa2e4d8fbb7cf482ff3cb54a359d96a9d476c1f17db01",
+  "base_expect_json_sha256": "03e1cb890797121be9546765a00ca92e840b0ee74fbffaeb0d56fa4611254a68"
+ },
+ "root_from_exported_bytes": "c4b0417b9b0679e5a80413a6d94574a32b7a7a454f2ce6346d7596f335d71b43",
+ "root_in_retained_public_checkpoint": "c4b0417b9b0679e5a80413a6d94574a32b7a7a454f2ce6346d7596f335d71b43",
+ "base_root_digest": "ce0f6775c53fd81038d16a1ac5ff60a6769c3cddcb886452e68148a3992db103",
+ "tB_expected_sha256": "019ad3aae8b3acd970bf1e12337d4a4b3104fc88b11d93a1790e4531f7d51692",
+ "encoding_differs_only_in_root_field": {
+  "prefix_len": 87,
+  "suffix_len": 1145,
+  "base_total": 1266,
+  "new_total": 1265,
+  "old_field_len": 34,
+  "new_field_len": 33
+ },
+ "chain_output_read": false
+}

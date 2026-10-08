@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r7 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r8 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r8 (relative to r7 at `a7f3f0c`): two prototype corrections (`ts-prototype/RESULTS.md` §D): public HTTP reads during facade finalization and the capture client's checkpoint wait are now bounded by explicit deadlines (a stalled-response defect was reproduced first), and the detached-closure chain path was re-run against a detached-specific expected `tB` derived from retained exported bytes; the original FAIL report is preserved. Nothing is adopted; selection, bootstrap, policy enforcement, glue, G5 and the acceptance path remain OPEN.
 
 Revision r7 (relative to r6 at `8d154b5`/`dda0116`): a candidate Go facade over Tessera v1.0.4 and a separate HTTP-only capture client were built and exercised (`ts-prototype/`, `ts-prototype/RESULTS.md`): facade/public-read checks are reported apart from the frozen verdict; an exploratory seven-leaf lifecycle (synthetic, unenforced bootstrap statements) was captured through them, anchored, and run through G5 and the unchanged chain. Nothing is adopted; TS selection, bootstrap, policy enforcement, glue, G5 and the acceptance path remain OPEN.
 

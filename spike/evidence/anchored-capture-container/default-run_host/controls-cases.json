@@ -1,0 +1,140 @@
+[
+ {
+  "id": "C-ACC",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/request.cbor",
+  "source": "s2a-post/POST-BASE-match",
+  "tb_expected": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/tB.expected",
+  "pb": "/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json",
+  "inst": "/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin",
+  "ib": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/iB.json",
+  "retained_target_payload": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/POST-BASE-match/target_payload.json",
+  "expect": {
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2a": ".accept",
+   "e2e": "some",
+   "post": {
+    "rule": null,
+    "verdict": "BINDING_MATCH",
+    "code": "BindingMatch",
+    "helper_required": true,
+    "rows_all_match": true
+   }
+  }
+ },
+ {
+  "id": "C-POST-REJ",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/BIND-A10-mismatch/request.cbor",
+  "source": "s2a-post/BIND-A10-mismatch",
+  "tb_expected": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/BIND-A10-mismatch/tB.expected",
+  "pb": "/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json",
+  "inst": "/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin",
+  "ib": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/BIND-A10-mismatch/iB.json",
+  "retained_target_payload": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/BIND-A10-mismatch/target_payload.json",
+  "expect": {
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2a": ".accept",
+   "e2e": "some",
+   "post": {
+    "rule": "A10",
+    "verdict": "REJECT",
+    "code": "BindingMismatch",
+    "helper_required": true
+   }
+  }
+ },
+ {
+  "id": "C-POST-HALT",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/T13-T5-closureAt-none/request.cbor",
+  "source": "s2a-post/T13-T5-closureAt-none",
+  "tb_expected": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/T13-T5-closureAt-none/tB.expected",
+  "pb": "/home/user/volmax-studio/s2b-8eaa91c/profile/pB.json",
+  "inst": "/home/user/volmax-studio/s2b-8eaa91c/profile/inst.bin",
+  "ib": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/T13-T5-closureAt-none/iB.json",
+  "retained_target_payload": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-post/T13-T5-closureAt-none/target_payload.json",
+  "expect": {
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2a": ".accept",
+   "e2e": "some",
+   "post": {
+    "rule": "T5",
+    "verdict": "HALT",
+    "code": "TargetAdjudicationNotEstablished",
+    "detail_contains": "closureAt returned none",
+    "helper_required": true
+   }
+  }
+ },
+ {
+  "id": "C-S2A-REJ",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/request.cbor",
+  "source": "s2a-t11/N13b",
+  "tb_expected": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/tB.expected",
+  "pb": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/pB.json",
+  "inst": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N13b/inst.bin",
+  "expect": {
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2a": ".reject .c3_profileAfterFirstAdmission"
+  }
+ },
+ {
+  "id": "C-S2A-HALT",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/request.cbor",
+  "source": "s2a-t11/N7a",
+  "tb_expected": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/tB.expected",
+  "pb": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/pB.json",
+  "inst": "/home/user/volmax-studio/s2b-8eaa91c/vectors/s2a-t11/N7a/inst.bin",
+  "expect": {
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2a": ".halt .c2_subjectPayloadUnavailable"
+  }
+ },
+ {
+  "id": "C-S2B-REJ",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/E/E10-unprotected/request.cbor",
+  "source": "E/E10-unprotected",
+  "expect": {
+   "s2b": {
+    "status": "Invalid",
+    "class": "binding",
+    "reason": "LeafInputDomainViolation"
+   },
+   "composed_after_s2b": "REJECT"
+  }
+ },
+ {
+  "id": "C-S2B-HALT",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/M/M1/request.cbor",
+  "source": "M/M1",
+  "expect": {
+   "s2b": {
+    "status": "Invalid",
+    "class": "replay",
+    "reason": "RootMismatch"
+   },
+   "composed_after_s2b": "HALT"
+  }
+ },
+ {
+  "id": "C-S2B-UNAV",
+  "request": "/home/user/volmax-studio/s2b-8eaa91c/vectors/M/M8/request.cbor",
+  "source": "M/M8",
+  "expect": {
+   "s2b": {
+    "status": "Unavailable",
+    "class": "material",
+    "reason": "MissingIndex"
+   },
+   "composed_after_s2b": "HALT"
+  }
+ }
+]

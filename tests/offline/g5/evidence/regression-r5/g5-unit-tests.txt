@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running unittests src/lib.rs (target/debug/deps/s3_g5-981bb4782fc7a955)
+
+running 7 tests
+test tests::components ... ok
+test tests::duplicate_members_and_numbers_are_rejected_by_the_frozen_json_type ... ok
+test tests::index_numbers ... ok
+test tests::path_policy ... ok
+test tests::inventory_rejects_non_utf8_names ... ok
+test tests::inventory_accepts_plain_names_and_returns_exact_relative_paths ... ok
+test tests::inventory_rejects_backslash_name_beside_the_legitimate_file ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

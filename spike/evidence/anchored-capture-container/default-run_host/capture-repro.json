@@ -1,0 +1,18 @@
+{
+ "all_identical": true,
+ "closureat_binary_identical": true,
+ "s2a_runner_binary_identical": true,
+ "tB": {
+  "CAP-ML1": {
+   "a": "e716ad43c9adf865416aa2e4d8fbb7cf482ff3cb54a359d96a9d476c1f17db01",
+   "b": "e716ad43c9adf865416aa2e4d8fbb7cf482ff3cb54a359d96a9d476c1f17db01",
+   "identical": true
+  },
+  "CAP-volmax-owner": {
+   "a": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519",
+   "b": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519",
+   "identical": true
+  }
+ },
+ "verdict_projection_identical": true
+}

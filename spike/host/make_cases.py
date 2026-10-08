@@ -46,6 +46,8 @@ def with_code(post):
     if v == "HALT" and r == "T5":
         post.setdefault("detail_contains", "closureAt returned none")
     post.setdefault("helper_required", not (v == "HALT" and r in ("T1", "T2", "T3", "T4", "T6")))
+    if v == "BINDING_MATCH":
+        post.setdefault("rows_all_match", True)
     return post
 
 
@@ -57,7 +59,7 @@ def inventory(dirpath, extra=()):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--s2b", required=True)
-    ap.add_argument("--fixtures", required=True)
+    ap.add_argument("--fixtures", help="optional directory of direct spike fixtures; NOT used by the host runner (the capture path uses G5-returned paths)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     V = os.path.join(a.s2b, "vectors")
@@ -98,7 +100,7 @@ def main():
         cases.append(c)
     # volmax-owner fixtures (public material only), if present
     fx = a.fixtures
-    if os.path.isdir(fx):
+    if fx and os.path.isdir(fx):
         for name in sorted(os.listdir(fx)):
             d = os.path.join(fx, name)
             if not os.path.exists(os.path.join(d, "request.cbor")):

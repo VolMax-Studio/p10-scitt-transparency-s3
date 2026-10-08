@@ -205,33 +205,46 @@ fn parse_index(bytes: &[u8]) -> Result<Index, Fail> {
 
 // ---------------------------------------------------------------------------------------------- path policy and inventory
 
-/// A capture path is relative, uses `/` separators, has only normal components, and is not `capture.json`.
-pub fn path_ok(p: &str) -> bool {
-    if p.is_empty() || p.starts_with('/') || p.contains('\\') || p.contains('\0') || p == "capture.json" {
-        return false;
-    }
-    if p.split('/').any(|c| c.is_empty() || c == "." || c == "..") {
-        return false;
-    }
-    Path::new(p).components().all(|c| matches!(c, Component::Normal(_)))
+/// One path component (an index path segment or a file name found on disk): non-empty, not `.`/`..`, and free of `/`, backslash, NUL and
+/// ASCII control characters. A file system name is checked with exactly this rule and is never normalized into a different name.
+pub fn component_ok(c: &str) -> bool {
+    !c.is_empty() && c != "." && c != ".." && !c.chars().any(|ch| ch == '/' || ch == '\\' || (ch as u32) < 0x20 || ch as u32 == 0x7f)
 }
 
-fn walk(root: &Path, rel: &Path, out: &mut BTreeSet<String>) -> Result<(), Fail> {
-    let dir = root.join(rel);
+/// A capture path is relative, uses `/` separators, has only policy-valid components, and is not `capture.json`.
+pub fn path_ok(p: &str) -> bool {
+    if p.is_empty() || p.starts_with('/') || p == "capture.json" {
+        return false;
+    }
+    p.split('/').all(component_ok) && Path::new(p).components().all(|c| matches!(c, Component::Normal(_)))
+}
+
+/// Inventory of the regular files under `root`. Names are taken from the file system WITHOUT lossy conversion or separator rewriting:
+/// a non-UTF-8 name or a name that violates `component_ok` (for example a file called `prefix\\000001.cose`, which a lossy
+/// backslash-to-slash rewrite would have merged with the legitimate `prefix/000001.cose`) is `E_PATH_UNSAFE`.
+fn walk(root: &Path, rel: &str, out: &mut BTreeSet<String>) -> Result<(), Fail> {
+    let dir = if rel.is_empty() { root.to_path_buf() } else { root.join(rel) };
     let rd = fs::read_dir(&dir).or_else(|e| fail("E_CAPTURE_UNREADABLE", format!("{}: {e}", dir.display())))?;
     for ent in rd {
         let ent = ent.or_else(|e| fail("E_CAPTURE_UNREADABLE", e.to_string()))?;
-        let r = rel.join(ent.file_name());
+        let name_os = ent.file_name();
+        let Some(name) = name_os.to_str() else {
+            return fail("E_PATH_UNSAFE", format!("non-UTF-8 file name {name_os:?} under {rel:?}"));
+        };
+        let at_root = rel.is_empty();
+        if !(at_root && name == "capture.json") && !component_ok(name) {
+            return fail("E_PATH_UNSAFE", format!("file name {name:?} under {rel:?} is not a valid path component"));
+        }
+        let r = if at_root { name.to_string() } else { format!("{rel}/{name}") };
         let md = fs::symlink_metadata(root.join(&r)).or_else(|e| fail("E_CAPTURE_UNREADABLE", e.to_string()))?;
-        let name = r.to_string_lossy().replace('\\', "/");
         if md.file_type().is_symlink() {
-            return fail("E_PATH_UNSAFE", format!("{name}: symbolic link"));
+            return fail("E_PATH_UNSAFE", format!("{r}: symbolic link"));
         } else if md.is_dir() {
             walk(root, &r, out)?;
         } else if md.is_file() {
-            out.insert(name);
+            out.insert(r);
         } else {
-            return fail("E_PATH_UNSAFE", format!("{name}: not a regular file or directory"));
+            return fail("E_PATH_UNSAFE", format!("{r}: not a regular file or directory"));
         }
     }
     Ok(())
@@ -264,7 +277,7 @@ pub fn check_capture(root: &Path, anchor: Option<&str>) -> Result<Pass, Fail> {
     }
     // C3 inventory: every indexed file exists, every file on disk is indexed (capture.json excepted); no symlinks
     let mut on_disk = BTreeSet::new();
-    walk(root, Path::new(""), &mut on_disk)?;
+    walk(root, "", &mut on_disk)?;
     on_disk.remove("capture.json");
     for f in &ix.files {
         if !on_disk.contains(&f.path) {
@@ -415,6 +428,59 @@ mod tests {
         for bad in ["", "/etc/passwd", "../x", "a/../b", "a//b", "./a", "a/.", "a\\b", "capture.json", "a/\0"] {
             assert!(!path_ok(bad), "{bad:?}");
         }
+    }
+
+    #[test]
+    fn components() {
+        for ok in ["a", "000001.cose", "x y", "ü"] {
+            assert!(component_ok(ok), "{ok}");
+        }
+        for bad in ["", ".", "..", "a/b", "prefix\\000001.cose", "a\nb", "a\u{7f}", "a\0b"] {
+            assert!(!component_ok(bad), "{bad:?}");
+        }
+        assert!(!path_ok("prefix\\000001.cose") && !path_ok("a/b\tc"));
+    }
+
+    fn scratch(tag: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("s3g5-{tag}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&d);
+        fs::create_dir_all(d.join("prefix")).unwrap();
+        d
+    }
+
+    #[test]
+    fn inventory_rejects_backslash_name_beside_the_legitimate_file() {
+        // Regression: the previous inventory rewrote `\` to `/`, so a root file literally named `prefix\000001.cose` collapsed onto the
+        // legitimate `prefix/000001.cose`, was never hashed and was never reported.
+        let d = scratch("backslash");
+        fs::write(d.join("prefix/000001.cose"), b"legit").unwrap();
+        fs::write(d.join("prefix\\000001.cose"), b"extra, never hashed").unwrap();
+        let mut set = BTreeSet::new();
+        let r = walk(&d, "", &mut set);
+        assert_eq!(r.unwrap_err().reason, "E_PATH_UNSAFE");
+        let _ = fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn inventory_rejects_non_utf8_names() {
+        use std::ffi::OsStr;
+        use std::os::unix::ffi::OsStrExt;
+        let d = scratch("nonutf8");
+        fs::write(d.join("prefix").join(OsStr::from_bytes(b"\xff.cose")), b"x").unwrap();
+        let mut set = BTreeSet::new();
+        assert_eq!(walk(&d, "", &mut set).unwrap_err().reason, "E_PATH_UNSAFE");
+        let _ = fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn inventory_accepts_plain_names_and_returns_exact_relative_paths() {
+        let d = scratch("plain");
+        fs::write(d.join("prefix/000001.cose"), b"a").unwrap();
+        fs::write(d.join("capture.json"), b"{}").unwrap();
+        let mut set = BTreeSet::new();
+        walk(&d, "", &mut set).unwrap();
+        assert_eq!(set.into_iter().collect::<Vec<_>>(), vec!["capture.json".to_string(), "prefix/000001.cose".to_string()]);
+        let _ = fs::remove_dir_all(&d);
     }
 
     #[test]

@@ -1,0 +1,15 @@
+R1 G5 FAIL result
+refusing: G5 result is 'FAIL', not PASS
+exit=1
+R2 G5 PASS without anchor
+refusing: G5 PASS without anchor_checked=true is not an anchored capture
+exit=1
+R3 expectation file inside the capture
+refusing: the expectation file must not be inside the capture
+exit=1
+R4 forged PASS with a path outside the capture root
+refusing: request path /home/user/p10-scitt-transparency-s3/spike/fixtures/volmax-owner/request.cbor is outside the checked capture root /home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture
+exit=1
+R5 valid anchored PASS
+R5: inputs taken from G5-returned paths under /home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture
+exit=0

@@ -1,0 +1,10 @@
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-volmax-owner/s2b/tB.bin
+inst	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/inst.bin
+pb	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-volmax-owner/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/pB.json	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/inst.bin
+e2e	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-volmax-owner/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/pB.json	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/iB.json	/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/inst.bin
+tb	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-ML1/s2b/tB.bin
+inst	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/inst.bin
+pb	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/pB.json
+cov	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-ML1/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/pB.json	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/inst.bin
+e2e	/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-ML1/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/pB.json	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/iB.json	/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/inst.bin

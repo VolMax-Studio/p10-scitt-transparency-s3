@@ -1,0 +1,356 @@
+{
+ "a12_a14": {
+  "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+  "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+  "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+ },
+ "a12_a14_source": "S2b frozen/StatementPayloadSchemaV0_r9_FREEZE.txt",
+ "artifact_hashes": {
+  "CAP-ML1/ib": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "CAP-ML1/inst": "5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+  "CAP-ML1/pb": "a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c",
+  "CAP-ML1/request.cbor": "9a27aa63680da7973780023152b4ddce5a8a0d5e188abb52142b704849da4e05",
+  "CAP-ML1/retained_target_payload": "84d1535bbcc560224c54649a30b2a4ab8b88b07d7eda7e98c72ecc4643b21ba7",
+  "CAP-ML1/tB.actual": "e716ad43c9adf865416aa2e4d8fbb7cf482ff3cb54a359d96a9d476c1f17db01",
+  "CAP-volmax-owner/ib": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "CAP-volmax-owner/inst": "5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+  "CAP-volmax-owner/pb": "a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c",
+  "CAP-volmax-owner/request.cbor": "6e4dd60f97b908c0b12d1da249f12807a9da175f49bdea888bc5708de7055e7d",
+  "CAP-volmax-owner/retained_target_payload": "ca8fbce856544615eb6a0c8c73b38a4a40662a01b38b7489fd1be474d1d03181",
+  "CAP-volmax-owner/tB.actual": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519"
+ },
+ "cases": {
+  "CAP-ML1": {
+   "checks": [
+    {
+     "check": "s2b-result",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "s2b-structure",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "target-extracted-from-authenticated-target",
+     "detail": "exit=0 target={'leaf_index': 6, 'sub': 'p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2', 'payload_len': 7316, 'payload_equals_retained_file': True}",
+     "ok": true
+    },
+    {
+     "check": "tB-actual-equals-tB.expected (comparison only)",
+     "detail": "e716ad43c9adf865 vs e716ad43c9adf865",
+     "ok": true
+    },
+    {
+     "check": "s2a-outcome",
+     "detail": "('accept', None) vs ('accept', None)",
+     "ok": true
+    },
+    {
+     "check": "s1-e2e",
+     "detail": "some vs some",
+     "ok": true
+    },
+    {
+     "check": "post-s2a-result-code-rule",
+     "detail": "BINDING_MATCH/BindingMatch/None",
+     "ok": true
+    },
+    {
+     "check": "no-infrastructure-failure",
+     "detail": "",
+     "ok": true
+    }
+   ],
+   "composed_after_s2b": "continue",
+   "infra_failures": [],
+   "not_run": [],
+   "pass": true,
+   "post": {
+    "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+    "code": "BindingMatch",
+    "detail": "T1-T6 and A1-A15 hold",
+    "result": "BINDING_MATCH",
+    "rows": {
+     "A1": "match",
+     "A10": "match",
+     "A11": "match",
+     "A12": "match",
+     "A13": "match",
+     "A14": "match",
+     "A15": "match",
+     "A2": "match",
+     "A3": "match",
+     "A4": "match",
+     "A5": "match",
+     "A6": "match",
+     "A7": "match",
+     "A8": "match",
+     "A9": "match"
+    },
+    "rule": null
+   },
+   "s2a": {
+    "actual": [
+     "accept",
+     null
+    ],
+    "codec_ok": true
+   },
+   "s2b": {
+    "checkpoint_size": 7,
+    "log_identity_digest": "7dd7aff43fd2d5becf170822b4e600b928a1fb4031285142a7068a42fa9ebf75",
+    "root": "ce0f6775c53fd81038d16a1ac5ff60a6769c3cddcb886452e68148a3992db103",
+    "stage": "s2b",
+    "status": "Verified",
+    "subject_observations": [
+     {
+      "idx": 2,
+      "kind": "ProfileCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 3,
+      "kind": "InstanceCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 4,
+      "kind": "Admission",
+      "sig": "Verified"
+     },
+     {
+      "idx": 5,
+      "kind": "Closure",
+      "sig": "Verified"
+     },
+     {
+      "idx": 6,
+      "kind": "Adjudication",
+      "sig": "Verified"
+     }
+    ],
+    "target": {
+     "leaf_index": 6,
+     "payload_equals_retained_file": true,
+     "payload_len": 7316,
+     "sub": "p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2"
+    },
+    "tb_len": 1266,
+    "transcript_sha256": "e716ad43c9adf865416aa2e4d8fbb7cf482ff3cb54a359d96a9d476c1f17db01",
+    "unreadable_rows": []
+   }
+  },
+  "CAP-volmax-owner": {
+   "checks": [
+    {
+     "check": "s2b-result",
+     "detail": "",
+     "ok": true
+    },
+    {
+     "check": "target-extracted-from-authenticated-target",
+     "detail": "exit=0 target={'leaf_index': 4, 'sub': 'p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2', 'payload_len': 7316, 'payload_equals_retained_file': True}",
+     "ok": true
+    },
+    {
+     "check": "tB-actual-equals-tB.expected (comparison only)",
+     "detail": "dc9ec4edae2a72f8 vs dc9ec4edae2a72f8",
+     "ok": true
+    },
+    {
+     "check": "s2a-outcome",
+     "detail": "('accept', None) vs ('accept', None)",
+     "ok": true
+    },
+    {
+     "check": "s1-e2e",
+     "detail": "some vs some",
+     "ok": true
+    },
+    {
+     "check": "post-s2a-result-code-rule",
+     "detail": "BINDING_MATCH/BindingMatch/None",
+     "ok": true
+    },
+    {
+     "check": "no-infrastructure-failure",
+     "detail": "",
+     "ok": true
+    }
+   ],
+   "composed_after_s2b": "continue",
+   "infra_failures": [],
+   "not_run": [],
+   "pass": true,
+   "post": {
+    "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+    "code": "BindingMatch",
+    "detail": "T1-T6 and A1-A15 hold",
+    "result": "BINDING_MATCH",
+    "rows": {
+     "A1": "match",
+     "A10": "match",
+     "A11": "match",
+     "A12": "match",
+     "A13": "match",
+     "A14": "match",
+     "A15": "match",
+     "A2": "match",
+     "A3": "match",
+     "A4": "match",
+     "A5": "match",
+     "A6": "match",
+     "A7": "match",
+     "A8": "match",
+     "A9": "match"
+    },
+    "rule": null
+   },
+   "s2a": {
+    "actual": [
+     "accept",
+     null
+    ],
+    "codec_ok": true
+   },
+   "s2b": {
+    "checkpoint_size": 5,
+    "log_identity_digest": "7dd7aff43fd2d5becf170822b4e600b928a1fb4031285142a7068a42fa9ebf75",
+    "root": "8ecd10cce78fa96f66a60590d740977c8d5b7b4995d841eeb4b0a63b343a6f76",
+    "stage": "s2b",
+    "status": "Verified",
+    "subject_observations": [
+     {
+      "idx": 0,
+      "kind": "ProfileCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 1,
+      "kind": "InstanceCommit",
+      "sig": "Verified"
+     },
+     {
+      "idx": 2,
+      "kind": "Admission",
+      "sig": "Verified"
+     },
+     {
+      "idx": 3,
+      "kind": "Closure",
+      "sig": "Verified"
+     },
+     {
+      "idx": 4,
+      "kind": "Adjudication",
+      "sig": "Verified"
+     }
+    ],
+    "target": {
+     "leaf_index": 4,
+     "payload_equals_retained_file": true,
+     "payload_len": 7316,
+     "sub": "p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2"
+    },
+    "tb_len": 1190,
+    "transcript_sha256": "dc9ec4edae2a72f896b6b9aa2e3a596da88da98e44ea2ebb2f8989feecd29519",
+    "unreadable_rows": []
+   }
+  }
+ },
+ "closureat_helper": {
+  "helper-binary-sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "helper-source-sha256": "bcf18c4eccdfcf5176a16df62980c1760ad529351bce5ba826701d8ae919313f",
+  "lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/home/user/p10-scitt-transparency-s3/spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/request.cbor",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-volmax-owner/s2b",
+    "--expect-target-payload",
+    "/home/user/p10-scitt-transparency-s3/tests/offline/g5/fixtures/volmax-owner-capture/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "s2b-CAP-volmax-owner",
+   "seconds": 0.02,
+   "stderr": "logs/001-s2b-CAP-volmax-owner.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-s2b-CAP-volmax-owner.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "/home/user/p10-scitt-transparency-s3/spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/request.cbor",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/cases/CAP-ML1/s2b",
+    "--expect-target-payload",
+    "/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1-capture/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "s2b-CAP-ML1",
+   "seconds": 0.02,
+   "stderr": "logs/002-s2b-CAP-ML1.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-s2b-CAP-ML1.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/f2/default/capture-run1/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "s2a-runner",
+   "seconds": 10.0,
+   "stderr": "logs/003-s2a-runner.stderr",
+   "stderr_sha256": "ae6e8ec44f943d37b7566e72dcfa509fdbc4b3d97d922fe7f596a2e03e3979ee",
+   "stdout": "logs/003-s2a-runner.stdout",
+   "stdout_sha256": "30952498ec062324da1eb0152c5301ae3a06a68f4ba23cd885e85a8492021c82"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_closureat.sh",
+    "--batch",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/tmpsc6ox73k/jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 4,
+   "name": "closureat-batch",
+   "seconds": 9.31,
+   "stderr": "logs/004-closureat-batch.stderr",
+   "stderr_sha256": "00c2d095fc3c85efc5b09083d6b209a4c732b2ab90f3deb638f055156c66188a",
+   "stdout": "logs/004-closureat-batch.stdout",
+   "stdout_sha256": "0bcf47acc7ea8ff7781c5c874fc297ba3189545fa1d0e086d7a90c173c8ba8fa"
+  }
+ ],
+ "s2a_runner": {
+  "exit": 0,
+  "info": {
+   "helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+   "helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+   "helper-target": "s2a-runner",
+   "lean-executable": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin/lean",
+   "lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "lean-pinned-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "lean-toolchain": "leanprover/lean4:v4.33.0"
+  }
+ }
+}

@@ -6,11 +6,12 @@ Experimental code and evidence showing that the traced offline chain can be exec
 |---|---|
 | `s3-entry/` | thin Rust entry over the unchanged pinned S2b crate (`decode_request`, `replay_p0_p9`, `parse_cose_sign1`, `read_protected`); no new parser |
 | `glue/s3_spike_chain.py` | sequencing glue: S2b result composition, S2a runner jobs, post-S2a inputs from actual outputs, comparison (expected artifacts only read after actual outputs) |
-| `host/run_host.sh` | single host command; `preflight.py` checks each pin; `make_cases.py`, `compare_runs.py` |
+| `host/run_host.sh` | single host command; `preflight.py` checks each pin; `make_cases.py` (ratified controls), `make_capture_cases.py` and `anchored_captures.json` (anchored capture path), `compare_runs.py` |
 | `fixtures/volmax-owner/` | public material of a `volmax-owner` instance on the frozen toy semantics (test keys; private keys not in the repository); `gen_volmax_owner.py` is the generator |
 | `PINS.json`, `API_INVENTORY.md`, `A12_A14_APPLICABILITY.md`, `FEASIBILITY_REPORT.md`, `HARDENING_REPORT.md` | pins, API accessibility, A12–A14 analysis, baseline results, runner hardening results |
 | `evidence/2026-10-07-container/` | baseline outputs from the Claude Code container run (not the maintainer's host); preserved unchanged |
 | `evidence/hardening-container/` | outputs of the hardening pass (stop paths, connected run label, fault injection, negative preflights) |
+| `evidence/anchored-capture-container/` | outputs of the r5 pass: controls run directly, anchored capture path (G5 -> chain inputs from G5-returned paths), a tampered-capture stop, make_capture_cases refusals |
 
 Not committed: `.deps/` (symlink to the S2b checkout), `s3-entry/target/`, private keys.
 

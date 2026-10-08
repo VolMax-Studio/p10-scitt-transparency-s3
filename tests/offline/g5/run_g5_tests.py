@@ -147,6 +147,17 @@ def c_xp1(d):    # symbolic link in the capture
 def c_xp2(d):    # path traversal in the index
     idx = load_idx(d); ref(idx, "provenance/MATERIALIZATION.json")["path"] = "../escape"; return save_idx(d, idx)
 
+def c_xp3(d):    # REGRESSION: a root file literally named `prefix\000001.cose` beside the legitimate prefix/000001.cose.
+    # The earlier inventory rewrote backslash to slash, merged the two names, never hashed the extra file and reported PASS.
+    wr(os.path.join(d, "prefix\\000001.cose"), b"extra file that no hash covers"); return c_base(d)
+
+def c_xp4(d):    # a non-UTF-8 file name in prefix/
+    with open(os.path.join(os.fsencode(d), b"prefix", b"\xff.cose"), "wb") as f: f.write(b"x")
+    return c_base(d)
+
+def c_xp5(d):    # a control character in a file name
+    wr(os.path.join(d, "prefix/new\nline.cose"), b"x"); return c_base(d)
+
 def c_xi1(d):    # duplicate member name in capture.json
     p = os.path.join(d, "capture.json"); t = rd(p).decode()
     t = t.replace('"format":', '"format": "x",\n "format":', 1); wr(p, t.encode()); return c_base(d)
@@ -196,6 +207,9 @@ CASES = [
     ("X-S2", c_xs2, "E_SUBMISSION_MISSING", False),
     ("X-P1", c_xp1, "E_PATH_UNSAFE", False),
     ("X-P2", c_xp2, "E_PATH_UNSAFE", False),
+    ("X-P3", c_xp3, "E_PATH_UNSAFE", False),
+    ("X-P4", c_xp4, "E_PATH_UNSAFE", False),
+    ("X-P5", c_xp5, "E_PATH_UNSAFE", False),
     ("X-I1", c_xi1, "E_INDEX_MALFORMED", False),
     ("X-I2", c_xi2, "E_INDEX_MALFORMED", False),
     ("X-T1", c_xt1, "E_TARGET_BYTES_MISMATCH", False),

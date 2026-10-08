@@ -1,0 +1,6 @@
+{
+ "note": "test materialization of a spike fixture; not an S3 capture",
+ "request_sha256": "9a27aa63680da7973780023152b4ddce5a8a0d5e188abb52142b704849da4e05",
+ "source_fixture": "spike/fixtures/volmax-owner",
+ "tool": "tests/offline/g5/materialize_capture.py"
+}

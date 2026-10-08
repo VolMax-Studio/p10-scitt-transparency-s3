@@ -179,7 +179,23 @@ def match_post(expect, post):
         return False, f"detail {post.get('detail')!r} lacks {expect['detail_contains']!r}"
     if expect.get("helper_required") and not post.get("closure_helper_binary_sha256"):
         return False, "no closureAt helper binary hash recorded for a result that requires the real helper"
+    if expect.get("rows_all_match"):
+        rows = post.get("rows") or {}
+        want = [f"A{i}" for i in range(1, 16)]
+        bad = [r for r in want if rows.get(r) != "match"]
+        if bad:
+            return False, f"rows not 'match': { {r: rows.get(r) for r in bad} }"
     return True, ""
+
+
+def match_s2b_detail(expect, res):
+    """Optional structural expectations on a Verified S2b result: checkpoint size, subject-entry indices, unreadable rows."""
+    if res.get("status") != "Verified":
+        return False, f"status {res.get('status')}"
+    got = {"checkpoint_size": res.get("checkpoint_size"), "subject_idx": [o["idx"] for o in res.get("subject_observations", [])],
+           "unreadable": [u["idx"] for u in res.get("unreadable_rows", [])]}
+    bad = {k: (got[k], v) for k, v in expect.items() if got.get(k) != v}
+    return (not bad), (f"differs: {bad}" if bad else "")
 
 
 # ---------------------------------------------------------------------------------------------------- main
@@ -396,6 +412,9 @@ def main():
         if "s2b" in exp:
             ok, d = match_s2b(exp["s2b"], st["s2b"])
             chk("s2b-result", ok, d)
+        if "s2b_detail" in exp:
+            ok, d = match_s2b_detail(exp["s2b_detail"], st["s2b"])
+            chk("s2b-structure", ok, d)
         if "composed_after_s2b" in exp:
             chk("s2b-composed", st["composed"] == exp["composed_after_s2b"], f"{st['composed']} vs {exp['composed_after_s2b']}")
         if st["s2b"].get("status") == "Verified":

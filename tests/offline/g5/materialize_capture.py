@@ -10,7 +10,9 @@ mutation tests, never for materialization).
 LIMITATION: in this materialization the submitted bytes, exported prefix bytes and request leaves all originate from the one request,
 so it exercises the checker's mechanics, not the independence of real submission/export sources. It is NOT the S3 capture.
 
-usage: materialize_capture.py --fixture DIR --out DIR
+usage: materialize_capture.py --fixture DIR --out DIR [--ts-origin 0,1] [--roles 0=registration-policy-test,1=trust-anchor-test]
+  --ts-origin: leaf indices recorded with origin "ts" (TS-originated statements): no submission file is written for them.
+  --roles: informational role text per index (default: p10-lifecycle / p10-target).
 """
 import argparse, hashlib, json, os, shutil, sys
 import cbor2
@@ -31,7 +33,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fixture", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--ts-origin", default="")
+    ap.add_argument("--roles", default="")
     a = ap.parse_args()
+    ts_origin = {int(x) for x in a.ts_origin.split(",") if x}
+    roles = {int(k): v for k, v in (kv.split("=", 1) for kv in a.roles.split(",") if kv)}
     req = open(os.path.join(a.fixture, "request.cbor"), "rb").read()
     obj = cbor2.loads(req)
     assert cbor2.dumps(obj) == req, "cbor2 round trip does not reproduce the request bytes"
@@ -51,8 +57,10 @@ def main():
     idx["prefix"], idx["submissions"] = [], []
     for i, b in pairs:
         ref = w(out, f"prefix/{i:06d}.cose", b)
-        idx["prefix"].append({"index": str(i), **ref, "origin": "issuer", "role": "p10-target" if i == target_index else "p10-lifecycle"})
-        idx["submissions"].append({"index": str(i), **w(out, f"submissions/{i:06d}.cose", b)})
+        role = roles.get(i, "p10-target" if i == target_index else "p10-lifecycle")
+        idx["prefix"].append({"index": str(i), **ref, "origin": "ts" if i in ts_origin else "issuer", "role": role})
+        if i not in ts_origin:
+            idx["submissions"].append({"index": str(i), **w(out, f"submissions/{i:06d}.cose", b)})
     idx["receipts"] = [{"index": str(target_index), **w(out, f"receipts/{target_index:06d}.receipt.cbor", receipt), "selected": True}]
     idx["detached_payloads"] = [{"index": str(i), **w(out, f"detached/{i:06d}.payload", b)} for i, b in sorted(detached)]
     idx["target"] = {"index": str(target_index)}

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# NON-NORMATIVE FEASIBILITY SPIKE. Single host command for the traced S3-C chain over the ratified controls and the volmax-owner fixture.
+# NON-NORMATIVE FEASIBILITY SPIKE. Single host command for the traced S3-C chain: (A) the ratified runner controls, run directly with their own bound
+# inputs, and (B) the ANCHORED CAPTURE PATH: candidate G5 (with the external anchor from MANIFEST.sha256) -> chain inputs taken from G5's returned paths only.
 #
 #   spike/host/run_host.sh --s1 <S1 checkout> --s2a <S2a checkout> --s2b <S2b checkout> --out <empty output dir> [--lean-bin-dir <dir with pinned lean>] [--no-offline]
 #
@@ -38,17 +39,13 @@ ln -sfn "$S2B" "$SPIKE/.deps/s2b" 2>/dev/null || { mkdir -p "$SPIKE/.deps" && ln
 ( cd "$SPIKE/s3-entry" && rustc -V && cargo fetch --locked && cargo build --locked --offline ) || die "entry build failed"
 ENTRY="$SPIKE/s3-entry/target/debug/s3-spike-entry"; sha256sum "$ENTRY" | tee "$OUT/entry.sha256"
 
-step "2b candidate G5 (verifier/g5): build, unit tests, and the correspondence check of the committed test capture against its external anchor"
+step "2b candidate G5 (verifier/g5): build and unit tests"
 VER="$REPO/verifier"; mkdir -p "$VER/.deps" && ln -sfn "$S2B" "$VER/.deps/s2b"
 ( cd "$VER/g5" && cargo build --locked --offline && cargo test --locked --offline --lib ) || die "G5 build or unit tests failed"
-CAPDIR="$REPO/tests/offline/g5/fixtures/volmax-owner-capture"
-ANCHOR="$(grep -E '  tests/offline/g5/fixtures/volmax-owner-capture/capture.json$' "$REPO/MANIFEST.sha256" | cut -d' ' -f1)"
-[ -n "$ANCHOR" ] || die "no MANIFEST.sha256 anchor for the committed test capture's capture.json (regenerate MANIFEST.sha256)"
-"$VER/g5/target/debug/s3-g5" --capture "$CAPDIR" --index-sha256 "$ANCHOR" | tee "$OUT/g5-committed-capture.json"
-grep -q '"g5":"PASS"' "$OUT/g5-committed-capture.json" || die "G5 did not pass on the committed test capture"
+G5="$VER/g5/target/debug/s3-g5"; sha256sum "$G5" | tee "$OUT/g5-binary.sha256"
 
-step "3 cases (controls reuse ratified S2b fixtures unchanged; plus spike/fixtures/*)"
-python3 -B "$HERE/make_cases.py" --s2b "$S2B" --fixtures "$SPIKE/fixtures" --out "$OUT/cases.json" || die "make_cases failed"
+step "3 controls: ratified S2b fixtures, run directly with their own bound inputs (separate from the anchored capture path)"
+python3 -B "$HERE/make_cases.py" --s2b "$S2B" --out "$OUT/controls-cases.json" || die "make_cases failed"
 
 RUNNER=(env)
 if [ "$OFFLINE" = 1 ]; then
@@ -83,14 +80,33 @@ else
 fi
 
 for n in 1 2; do
-  step "4.$n chain run $n (S2b -> S2a -> post-S2a with real closureAt helper)"
-  "${RUNNER[@]}" python3 -B "$HERE/../glue/s3_spike_chain.py" --cases "$OUT/cases.json" --out "$OUT/run$n" --s2b "$S2B" --s2a "$S2A" --entry "$ENTRY"
-  rc=$?; echo "run $n exit=$rc"; [ $rc -eq 0 ] || die "chain run $n did not fully pass (see $OUT/run$n/report.json; NOT RUN stages mean a missing prerequisite)"
+  step "4.$n controls chain run $n (S2b -> S2a -> post-S2a with real closureAt helper)"
+  "${RUNNER[@]}" python3 -B "$HERE/../glue/s3_spike_chain.py" --cases "$OUT/controls-cases.json" --out "$OUT/controls-run$n" --s2b "$S2B" --s2a "$S2A" --entry "$ENTRY"
+  rc=$?; echo "controls run $n exit=$rc"; [ $rc -eq 0 ] || die "controls run $n did not fully pass (see $OUT/controls-run$n/report.json; NOT RUN stages mean a missing prerequisite)"
 done
+step "5 repeatability of controls run 1 vs run 2"
+python3 -B "$HERE/compare_runs.py" "$OUT/controls-run1" "$OUT/controls-run2" "$OUT/controls-repro.json" || die "controls runs differ"
 
-step "5 repeatability of run 1 vs run 2 (verdicts, tB bytes, helper binaries; logs/timestamps/paths excluded)"
-python3 -B "$HERE/compare_runs.py" "$OUT/run1" "$OUT/run2" "$OUT/repro.json" || die "runs differ"
+step "6 anchored capture path: G5 with the external anchor, then chain inputs from G5's returned paths only"
+rm -f "$OUT/capture-cases.json"
+python3 -c "
+import json
+for c in json.load(open('$HERE/anchored_captures.json')): print(c['id'], c['capture'], c['expect'])" > "$OUT/anchored-captures.txt"
+while read -r CID CAPREL EXPREL; do
+  ANCHOR="$(grep -F "  $CAPREL/capture.json" "$REPO/MANIFEST.sha256" | cut -d' ' -f1)"
+  [ -n "$ANCHOR" ] || die "no MANIFEST.sha256 anchor for $CAPREL/capture.json (the external anchor is required; regenerate MANIFEST.sha256)"
+  "$G5" --capture "$REPO/$CAPREL" --index-sha256 "$ANCHOR" > "$OUT/g5-$CID.json"; rc=$?
+  cat "$OUT/g5-$CID.json" | cut -c1-200
+  [ $rc -eq 0 ] || die "G5 failed for $CID (exit $rc): the chain is NOT called for it"
+  python3 -B "$HERE/make_capture_cases.py" --id "$CID" --g5-result "$OUT/g5-$CID.json" --expect "$REPO/$EXPREL" --out "$OUT/capture-cases.json" --append || die "cannot build chain inputs from the G5 result for $CID"
+done < "$OUT/anchored-captures.txt"
+for n in 1 2; do
+  step "6.$n capture chain run $n"
+  "${RUNNER[@]}" python3 -B "$HERE/../glue/s3_spike_chain.py" --cases "$OUT/capture-cases.json" --out "$OUT/capture-run$n" --s2b "$S2B" --s2a "$S2A" --entry "$ENTRY"
+  rc=$?; echo "capture run $n exit=$rc"; [ $rc -eq 0 ] || die "capture run $n did not fully pass (see $OUT/capture-run$n/report.json)"
+done
+python3 -B "$HERE/compare_runs.py" "$OUT/capture-run1" "$OUT/capture-run2" "$OUT/capture-repro.json" || die "capture runs differ"
 
-step "6 hashes of every output file"
+step "7 hashes of every output file"
 ( cd "$OUT" && find . -type f ! -name host.log ! -name OUTPUT_HASHES.txt -print0 | sort -z | xargs -0 sha256sum > OUTPUT_HASHES.txt ); wc -l "$OUT/OUTPUT_HASHES.txt"
 echo; echo "HOST RUN COMPLETE. Feasibility evidence only; not ratification, freeze or acceptance."

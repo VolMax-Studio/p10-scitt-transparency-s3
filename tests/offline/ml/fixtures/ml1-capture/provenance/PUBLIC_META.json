@@ -1,0 +1,140 @@
+{
+ "file_sha256": {
+  "iB.json": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "inst.bin": "5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+  "pB.json": "a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c",
+  "request.cbor": "9a27aa63680da7973780023152b4ddce5a8a0d5e188abb52142b704849da4e05",
+  "tB.expected": "e716ad43c9adf865416aa2e4d8fbb7cf482ff3cb54a359d96a9d476c1f17db01",
+  "target_payload.json": "84d1535bbcc560224c54649a30b2a4ab8b88b07d7eda7e98c72ecc4643b21ba7"
+ },
+ "generator_environment": {
+  "note": "not the pinned oracle interpreter; output is test input validated by the pinned chain",
+  "python": "3.13.16"
+ },
+ "identity": {
+  "instance_subject": "p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2",
+  "issuer_key_thumbprints": {
+   "admitter-one": "1bfd484b396512dadfef491786708152cc0245658f1a868cda047eb1e15338fe",
+   "admitter-two": "c78ba9d6ae8f4b19fd7dca2e93d0e08aee34b4a04814801764f12ec6425e9fd1",
+   "intruder-x": "4e27df34db7604a6f0d93778965190d2403a878c4c0e9a3de44397bd1c0208a5",
+   "volmax-owner": "e9b5393e2e7aab7d2629eee641999f2fdd68314928028daf66d85b8bb051e71a"
+  },
+  "log_identity_digest": "7dd7aff43fd2d5becf170822b4e600b928a1fb4031285142a7068a42fa9ebf75",
+  "owner_iss": "volmax-owner",
+  "ts_iss": "https://ts.example/volmax-s3-spike",
+  "ts_key_thumbprint": "87b27077c51ffcecdb7704b6ca8d960054c2e5b4f1cbab5ba0836dc9c9ca452b"
+ },
+ "layout": {
+  "0": "registration-policy TEST statement (non-target, sub urn:volmax:s3-test:registration-policy)",
+  "1": "trust-anchor TEST statement (non-target, sub urn:volmax:s3-test:trust-anchor)",
+  "2": "profile commitment",
+  "3": "instance commitment",
+  "4": "admission",
+  "5": "closure",
+  "6": "adjudication (Receipt target)"
+ },
+ "leading_statement_sha256": [
+  "c531a49b4aee7067f9bec70e294e4c9c06b642760f524b07090a3ceb4354885f",
+  "43e3965ec32b028f0fe2f4d46dbd73fbaf173b02c470bdde62f4be69e3b95a1d"
+ ],
+ "policy_test_key_thumbprint": "4e7d6361631d309c9d31ee1fa3f24b68d75d5ae80eba3077d064767bcd58ad5a",
+ "private_keys": "kept outside the repository, not recorded",
+ "sanity_checks": [
+  {
+   "check": "inst decodes canonically",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "iB is the exact toy S1 instance",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "key admitter-one matches pB.key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "key admitter-two matches pB.key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "key intruder-x matches pB.key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "key volmax-owner matches pB.key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "TS key and ts_iss reproduce inst.log_identity_digest",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "leading statement is a tagged COSE_Sign1 with an empty unprotected map",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "leading statement is a tagged COSE_Sign1 with an empty unprotected map",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "leading subs differ from the instance subject",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "adjudication wire refs are the shifted indices",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "adjudication wire preclosure digest equals the shifted closure digest",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "frozen A12-A14 digests carried unchanged",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "profile/instance/admission statements carry no index, so they equal the base fixture's leaves 0-2 byte for byte",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "closure and adjudication statements were re-signed for the shifted indices",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "the log is not the base fixture with leaves prepended: its root differs from every prefix-extension of the old leaf list",
+   "detail": "",
+   "ok": true
+  }
+ ],
+ "sources": {
+  "base_fixture": "spike/fixtures/volmax-owner",
+  "s2a_commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+  "s2b_commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89"
+ },
+ "status": "NON-NORMATIVE TEST FIXTURE ML-1 (synthetic authenticated mixed log); test keys only; not an S3 capture; the leading statements are synthetic and select no bootstrap",
+ "unchanged_vs_volmax_owner_fixture": {
+  "a12_a14": {
+   "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+   "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+   "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+  },
+  "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "inst_sha256": "5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+  "pB_sha256": "a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c"
+ }
+}

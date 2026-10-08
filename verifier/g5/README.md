@@ -14,3 +14,5 @@ Build (Rust 1.82.0, locked versions identical to the S2b `Cargo.lock`; `p10_repl
 cd verifier/g5 && cargo build --locked --offline && cargo test --locked --offline --lib
 ```
 Dependencies: `p10_replay` (path), `sha2 =0.10.8`, `serde_json =1.0.132` (both already locked by S2b). `spike/host/preflight.py` checks the lock against the S2b lock.
+
+r5: file names found on disk are taken as returned by the file system (no lossy conversion, no separator rewriting); a non-UTF-8 name or a name violating the component policy is `E_PATH_UNSAFE`. The pass line also carries `root`. See `tests/offline/g5/evidence/regression-r5/`.

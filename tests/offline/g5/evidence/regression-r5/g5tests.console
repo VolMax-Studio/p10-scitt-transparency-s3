@@ -1,0 +1,39 @@
+BASE                   ok    expected=PASS                         actual=PASS  chain_invoked=True
+N-P1a                  ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P1b                  ok    expected=E_LEAF_BYTES_MISMATCH        actual=E_LEAF_BYTES_MISMATCH  chain_invoked=False
+N-P2a                  ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P2b                  ok    expected=E_LEAF_BYTES_MISMATCH        actual=E_LEAF_BYTES_MISMATCH  chain_invoked=False
+N-P3                   ok    expected=E_PREFIX_FILE_UNMATCHED      actual=E_PREFIX_FILE_UNMATCHED  chain_invoked=False
+N-P4                   ok    expected=E_REQUEST_LEAF_DUPLICATE     actual=E_REQUEST_LEAF_DUPLICATE  chain_invoked=False
+N-P5                   ok    expected=E_FILE_NOT_INDEXED           actual=E_FILE_NOT_INDEXED  chain_invoked=False
+N-P6a                  ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P6b                  ok    expected=E_RECEIPT_BYTES_MISMATCH     actual=E_RECEIPT_BYTES_MISMATCH  chain_invoked=False
+N-D1                   ok    expected=PASS                         actual=PASS  chain_invoked=True
+X-S1                   ok    expected=E_SUBMISSION_MISMATCH        actual=E_SUBMISSION_MISMATCH  chain_invoked=False
+X-S2                   ok    expected=E_SUBMISSION_MISSING         actual=E_SUBMISSION_MISSING  chain_invoked=False
+X-P1                   ok    expected=E_PATH_UNSAFE                actual=E_PATH_UNSAFE  chain_invoked=False
+X-P2                   ok    expected=E_PATH_UNSAFE                actual=E_PATH_UNSAFE  chain_invoked=False
+X-P3                   ok    expected=E_PATH_UNSAFE                actual=E_PATH_UNSAFE  chain_invoked=False
+X-P4                   ok    expected=E_PATH_UNSAFE                actual=E_PATH_UNSAFE  chain_invoked=False
+X-P5                   ok    expected=E_PATH_UNSAFE                actual=E_PATH_UNSAFE  chain_invoked=False
+X-I1                   ok    expected=E_INDEX_MALFORMED            actual=E_INDEX_MALFORMED  chain_invoked=False
+X-I2                   ok    expected=E_INDEX_MALFORMED            actual=E_INDEX_MALFORMED  chain_invoked=False
+X-T1                   ok    expected=E_TARGET_BYTES_MISMATCH      actual=E_TARGET_BYTES_MISMATCH  chain_invoked=False
+X-R1                   ok    expected=E_RECEIPT_ABSENT             actual=E_RECEIPT_ABSENT  chain_invoked=False
+X-D1                   ok    expected=E_DETACHED_UNMATCHED         actual=E_DETACHED_UNMATCHED  chain_invoked=False
+X-X1                   ok    expected=E_REQUEST_DECODE             actual=E_REQUEST_DECODE  chain_invoked=False
+N-P7-pB-a              ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P7-pB-b              ok    expected=E_INDEX_ANCHOR_MISMATCH      actual=E_INDEX_ANCHOR_MISMATCH  chain_invoked=False
+N-P7-inst-a            ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P7-inst-b            ok    expected=E_INDEX_ANCHOR_MISMATCH      actual=E_INDEX_ANCHOR_MISMATCH  chain_invoked=False
+N-P7-iB-a              ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P7-iB-b              ok    expected=E_INDEX_ANCHOR_MISMATCH      actual=E_INDEX_ANCHOR_MISMATCH  chain_invoked=False
+N-P7-target-payload-a  ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P7-target-payload-b  ok    expected=E_INDEX_ANCHOR_MISMATCH      actual=E_INDEX_ANCHOR_MISMATCH  chain_invoked=False
+N-P7-request-a         ok    expected=E_FILE_HASH_MISMATCH         actual=E_FILE_HASH_MISMATCH  chain_invoked=False
+N-P7-request-b         ok    expected=E_INDEX_ANCHOR_MISMATCH      actual=E_INDEX_ANCHOR_MISMATCH  chain_invoked=False
+{"cases": 34, "all_ok": true, "chain_invocations": 2, "chain_invocations_expected": 2, "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd", "capture_base_json_sha256": "6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09"}
+
+real	0m36.235s
+user	0m25.770s
+sys	0m10.227s

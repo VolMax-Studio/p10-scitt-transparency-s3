@@ -30,7 +30,8 @@ fn main() -> ExitCode {
         Ok(p) => {
             let opt = |o: &Option<PathBuf>| o.as_ref().map(|p| jstr(&p.to_string_lossy())).unwrap_or_else(|| "null".into());
             println!(
-                "{{\"g5\":\"PASS\",\"anchor_checked\":{},\"prefix_leaves\":{},\"files_indexed\":{},\"request\":{},\"profile_artifact\":{},\"instance_commitment\":{},\"s1_instance\":{},\"retained_target_payload\":{}}}",
+                "{{\"g5\":\"PASS\",\"root\":{},\"anchor_checked\":{},\"prefix_leaves\":{},\"files_indexed\":{},\"request\":{},\"profile_artifact\":{},\"instance_commitment\":{},\"s1_instance\":{},\"retained_target_payload\":{}}}",
+                jstr(&p.root.to_string_lossy()),
                 p.anchor_checked,
                 p.prefix_leaves,
                 p.files_indexed,

@@ -1,6 +1,6 @@
 # Capture format and G5 correspondence checks (candidate)
 
-Status: **DRAFT CANDIDATE**, supporting `S3_PREREG_v0.1.md` r4 §6.1. Not ratified, not frozen, not adopted. Manifest coverage confers no normative authority. This document defines the layout of a capture directory and the checks of the S3-owned correspondence checker "G5". The candidate implementation is `verifier/g5/`; its test evidence is under `tests/offline/g5/` and is separate from the feasibility-spike evidence under `spike/`.
+Status: **DRAFT CANDIDATE**, supporting `S3_PREREG_v0.1.md` r5 §6.1. Not ratified, not frozen, not adopted. Manifest coverage confers no normative authority. This document defines the layout of a capture directory and the checks of the S3-owned correspondence checker "G5". The candidate implementation is `verifier/g5/`; its test evidence is under `tests/offline/g5/` and is separate from the feasibility-spike evidence under `spike/`.
 
 G5 is S3-owned acceptance code and part of the S3-C trusted computing base. Its role is **artifact correspondence only**. It implements no P10 rule: no configuration, identity, fingerprint, lifecycle, coverage, signature, Receipt or Merkle check, and it never parses or re-encodes a signed object. Those are checked by the frozen chain.
 
@@ -49,15 +49,15 @@ A JSON object with exactly these members, in any order:
 
 ## 4. Ordered checks and reason codes
 
-G5 runs the checks in this order and reports the first failure. A failure is an S3 acceptance failure of the packaging layer, `S3-FAIL(packaging)`, **not a P10 verdict**. G5 exit code: 0 pass, 30 fail, 2 usage error.
+G5 runs the checks in this order and reports the first failure. A failure is an S3 acceptance failure of the packaging layer, `S3-FAIL(packaging)`, **not a P10 verdict**. G5 exit code: 0 pass, 30 fail, 2 usage error. The pass line carries `root` (the checked capture directory), `anchor_checked`, and the absolute paths of the request, `pB`, `inst`, `iB` and the retained target payload; a downstream runner takes its inputs from these returned paths only.
 
 | # | Check | Reason code |
 |---|---|---|
 | C0 | external anchor (when supplied): SHA-256 of `capture.json` equals the anchor | `E_INDEX_ANCHOR_MISMATCH` |
 | C0 | `capture.json` / the capture directory cannot be read | `E_CAPTURE_UNREADABLE` |
 | C1 | `capture.json` parses with the frozen JSON type and has the exact shape of §3 (members, types, canonical indices, hex hashes, `origin` values, format id; duplicate members and numbers rejected) | `E_INDEX_MALFORMED` |
-| C2 | path policy for every indexed path; no symbolic link or special file anywhere in the capture | `E_PATH_UNSAFE`; `E_PATH_DUPLICATE` for a path indexed twice |
-| C3 | inventory: every indexed file exists; every regular file on disk (other than `capture.json`) is indexed | `E_FILE_MISSING`; `E_FILE_NOT_INDEXED` |
+| C2 | path policy for every indexed path (each component non-empty, not `.`/`..`, and free of `/`, backslash, NUL and ASCII control characters); no symbolic link or special file anywhere in the capture | `E_PATH_UNSAFE`; `E_PATH_DUPLICATE` for a path indexed twice |
+| C3 | inventory: every indexed file exists; every regular file on disk (other than `capture.json`) is indexed. File names found on disk are taken exactly as the file system returns them: no lossy conversion and no separator rewriting. A name that is not valid UTF-8, or that violates the component policy of C2 (for example a root file literally named `prefix\000001.cose`), is `E_PATH_UNSAFE` and is never normalized into another name | `E_FILE_MISSING`; `E_FILE_NOT_INDEXED`; `E_PATH_UNSAFE` |
 | C4 | every indexed file's SHA-256 equals the indexed value | `E_FILE_HASH_MISMATCH` |
 | C5 | index structure: prefix indices unique and exactly `0..n-1`; submissions unique and for known indices; every `origin="issuer"` leaf has a submission; target index in the prefix; receipts unique per index and exactly one selected, for the target index; detached payloads unique | `E_PREFIX_DUPLICATE_INDEX`, `E_PREFIX_NOT_CONTIGUOUS`, `E_SUBMISSION_INDEX_UNKNOWN`, `E_SUBMISSION_DUPLICATE`, `E_SUBMISSION_MISSING`, `E_TARGET_INDEX_UNKNOWN`, `E_RECEIPT_DUPLICATE`, `E_RECEIPT_SELECTION`, `E_DETACHED_DUPLICATE` |
 | C6 | `request.cbor` decodes with the pinned frozen `decode_request` | `E_REQUEST_DECODE` |
@@ -85,7 +85,7 @@ On any G5 failure none of the following may be invoked: the S2b replay (`replay_
 | N-P7 `pB` / `inst` / `iB` / retained target payload / `request.cbor` replaced by another valid object | a: file replaced, index unchanged; b: index rewritten, committed anchor unchanged | a `E_FILE_HASH_MISMATCH`; b `E_INDEX_ANCHOR_MISMATCH` |
 | N-D1 delivery order permuted, indices unchanged (positive control) | re-anchored derived request | G5 pass; the chain result and `tB` bytes are identical to the unpermuted run |
 
-"Re-anchored" means the index (and the anchor handed to G5) were rewritten to match the altered file, simulating a packaging layer that is internally consistent; it isolates the correspondence layer from the hash layer. Additional cases (submission mismatch/missing, symlink, path traversal, duplicate/number in `capture.json`, wrong target, absent Receipt, unmatched detached record, undecodable request) are listed with their results in `tests/offline/g5/`.
+"Re-anchored" means the index (and the anchor handed to G5) were rewritten to match the altered file, simulating a packaging layer that is internally consistent; it isolates the correspondence layer from the hash layer. Additional cases (submission mismatch/missing, symlink, path traversal, a root file named `prefix\000001.cose` beside the legitimate `prefix/000001.cose`, a non-UTF-8 file name, a control character in a file name, duplicate/number in `capture.json`, wrong target, absent Receipt, unmatched detached record, undecodable request) are listed with their results in `tests/offline/g5/`. The backslash case is a regression: an earlier inventory rewrote backslash to slash, merged the two names, never hashed the extra file and reported a pass (reproduced with the earlier binary, `tests/offline/g5/evidence/regression-r5/`).
 
 ## 7. Open points
 

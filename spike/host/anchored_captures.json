@@ -1,0 +1,4 @@
+[
+  {"id": "CAP-volmax-owner", "capture": "tests/offline/g5/fixtures/volmax-owner-capture", "expect": "spike/fixtures/volmax-owner/expect.json"},
+  {"id": "CAP-ML1", "capture": "tests/offline/ml/fixtures/ml1-capture", "expect": "tests/offline/ml/fixtures/ml1/expect.json"}
+]

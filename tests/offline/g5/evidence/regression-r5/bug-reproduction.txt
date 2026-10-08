@@ -1,0 +1,13 @@
+Reproduction of the inventory defect (executed before the fix, with the r4 binary, SHA-256 b77e814f4dc347bd24de7cc294dbcdd664de39806396d8249e3b45c2862007cd):
+
+  1. copy tests/offline/g5/fixtures/volmax-owner-capture to a scratch directory
+  2. create a root file literally named `prefix\000001.cose` (backslash in the name) containing "UNHASHED EXTRA FILE"
+  3. s3-g5 --capture <copy> --index-sha256 <anchor from MANIFEST.sha256>
+
+Output of the r4 binary (exit 0):
+  {"g5":"PASS","anchor_checked":true,"prefix_leaves":5,"files_indexed":23,...}
+
+Cause: the inventory rewrote `\` to `/`, so `prefix\000001.cose` and the legitimate `prefix/000001.cose` collapsed to one entry of a BTreeSet; the extra file was never hashed.
+
+After the fix (r5 binary, SHA-256 in g5-binary.sha256), the same capture gives (exit 30):
+  {"g5":"FAIL","reason":"E_PATH_UNSAFE","detail":"file name \"prefix\\\\000001.cose\" under \"\" is not a valid path component"}

@@ -1,0 +1,2 @@
+CAP-volmax-owner tests/offline/g5/fixtures/volmax-owner-capture spike/fixtures/volmax-owner/expect.json
+CAP-ML1 tests/offline/ml/fixtures/ml1-capture tests/offline/ml/fixtures/ml1/expect.json

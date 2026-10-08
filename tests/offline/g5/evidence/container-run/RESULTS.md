@@ -8,3 +8,5 @@ Candidate acceptance-code evidence. The G5 binary under test has SHA-256 `b77e81
 - N-D1 (leaves delivered in permuted order, indices unchanged): G5 pass; `tB` bytes identical to the unpermuted run and equal to the generator's independently built expected `tB` (`nd1-tB-comparison.txt`).
 
 Limits: all files of the materialization derive from one request (mechanics, not source independence); the harness is test scaffolding, not acceptance code; "stages not called" is shown by the driver not spawning the chain and by the absent output directory, not by tracing system calls.
+
+> Correction (r5 pass): the run had 31 cases = 2 passes (BASE, N-D1) + 29 expected failures; "all 28 G5 failures" above is a miscount. The raw outputs in this directory are unchanged. This r4 run used the r4 inventory, which was later found to merge a backslash-named extra file with a legitimate path; see `../regression-r5/`.

@@ -1,6 +1,6 @@
 # S3-C runner map, S3-owned glue, and supported-runtime contract
 
-Status: DRAFT CANDIDATE, supporting `S3_PREREG_v0.1.md` r4. Not normative, not frozen. Sections 1-7 were derived by reading the frozen sources (S2b `8eaa91c`, S2a `741d56d`); the experimental spike under `spike/` later executed the traced path, and its executed findings are recorded in §8 and in `spike/FEASIBILITY_REPORT.md`, clearly separated from source inspection. Manifest coverage confers no normative authority.
+Status: DRAFT CANDIDATE, supporting `S3_PREREG_v0.1.md` r5. Not normative, not frozen. Sections 1-7 were derived by reading the frozen sources (S2b `8eaa91c`, S2a `741d56d`); the experimental spike under `spike/` later executed the traced path, and its executed findings are recorded in §8 and in `spike/FEASIBILITY_REPORT.md`, clearly separated from source inspection. Manifest coverage confers no normative authority.
 
 ## 1. Implementation acceptance is not capture acceptance
 
@@ -104,3 +104,7 @@ Executed in a Claude Code cloud container (Ubuntu 24.04, x86_64, gcc 13.3.0, Pyt
 - `lake`, `libleanshared.so` and the version string of the Lean directory actually used are required against the S1 manifest.
 - The glue reads S2a runner output strictly; an error object, malformed result or missing `evidence_repr` is an infrastructure failure, never a semantic `false` or an A15 REJECT.
 - Post-S2a controls compare result, code and rule exactly (and the T5 detail text and the presence of the real helper's binary hash where the helper is required).
+
+## 10. Anchored capture path (r5; `spike/host/run_host.sh` step 6)
+
+Candidate G5 runs on each capture listed in `spike/host/anchored_captures.json` with the external anchor taken from `MANIFEST.sha256`; the runner stops if the anchor is absent, if G5 fails (the chain is not called for that capture), or if the G5 result is not a PASS with `anchor_checked=true`. `make_capture_cases.py` then builds the chain inputs from the paths G5 returned for the capture it checked, refuses a path outside that capture root and an expectation file inside it, and has no fallback to any fixture directory (expectations are read for comparison only). The ratified runner controls are run directly in a separate step with their own bound inputs. Executed: both test captures (`volmax-owner` five leaves; ML-1 seven leaves) pass the whole chain; a deliberately tampered ML-1 capture stopped the host run at G5 with `E_FILE_HASH_MISMATCH` before any capture chain run. Evidence: `spike/evidence/anchored-capture-container/`.

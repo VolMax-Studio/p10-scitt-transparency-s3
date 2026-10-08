@@ -1,0 +1,475 @@
+{
+ "summary": {
+  "cases": 34,
+  "all_ok": true,
+  "chain_invocations": 2,
+  "chain_invocations_expected": 2,
+  "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+  "capture_base_json_sha256": "6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09"
+ },
+ "results": [
+  {
+   "id": "BASE",
+   "expected": "PASS",
+   "actual": "PASS",
+   "g5_exit": 0,
+   "detail": null,
+   "ok": true,
+   "chain_invoked": true,
+   "chain": {
+    "exit": 0,
+    "pass": true,
+    "checks": [
+     {
+      "check": "s2b-result",
+      "detail": "",
+      "ok": true
+     },
+     {
+      "check": "target-extracted-from-authenticated-target",
+      "detail": "exit=0 target={'leaf_index': 4, 'sub': 'p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2', 'payload_len': 7316, 'payload_equals_retained_file': True}",
+      "ok": true
+     },
+     {
+      "check": "s2a-outcome",
+      "detail": "('accept', None) vs ('accept', None)",
+      "ok": true
+     },
+     {
+      "check": "s1-e2e",
+      "detail": "some vs some",
+      "ok": true
+     },
+     {
+      "check": "post-s2a-result-code-rule",
+      "detail": "BINDING_MATCH/BindingMatch/None",
+      "ok": true
+     },
+     {
+      "check": "no-infrastructure-failure",
+      "detail": "",
+      "ok": true
+     }
+    ],
+    "post": {
+     "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+     "code": "BindingMatch",
+     "detail": "T1-T6 and A1-A15 hold",
+     "result": "BINDING_MATCH",
+     "rows": {
+      "A1": "match",
+      "A10": "match",
+      "A11": "match",
+      "A12": "match",
+      "A13": "match",
+      "A14": "match",
+      "A15": "match",
+      "A2": "match",
+      "A3": "match",
+      "A4": "match",
+      "A5": "match",
+      "A6": "match",
+      "A7": "match",
+      "A8": "match",
+      "A9": "match"
+     },
+     "rule": null
+    }
+   }
+  },
+  {
+   "id": "N-P1a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "prefix[1] (prefix/000001.cose): sha256 8ab6a4a2424396ea8b27dfd20d03b0eb679155873bfcfdd3a26b9a01266334f5 != indexed 09f489943a6e3e6ed095c8dd8b3b8be485f434385c9051886c72e3b6dd061f7a",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P1b",
+   "expected": "E_LEAF_BYTES_MISMATCH",
+   "actual": "E_LEAF_BYTES_MISMATCH",
+   "g5_exit": 30,
+   "detail": "index 1: request.cbor bytes differ from prefix/000001.cose",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P2a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "request (request.cbor): sha256 d9fbf7c9d156a8e081c0d91128662538622c03e4ade74d09ba4efaef6652f7e8 != indexed 6e4dd60f97b908c0b12d1da249f12807a9da175f49bdea888bc5708de7055e7d",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P2b",
+   "expected": "E_LEAF_BYTES_MISMATCH",
+   "actual": "E_LEAF_BYTES_MISMATCH",
+   "g5_exit": 30,
+   "detail": "index 1: request.cbor bytes differ from prefix/000001.cose",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P3",
+   "expected": "E_PREFIX_FILE_UNMATCHED",
+   "actual": "E_PREFIX_FILE_UNMATCHED",
+   "g5_exit": 30,
+   "detail": "capture file for index 2 has no record in request.cbor",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P4",
+   "expected": "E_REQUEST_LEAF_DUPLICATE",
+   "actual": "E_REQUEST_LEAF_DUPLICATE",
+   "g5_exit": 30,
+   "detail": "request.cbor carries 2 records for index 2",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P5",
+   "expected": "E_FILE_NOT_INDEXED",
+   "actual": "E_FILE_NOT_INDEXED",
+   "g5_exit": 30,
+   "detail": "prefix/000099.cose",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P6a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "receipt[4] (receipts/000004.receipt.cbor): sha256 b3e04c3347d5d58c6f49f1cbd256c09db2ffbfef023672a73152f3b42c22e160 != indexed c1e396deb95104e4ae4d68548df4d757ef041b3736b58527312a1ee598c8ea11",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P6b",
+   "expected": "E_RECEIPT_BYTES_MISMATCH",
+   "actual": "E_RECEIPT_BYTES_MISMATCH",
+   "g5_exit": 30,
+   "detail": "request.cbor Receipt differs from receipts/000004.receipt.cbor",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-D1",
+   "expected": "PASS",
+   "actual": "PASS",
+   "g5_exit": 0,
+   "detail": null,
+   "ok": true,
+   "chain_invoked": true,
+   "chain": {
+    "exit": 0,
+    "pass": true,
+    "checks": [
+     {
+      "check": "s2b-result",
+      "detail": "",
+      "ok": true
+     },
+     {
+      "check": "target-extracted-from-authenticated-target",
+      "detail": "exit=0 target={'leaf_index': 4, 'sub': 'p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2', 'payload_len': 7316, 'payload_equals_retained_file': True}",
+      "ok": true
+     },
+     {
+      "check": "tB-actual-equals-tB.expected (comparison only)",
+      "detail": "dc9ec4edae2a72f8 vs dc9ec4edae2a72f8",
+      "ok": true
+     },
+     {
+      "check": "s2a-outcome",
+      "detail": "('accept', None) vs ('accept', None)",
+      "ok": true
+     },
+     {
+      "check": "s1-e2e",
+      "detail": "some vs some",
+      "ok": true
+     },
+     {
+      "check": "post-s2a-result-code-rule",
+      "detail": "BINDING_MATCH/BindingMatch/None",
+      "ok": true
+     },
+     {
+      "check": "no-infrastructure-failure",
+      "detail": "",
+      "ok": true
+     }
+    ],
+    "post": {
+     "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+     "code": "BindingMatch",
+     "detail": "T1-T6 and A1-A15 hold",
+     "result": "BINDING_MATCH",
+     "rows": {
+      "A1": "match",
+      "A10": "match",
+      "A11": "match",
+      "A12": "match",
+      "A13": "match",
+      "A14": "match",
+      "A15": "match",
+      "A2": "match",
+      "A3": "match",
+      "A4": "match",
+      "A5": "match",
+      "A6": "match",
+      "A7": "match",
+      "A8": "match",
+      "A9": "match"
+     },
+     "rule": null
+    }
+   }
+  },
+  {
+   "id": "X-S1",
+   "expected": "E_SUBMISSION_MISMATCH",
+   "actual": "E_SUBMISSION_MISMATCH",
+   "g5_exit": 30,
+   "detail": "index 1: submitted bytes differ from the exported leaf prefix/000001.cose",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-S2",
+   "expected": "E_SUBMISSION_MISSING",
+   "actual": "E_SUBMISSION_MISSING",
+   "g5_exit": 30,
+   "detail": "issuer-originated prefix index 3 has no submission file",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-P1",
+   "expected": "E_PATH_UNSAFE",
+   "actual": "E_PATH_UNSAFE",
+   "g5_exit": 30,
+   "detail": "prefix/link.cose: symbolic link",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-P2",
+   "expected": "E_PATH_UNSAFE",
+   "actual": "E_PATH_UNSAFE",
+   "g5_exit": 30,
+   "detail": "provenance[1]: unsafe path \"../escape\"",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-P3",
+   "expected": "E_PATH_UNSAFE",
+   "actual": "E_PATH_UNSAFE",
+   "g5_exit": 30,
+   "detail": "file name \"prefix\\\\000001.cose\" under \"\" is not a valid path component",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-P4",
+   "expected": "E_PATH_UNSAFE",
+   "actual": "E_PATH_UNSAFE",
+   "g5_exit": 30,
+   "detail": "non-UTF-8 file name \"\\xFF.cose\" under \"prefix\"",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-P5",
+   "expected": "E_PATH_UNSAFE",
+   "actual": "E_PATH_UNSAFE",
+   "g5_exit": 30,
+   "detail": "file name \"new\\nline.cose\" under \"prefix\" is not a valid path component",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-I1",
+   "expected": "E_INDEX_MALFORMED",
+   "actual": "E_INDEX_MALFORMED",
+   "g5_exit": 30,
+   "detail": "capture.json: duplicate member name \"format\" at line 4 column 9",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-I2",
+   "expected": "E_INDEX_MALFORMED",
+   "actual": "E_INDEX_MALFORMED",
+   "g5_exit": 30,
+   "detail": "capture.json: JSON numbers are forbidden at line 26 column 13",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-T1",
+   "expected": "E_TARGET_BYTES_MISMATCH",
+   "actual": "E_TARGET_BYTES_MISMATCH",
+   "g5_exit": 30,
+   "detail": "request.cbor target differs from prefix/000004.cose",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-R1",
+   "expected": "E_RECEIPT_ABSENT",
+   "actual": "E_RECEIPT_ABSENT",
+   "g5_exit": 30,
+   "detail": "request.cbor carries no selected Receipt",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-D1",
+   "expected": "E_DETACHED_UNMATCHED",
+   "actual": "E_DETACHED_UNMATCHED",
+   "g5_exit": 30,
+   "detail": "request.cbor detached payload for index 4 has no capture file",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "X-X1",
+   "expected": "E_REQUEST_DECODE",
+   "actual": "E_REQUEST_DECODE",
+   "g5_exit": 30,
+   "detail": "WrongType { at: \"envelope\", expected: \"array\", found: \"map\" }",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-pB-a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "material.profile_artifact (material/pB.json): sha256 7d840d07184049cb9ca97e68d267ab3be2cb53eed7a00e6f8c866323e03fa9ad != indexed a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-pB-b",
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "g5_exit": 30,
+   "detail": "sha256(capture.json) = 81a30007d405a63232660044a56ee540490600108f51ee632ac2fd3fb7c306f3 but the anchor is 6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-inst-a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "material.instance_commitment (material/inst.bin): sha256 24316063d808800e66c610d3cbaeeb2010aaa76ea5fdfc59b41a0a5d0833e95d != indexed 5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-inst-b",
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "g5_exit": 30,
+   "detail": "sha256(capture.json) = 382be8b81afa95b2602f6b2081f6ac068de126e653432db6cabade786599494c but the anchor is 6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-iB-a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "material.s1_instance (material/iB.json): sha256 d5788855d7521bc44d6585e3e0b1e0f02858b5928f3bd080acf4a72f18783b85 != indexed 62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-iB-b",
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "g5_exit": 30,
+   "detail": "sha256(capture.json) = 37827bf78b5a943f61667db7c9c1ab305807f393eb41edb9492f9b478db34410 but the anchor is 6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-target-payload-a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "material.retained_target_payload (material/target_payload.json): sha256 3c55afb22b4dc8a7c13614ad78d70c2d90eb7000388e134f284c8f1f748f1fe2 != indexed ca8fbce856544615eb6a0c8c73b38a4a40662a01b38b7489fd1be474d1d03181",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-target-payload-b",
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "g5_exit": 30,
+   "detail": "sha256(capture.json) = 67396e5474e807340c192aac7e57aa72ac0a9adb53f0944bbfb3d8fc9f44c352 but the anchor is 6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-request-a",
+   "expected": "E_FILE_HASH_MISMATCH",
+   "actual": "E_FILE_HASH_MISMATCH",
+   "g5_exit": 30,
+   "detail": "request (request.cbor): sha256 ed3a26b4bb361ddabaea685d019036c46c2f688a74db100be825a84c7d3c9520 != indexed 6e4dd60f97b908c0b12d1da249f12807a9da175f49bdea888bc5708de7055e7d",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  },
+  {
+   "id": "N-P7-request-b",
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "g5_exit": 30,
+   "detail": "sha256(capture.json) = 93f756c7f748fd414da0598c36c4fa4579f0dd169b661485870c00a46310010c but the anchor is 6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09",
+   "ok": true,
+   "chain_invoked": false,
+   "chain_output_dir_exists": false
+  }
+ ]
+}

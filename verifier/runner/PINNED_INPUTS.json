@@ -1,0 +1,52 @@
+{
+ "a12_a14_source": "S2b frozen/StatementPayloadSchemaV0_r9_FREEZE.txt (read at run time; not duplicated here)",
+ "lean": {
+  "lake_sha256": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2",
+  "lean_pinned_by": [
+   "S2a manifest lean_toolchain_artifact_digest",
+   "S1 manifest lean_toolchain_artifact_sha256"
+  ],
+  "lean_sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "leanchecker_sha256": "612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33",
+  "libleanshared_sha256": "0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d",
+  "package": "conda-forge lean4 4.33.0 build h6c1889d_0",
+  "those_three_pinned_by": "S1 manifest",
+  "toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "python": "interpreter version recorded in run-info.json, not pinned (OPEN)",
+ "reuse": {
+  "spike/glue/s3_spike_chain.py": "functions copied verbatim into s3c_chain.py (marked REUSED); this file is pinned so the harness can compare source text",
+  "spike/host/preflight.py": "reused unchanged (candidate TCB, requires review)",
+  "spike/s3-entry": "reused unchanged (candidate TCB, requires review)",
+  "verifier/g5": "candidate G5 (candidate TCB)"
+ },
+ "rust": {
+  "toolchain": "1.82.0"
+ },
+ "s1": {
+  "commit": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1",
+  "tag": "v0.1.0-s1-ratified",
+  "verifier_manifest_sha256": "06bf9129bf480c79ed5281ec2e944ac5613d1c340552ce5a415f5bf4c8965907"
+ },
+ "s2a": {
+  "commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+  "tag": "v0.1.0-s2a-ratified"
+ },
+ "s2b": {
+  "commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+  "tag": "v0.1.0-s2b-complete"
+ },
+ "status": "CANDIDATE pinned inputs for the candidate S3-C runner (non-normative; not a freeze)",
+ "tcb_sources": {
+  "spike/glue/s3_spike_chain.py": "0f8a8788a6c67cf520ba80539817273517d982155ab555f45e2d71286f8f79ea",
+  "spike/host/preflight.py": "8b95eadbedc42ce53c303514962601fa6ae630da123208a0a9464bc8c2b83c5d",
+  "spike/s3-entry/Cargo.lock": "d0283512f34ae0c49de4b80b86e25f77ad58735b619dc34f43478d155fef11eb",
+  "spike/s3-entry/Cargo.toml": "b729e1f4b1d9d1d785fd093dca02b89256ef02b598347c327bc430e0958d64b4",
+  "spike/s3-entry/rust-toolchain.toml": "8e0c5bd6d955bff9fcb7d2028bc78d6cd5c66c74ea8586a9a56afe4c03939af4",
+  "spike/s3-entry/src/main.rs": "a6bb33d4456ff86ac5c0d10d19f0afcfabe9c10a21ab4eef7371322bf2be4ec8",
+  "verifier/g5/Cargo.lock": "1551158b9ed9969674b7d8c022c98ae339d5852d287dba81240baf651fbafe99",
+  "verifier/g5/Cargo.toml": "fd7e2a49fc96a26a745c096e8e221cc8c0d811c1b3797c4d1db48230de6b9eff",
+  "verifier/g5/src/lib.rs": "ab5634a8e30a3d10de49a30639559e389fedaf5e32d22f34ef8eb3d9d318692f",
+  "verifier/g5/src/main.rs": "c63b9bf9209aa2ce66511fe263fda65537cee7b27728afde759bb277666ec96d"
+ }
+}

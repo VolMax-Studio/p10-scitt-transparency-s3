@@ -69,7 +69,7 @@ Only `BINDING_MATCH` means that the S3-C oracle accepted the capture. HALT, REJE
 ## 5. Strictness and failure handling
 
 - Stage output is read strictly: the S2B `result.json` must be one JSON object with a known `status`; S2A output must be exactly one JSON line per job, each an object with the expected `op`, with no `error` member; `tb`/`inst`/`pb` need `decode` and `reencode_identical` both `true`; `cov` needs an outcome in `accept|reject|halt`, a string repr and, for `accept`, a 64-hex evidence digest; `e2e` needs an explicit `some` (with evidence repr) or `none`. Any deviation is `S3-FAIL(infrastructure)`; an unreadable `e2e` is never turned into a false value.
-- post-S2a codes `ClosureAtUnavailable`, `ClosureAtInconsistent` and `NOT_EVIDENCE` are infrastructure failures; a post-S2a HALT with a P10 rule is a HALT.
+- post-S2a codes `ClosureAtUnavailable`, `ClosureAtInconsistent` and `NOT_EVIDENCE` are infrastructure failures; a post-S2a HALT with a P10 rule is a HALT. A closureAt answer is accepted only if the launcher attested a 64-hex helper binary hash on its stderr (`CLOSUREAT_UNATTESTED` otherwise): the real helper must have run.
 - A missing launcher, missing pinned Lean, failed build or non-zero exit of the S2A runner or closureAt batch is `S3-FAIL(infrastructure)` with the stderr tail recorded.
 - No retry, no fallback parser, no substitution of expected or retained outputs. A failed run still writes `verdict.json` and `run-info.json` (when `--out` is usable).
 

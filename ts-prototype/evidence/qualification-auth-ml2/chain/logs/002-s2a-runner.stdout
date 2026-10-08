@@ -1,0 +1,5 @@
+{"op":"tb","decode":true,"reencode_identical":true}
+{"op":"inst","decode":true,"reencode_identical":true}
+{"op":"pb","decode":true,"reencode_identical":true}
+{"op":"cov","result":{"outcome":"accept","evidence_digest":"a8cf4ba58abe5f0245b1f3d6e1b5b4c8e718ce8dfdfb1137ec1f3a33e5e0fab0","repr":"P10S2.CoverageOutcome.accept (P10.S1.Evidence.obs false none)"}}
+{"op":"e2e","result":"some","evidence_repr":"P10.S1.Evidence.obs false none"}

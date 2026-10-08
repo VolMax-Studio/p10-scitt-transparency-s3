@@ -1,0 +1,183 @@
+{
+ "bootstrap": {
+  "issuer_table_sha256": "e1fffa936136135da54c518328b55cb4915cf858dadd73860ff3c3f77d03d1ba",
+  "operator_note_subject": "urn:volmax:s3:operator-note",
+  "policy_declaration_sha256": "c9ac82ddc94da80f87c68547e5ca84b0f0c98da80264614b8df9fb169818763e",
+  "policy_subject": "urn:volmax:s3:policy-declaration",
+  "verification_material_declaration_sha256": "c09e60ab6d7f36107245e3f8d5fa272eb8859b3f64c4f9cd39f26eaec8f27e68",
+  "verification_material_subject": "urn:volmax:s3:verification-material-declaration"
+ },
+ "facade_configuration": {
+  "batch": "1:10ms",
+  "checkpoint_interval": "200ms",
+  "fetch_timeout": "10s",
+  "max_leaf_input": 65535,
+  "public_port": 19901,
+  "publish_timeout": "30s",
+  "register_port": 19900
+ },
+ "file_sha256": {
+  "config/PUBLIC_META.json": "1317859e9fd3fd2e5418a1109d72235b0144035d2e5f5ff3f7804e6e499e9f88",
+  "config/bootstrap/policy-declaration.json": "c9ac82ddc94da80f87c68547e5ca84b0f0c98da80264614b8df9fb169818763e",
+  "config/bootstrap/verification-material-declaration.json": "c09e60ab6d7f36107245e3f8d5fa272eb8859b3f64c4f9cd39f26eaec8f27e68",
+  "config/expect.json": "cf03db9faa8051f4644b76911728e4b1becbb65eea7d39e956259bd9bcbbabd7",
+  "config/iB.json": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "config/inst.bin": "7f38622b51abebfed5374c3aefd7ded77f169f04cf6e02c00ecdad4d39d6eaaf",
+  "config/pB.json": "ac4895511c903e6836c471d197507793566f7d822c49aa5a02a6e0581e7a26ec",
+  "config/public/admitter-one.public.cose_key.cbor": "d670cdd06104880626929398bb2bfad40103801a7ba156393ef9d1cac6172f62",
+  "config/public/admitter-two.public.cose_key.cbor": "43e39148af008041703b0ab2f5cd86071e94b3bc1364d319bfff9a4ea8bd9ac1",
+  "config/public/intruder-x.public.cose_key.cbor": "17b4ef8d400dc85b201f3ecf489a451e1216b155d88f601048ed67c29ef1f25d",
+  "config/public/issuers.json": "e1fffa936136135da54c518328b55cb4915cf858dadd73860ff3c3f77d03d1ba",
+  "config/public/operator.public.cose_key.cbor": "f7cae36222deeaccc01ed6cf2508d7d5f9e7d8e323c17ab2f3a70a264620a45e",
+  "config/public/ts.public.cose_key.cbor": "6bc5b0ae47f8726379ffbfb0e0858fe10ef74ba5b8801edeba0b3d3b89944056",
+  "config/public/volmax-owner.public.cose_key.cbor": "63759d03f57a34801b4405f54c6dd9a2ab6bf47e120fa8660f548e202dbce512",
+  "operator-staging/note.cose": "7cd73a51bb2baaa7773cd2eaed2c99869598500f641c5d2905b316ec949979cb"
+ },
+ "identity": {
+  "instance_subject": "p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2",
+  "issuer_key_thumbprints": {
+   "admitter-one": "d670cdd06104880626929398bb2bfad40103801a7ba156393ef9d1cac6172f62",
+   "admitter-two": "43e39148af008041703b0ab2f5cd86071e94b3bc1364d319bfff9a4ea8bd9ac1",
+   "intruder-x": "17b4ef8d400dc85b201f3ecf489a451e1216b155d88f601048ed67c29ef1f25d",
+   "volmax-owner": "63759d03f57a34801b4405f54c6dd9a2ab6bf47e120fa8660f548e202dbce512"
+  },
+  "log_identity_digest": "6a510bcf3a122ae9af2714939d60a6a4e997ff9751836024dd480ebd60cd37c9",
+  "note_vkey": "volmax-s3/ts+50425c42+ASw9Mfm5hEfaIJgQ06LI7FHWIyKZb0wvk/uli2w4MiRt",
+  "operator_iss": "volmax-s3-operator",
+  "operator_key_thumbprint": "f7cae36222deeaccc01ed6cf2508d7d5f9e7d8e323c17ab2f3a70a264620a45e",
+  "origin": "volmax-s3/ts",
+  "owner_iss": "volmax-owner",
+  "profile_digest": "ac4895511c903e6836c471d197507793566f7d822c49aa5a02a6e0581e7a26ec",
+  "receipt_key_thumbprint": "6bc5b0ae47f8726379ffbfb0e0858fe10ef74ba5b8801edeba0b3d3b89944056",
+  "ts_iss": "https://ts.example/volmax-s3"
+ },
+ "layout": {
+  "adjudication_index": 7,
+  "adjudication_refs": [
+   2,
+   4,
+   6
+  ],
+  "admission_index": 5,
+  "closure_index": 6,
+  "instance_index": 4,
+  "layout": [
+   {
+    "index": 0,
+    "what": "bootstrap"
+   },
+   {
+    "index": 1,
+    "what": "bootstrap"
+   },
+   {
+    "index": 2,
+    "what": "profile"
+   },
+   {
+    "index": 3,
+    "what": "note"
+   },
+   {
+    "index": 4,
+    "what": "instance"
+   },
+   {
+    "index": 5,
+    "what": "admission"
+   },
+   {
+    "index": 6,
+    "what": "closure"
+   },
+   {
+    "index": 7,
+    "what": "adjudication"
+   }
+  ],
+  "leaves": 8
+ },
+ "log_engine": {
+  "antispam": false,
+  "commit": "6bca8e8d5e23c9941f2b8a08f512b373f7131730",
+  "name": "github.com/transparency-dev/tessera",
+  "storage": "posix",
+  "version": "v1.0.4",
+  "witnesses": false
+ },
+ "notes": [
+  "config/PUBLIC_META.json carries the generator's generic status line ('NON-NORMATIVE EXPLORATORY CONFIGURATION; fresh test keys only; not S3 live-capture evidence'); it is the unmodified output of the pinned gen_config.py and does not describe adoption: nothing here is adopted. The keys it lists are the candidate key set, generated fresh and not used in any run",
+  "config/expect.json is an expectation for the test harness only; no stage reads it",
+  "the private keys of this candidate set are outside the repository (custody); the thumbprints, bootstrap payload hashes, profile digest, instance commitment, subject and LogIdentityV0 above depend on that exact key set and change if the keys are regenerated",
+  "the bootstrap declarations are published bytes; they confer no key authority and are not read by the facade"
+ ],
+ "pins": {
+  "executables": {
+   "go_binaries_recipe": "CGO_ENABLED=0 go build -trimpath -buildvcs=false ./cmd/... from the facade source pin",
+   "go_binaries_sha256_from_that_recipe": {
+    "s3-capture": "1ecde5e4bc10ad8587782f9ab74b070aed0665c800c261972bab5e69cc1fab4d",
+    "s3-facade": "7c71d8615bc3d46152943e47bf0c7555bc310e93ba9f67b69fd7bfb9e3a0ec40",
+    "s3-keygen": "fd829bd6e250b1c9294dd952d59bc1e7db2adaed9e028e41b2ee116c684e7532"
+   },
+   "supplied_artifacts": {
+    "entry": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+    "g5": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd"
+   },
+   "supplied_in": "verifier/artifacts/"
+  },
+  "facade_and_tooling_source": {
+   "check": "git diff --quiet 10638c239b27d7c87b238a6f387c95882162c4dc HEAD -- ts-prototype/cmd ts-prototype/internal ts-prototype/producer ts-prototype/scripts ts-prototype/go.mod ts-prototype/go.sum",
+   "commit": "10638c239b27d7c87b238a6f387c95882162c4dc",
+   "file_list_sha256": "c360a25068c652b345b6325695cb16414b47afbe59c7b9ed0f3791992952a7d8",
+   "files": 34,
+   "scope": "ts-prototype/{cmd,internal,producer,scripts,go.mod,go.sum}"
+  },
+  "go": "go version go1.24.7 linux/amd64",
+  "lean": {
+   "lake_sha256": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2",
+   "lean_pinned_by": [
+    "S2a manifest lean_toolchain_artifact_digest",
+    "S1 manifest lean_toolchain_artifact_sha256"
+   ],
+   "lean_sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+   "leanchecker_sha256": "612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33",
+   "libleanshared_sha256": "0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d",
+   "package": "conda-forge lean4 4.33.0 build h6c1889d_0",
+   "those_three_pinned_by": "S1 manifest",
+   "toolchain": "leanprover/lean4:v4.33.0"
+  },
+  "runner_source_sha256": {
+   "PINNED_INPUTS.json": "3a1550f8230a70431ca8c7d4905db9d486b2ca7fc6cde1bbc66265ced7ec9912",
+   "s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494",
+   "s3c_verify.py": "2abec1f4c22c32174f96519ab8f1650a420d7f13847418e4bb1f443df1724d14"
+  },
+  "rust": {
+   "toolchain": "1.82.0"
+  },
+  "s1": {
+   "commit": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1",
+   "tag": "v0.1.0-s1-ratified",
+   "verifier_manifest_sha256": "06bf9129bf480c79ed5281ec2e944ac5613d1c340552ce5a415f5bf4c8965907"
+  },
+  "s2a": {
+   "commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+   "tag": "v0.1.0-s2a-ratified"
+  },
+  "s2b": {
+   "commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+   "tag": "v0.1.0-s2b-complete"
+  }
+ },
+ "receipt_payload": "detached",
+ "status": "CANDIDATE DEPLOYMENT DEFINITION (public part). Proposals prepared for review; not adopted, not frozen, not signed. Key-dependent values below belong to the candidate key set only.",
+ "unchanged_frozen_inputs": {
+  "a12_a14": {
+   "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+   "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+   "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+  },
+  "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "request_id": "7265712d30303031",
+  "verifier_manifest_digest": "f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46"
+ }
+}

@@ -152,3 +152,14 @@ F0-F8 all OK for the eight registrations (export == `LeafEncodeV0(submitted)` by
 G5 PASS (anchor checked, 8 leaves, 53 files; the note is recorded as `origin="ts"` with no submission file, as for the bootstrap leaves). Chain, network-isolated: S2b Verified (subject observations at 2, 4, 5, 6, 7 all signature-verified, rows 0 and 3 non-subject), S2a accept, S1 e2e `some`, `BINDING_MATCH`/`BindingMatch`, A1-A15 `match`; `tB.actual == tB.expected` exactly (`304c16329c93be9a…`); run PASS.
 
 Not shown: concurrent writers, retries inside a producer-driven run, issuer-signature verification by the facade, policy enforcement; the single operator insert exercises one divergence only. Nothing is adopted.
+
+## G. Issuer authentication in the facade (r15; exploratory)
+
+The statements in sections A-F describe the builds of their time: those facades verified no issuer signatures. From source commit `10638c2` the facade authenticates every statement (ES256, preconfigured issuer table, detached-payload transport) before any append, journal `intent`, duplicate answer or Receipt; interface and rules were written first (`../spec/registration-interface.md`, commit `77c31b2`).
+
+- Unit tests (`evidence/auth-regression/go-test.out`): valid, tampered signature/header/payload, identity-to-key mismatch, unknown issuer, unsupported algorithms (ES384, ES512, EdDSA, RS256, missing, non-integer), unsupported labels (crit, x5chain, x5t, unknown), kid cases, detached cases (valid, missing, wrong, empty, unexpected), re-ordered protected map signed as submitted, and refusals to load a bad issuer table.
+- Facade tests T1-T8, chaos seed 1 (30 statements), public-read timeouts (`evidence/auth-regression/`): all PASS with correctly signed statements through the real capture client. T8 (new): every refusal appends nothing, journals no intent, stores and issues no Receipt, leaves the checkpoint size unchanged; a duplicate with a bad signature or without its payload is not answered; a detached payload sent by the capture client is used for verification only (exported leaf equals the submitted bytes, payload not in the log); the facade refuses to start without a valid table.
+- One exploratory eight-leaf qualification run through the public capture path, prototype checks, G5, the unchanged chain and the candidate runner: `evidence/qualification-auth-ml2/QUALIFICATION.md`.
+
+Limits: authentication, not authorization; the table is operator configuration on the facade host; no operator independence; ES256 only; no claim of RFC 9943 or SCRAPI compliance.
+

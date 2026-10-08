@@ -1,0 +1,152 @@
+{
+ "capture": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/capture",
+ "chain_info": {
+  "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "closureat_helper-binary-sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "closureat_helper-source-sha256": "bcf18c4eccdfcf5176a16df62980c1760ad529351bce5ba826701d8ae919313f",
+  "closureat_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "closureat_lean-toolchain": "leanprover/lean4:v4.33.0",
+  "s2a_helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+  "s2a_helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+  "s2a_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "s2a_lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/usr/bin/python3",
+    "-B",
+    "/home/user/p10-scitt-transparency-s3/spike/host/preflight.py",
+    "--s1",
+    "/home/user/volmax-studio/s1",
+    "--s2a",
+    "/home/user/volmax-studio/s2a",
+    "--s2b",
+    "/home/user/volmax-studio/s2b-8eaa91c",
+    "--out",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/preflight.json",
+    "--lean-bin-dir",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "preflight",
+   "seconds": 2.82,
+   "stderr": "logs/001-preflight.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-preflight.stdout",
+   "stdout_sha256": "e4335fc54f8167af53f371ffdb4ca7e61de34c97dac28830d2b5e739e707e86c"
+  },
+  {
+   "argv": [
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/bin/g5",
+    "--capture",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot",
+    "--index-sha256",
+    "46d28d117759c7844752b520ce5d2fc55bac10b4650195c608e264415cbb5ea2"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "g5",
+   "seconds": 0.01,
+   "stderr": "logs/002-g5.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-g5.stdout",
+   "stdout_sha256": "dd161fbde0c905e30f41803af5293323717388986329a28f4c3873aae1490357"
+  },
+  {
+   "argv": [
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/bin/entry",
+    "verify",
+    "--request",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/request.cbor",
+    "--out",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/s2b",
+    "--expect-target-payload",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "s2b-entry",
+   "seconds": 0.04,
+   "stderr": "logs/003-s2b-entry.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/003-s2b-entry.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 4,
+   "name": "s2a-runner",
+   "seconds": 16.57,
+   "stderr": "logs/004-s2a-runner.stderr",
+   "stderr_sha256": "5e5d43cc7b771441645452b622e6d2ded253884cd8a2e220b5d9fb7cd2a8fb20",
+   "stdout": "logs/004-s2a-runner.stdout",
+   "stdout_sha256": "361d0aa7a4d18520a55b7319c82fde499ff04ab7e349b9409ef285aa07c9a062"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_closureat.sh",
+    "--batch",
+    "/home/user/volmax-studio/s2a",
+    "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/closureat/jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 5,
+   "name": "closureat-batch",
+   "seconds": 16.11,
+   "stderr": "logs/005-closureat-batch.stderr",
+   "stderr_sha256": "a23ad5e043510fb2213e12ab5c2da0a1028e8dedb6c196f9d05e17ce43b4a6d2",
+   "stdout": "logs/005-closureat-batch.stdout",
+   "stdout_sha256": "6ca64c3108ba028f6137cec434cb8d827492a5c56b338e4976f04bb8dd5aac60"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "g5_output": {
+  "anchor_checked": true,
+  "files_indexed": 54,
+  "g5": "PASS",
+  "instance_commitment": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/material/inst.bin",
+  "prefix_leaves": 8,
+  "profile_artifact": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/material/pB.json",
+  "request": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/request.cbor",
+  "retained_target_payload": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/material/target_payload.json",
+  "root": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot",
+  "s1_instance": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/snapshot/material/iB.json"
+ },
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "input_sha256": {
+  "instance_commitment": "aaad84fd831889529f04ca4e0f29e2fc1c81feef89ebcc1908fea8e6c4561c1e",
+  "profile_artifact": "0904f218a1ec2d1e9551d44c5ceab3fa0ccf855ed3c2f536930ab84ceffb277b",
+  "request": "126f94411f50f5a8580a0fd981f625e0673ad626a9a5430565797cf1caebddfd",
+  "retained_target_payload": "be0340f9d620a23573f32b55e1180003cb319c6902d4ed2efb9fa83f671cb8c5",
+  "s1_instance": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824"
+ },
+ "isolation_test": {
+  "interfaces": [
+   "lo"
+  ]
+ },
+ "launcher_claim_not_evidence": "unshare -n",
+ "lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "network_isolated": true,
+ "problems": [],
+ "runner_source_sha256": {
+  "s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494",
+  "s3c_verify.py": "2abec1f4c22c32174f96519ab8f1650a420d7f13847418e4bb1f443df1724d14"
+ },
+ "seconds": 35.8,
+ "started": "2026-10-08T14:27:35Z",
+ "tcb_source_mismatch": []
+}

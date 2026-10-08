@@ -1,0 +1,49 @@
+== runtime issuer tooling creates, signs and submits each statement from the actually registered prefix
+submitted 8 statements
+== export from the PUBLIC read endpoint only
+exported 8 verified entries (root 96df1a6973865e0f69c010bc0e522a1250080932125e435527fdca0b619304c5)
+== pre-verification record of the producer/index separation (retained data only)
+{
+ "all_expectations_hold": true,
+ "checks": [
+  [
+   "the instance producer ordinal differs from its returned index",
+   true
+  ],
+  [
+   "returned indices equal log positions and every registration was fresh",
+   true
+  ],
+  [
+   "exactly one registration is an operator insert, not a producer role",
+   true
+  ],
+  [
+   "producer prefix size equals the next index at every step",
+   true
+  ],
+  [
+   "registered layout equals the preregistered layout",
+   true
+  ],
+  [
+   "closure references the actual admission index",
+   true
+  ],
+  [
+   "closure preclosure digest equals the recomputation from the retained a",
+   true
+  ],
+  [
+   "adjudication references the actual profile, instance and closure indic",
+   true
+  ],
+  [
+   "retention: submission, Receipt, response, public checkpoint and public",
+   true
+  ]
+ ]
+}
+== assemble capture and request.cbor from the retained bytes
+{"capture": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/capture", "capture_json_sha256": "46d28d117759c7844752b520ce5d2fc55bac10b4650195c608e264415cbb5ea2", "request_sha256": "126f94411f50f5a8580a0fd981f625e0673ad626a9a5430565797cf1caebddfd", "leaves": 8, "detached": []}
+anchor recorded: 46d28d117759c7844752b520ce5d2fc55bac10b4650195c608e264415cbb5ea2  -- commit it before running the verify phase

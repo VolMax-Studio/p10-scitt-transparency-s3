@@ -10,3 +10,4 @@ Candidate only; not adopted. The contract (`CONTRACT.md`) was written before the
 Validation harness (expectations live there, never in the runner): `tests/offline/runner/`.
 
 Preparation (outside the command): clean checkouts of S1/S2a/S2b at the pinned commits, the pinned Lean, `cargo build --locked --offline` of `spike/s3-entry` and `verifier/g5` against the S2b crate (see `spike/host/run_host.sh` steps 2 and 2b for the build commands used so far).
+- `../artifacts/`: the exact entry and G5 bytes the candidate was validated with (`SHA256SUMS`, `BUILD_RECORD.md`); pass them as `--entry`/`--g5`. Rust 1.82.0 remains a runner prerequisite (preflight).

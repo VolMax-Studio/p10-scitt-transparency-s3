@@ -1,0 +1,2 @@
+BINDING_MATCH  stage=post-s2a  reason={"code": "BindingMatch", "rule": null}
+  verdict: /home/user/p10-scitt-transparency-s3/ts-prototype/evidence/qualification-auth-ml2/runner/verdict.json

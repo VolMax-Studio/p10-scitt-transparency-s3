@@ -1,0 +1,37 @@
+[
+ {
+  "id": "S3-B-CANDIDATE",
+  "source": "anchored capture /home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture",
+  "request": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/request.cbor",
+  "pb": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/pB.json",
+  "inst": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/inst.bin",
+  "ib": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/iB.json",
+  "retained_target_payload": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/target_payload.json",
+  "tb_expected": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/expected/tB.expected",
+  "expect": {
+   "e2e": "some",
+   "post": {
+    "rule": null,
+    "verdict": "BINDING_MATCH",
+    "code": "BindingMatch",
+    "helper_required": true,
+    "rows_all_match": true
+   },
+   "s2a": ".accept",
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2b_detail": {
+    "checkpoint_size": 8,
+    "subject_idx": [
+     2,
+     4,
+     5,
+     6,
+     7
+    ],
+    "unreadable": []
+   }
+  }
+ }
+]

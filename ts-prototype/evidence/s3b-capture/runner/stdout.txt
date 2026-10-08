@@ -1,0 +1,2 @@
+BINDING_MATCH  stage=post-s2a  reason={"code": "BindingMatch", "rule": null}
+  verdict: $SP/s3b-runner/verdict.json

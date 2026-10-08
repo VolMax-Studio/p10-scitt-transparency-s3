@@ -1,0 +1,16 @@
+== prototype checks (facade/public-read; NOT a frozen-chain verdict)
+ok   F0 export holds 8 entries (indices contiguous)
+ok   F1 public export[i] == LeafEncodeV0(submitted statement[i]) byte for byte (registered bytes preserved)
+ok   F2 no two exported leaves are identical (no duplicate append)
+ok   F3 each retained public checkpoint: pinned-key signature valid, expected origin, size == index+1, root == RFC 9162 MTH of the exported leaves
+ok   F4 checkpoint returned with each registration == original signed checkpoint fetched from the public endpoint (same bytes)
+ok   F5 each returned Receipt: tagged COSE_Sign1, detached payload, expected protected header, proof (size,index,path) == RFC 9162 for that log state, ES256 signature verifies under the committed TS key over the PUBLIC checkpoint root
+ok   F6 facade response fields (index, tree_size, leaf_hash, root) agree with the independently recomputed values
+ok   F7 submit log: every registration was fresh (no duplicate/recovered flag); public checkpoint size == index+1 at retention time
+ok   F8 capture client export result: size, root and per-entry proof count agree with the retained final checkpoint
+FACADE/PUBLIC-READ CHECKS: ALL OK
+== G5 with the recorded anchor 2662c2daf912d2ce4796a26b13464d7bc2df6ba8825fa399fed3a87185d700a7
+{"g5":"PASS","root":"/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture","anchor_checked":true,"prefix_leaves":8,"files_indexed":54,"request":"/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/request.cbor","profile_artifact":"/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/pB.json","instance_commitment":"/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/inst.bin","s1_instance":"/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/iB.json","retained_target_payload":"/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/target_payload.json"}
+== unchanged chain on G5-returned paths (network-isolated)
+S3-B-CANDIDATE: inputs taken from G5-returned paths under /home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture
+S3-B-CANDIDATE  PASS

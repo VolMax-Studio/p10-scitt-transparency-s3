@@ -1,0 +1,5 @@
+tb	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/chain/cases/S3-B-CANDIDATE/s2b/tB.bin
+inst	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/inst.bin
+pb	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/pB.json
+cov	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/chain/cases/S3-B-CANDIDATE/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/pB.json	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/inst.bin
+e2e	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/chain/cases/S3-B-CANDIDATE/s2b/tB.bin	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/pB.json	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/iB.json	/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/s3b-capture/capture/material/inst.bin

@@ -27,7 +27,7 @@ Legend: **I** implemented, **C** configurable, **R** requires adaptation, **U** 
 | Stable Receipt signing key for the run | **U**. Fresh ad-hoc node key per Receipt (`ccf.py:98`). | **R**. Not a Tessera concept; the COSE key is held by the Receipt issuer, fixed before the instance commitment. (Tessera's own checkpoint `note.Signer` is a separate key; see §6.) |
 | Persistent log state | **C/R**. File storage, but the emulator creates a new ad-hoc node key on each receipt, so state alone does not give stable receipts. | **I/C**. POSIX driver persists. **Executed:** shutdown and reopen of the same directory before the 4th registration; indices and roots continued unchanged. Crash (unclean) consistency **not tested**. |
 | Entry size | Not assessed. | **C**. `DefaultEntrySizeLimit = 1<<16 - 1` (`append_lifecycle.go:62`). **Executed:** 65474-byte statement (leaf_input 65535) accepted, 65475 rejected. Limit applies to leaf_input including the 61-byte header. |
-| Duplicate handling | n/a | **C**. Antispam is off by default; **executed:** identical bytes got indices 0 and 1, `IsDup=false`. S2b would HALT with `ReceiptTargetAmbiguous` if target bytes appeared twice, so the front-end must refuse resubmission (or enable antispam). |
+| Duplicate handling | n/a | **C**. Antispam is off by default; **executed:** identical bytes got indices 0 and 1, `IsDup=false`. S2b would HALT with `ReceiptTargetAmbiguous` if target bytes appeared twice, so the front-end must prevent a second append of the same bytes, also across restarts (r7: antispam is best-effort and not sufficient; see `ts-prototype/`). |
 | Registration-policy enforcement / signature verification | **U** (documented as not applied). | **U**, by design: a log engine. Front-end work. |
 | Garbage collection | n/a | **C**. `WithGarbageCollectionInterval` (0 disables); GC removes obsolete partial tiles only, not entries. |
 
@@ -43,7 +43,7 @@ Select **B (Tessera v1.0.4, `6bca8e8d…`) plus a purpose-built S3 front-end**, 
 ### Smallest required patch list (B)
 
 1. **Front-end register path**: accept a COSE_Sign1 over a transport the S3 profile fixes; parse enough to apply the I2/I4 rules (tagged, readable protected `iss`/`sub`, **empty** unprotected header, reject rather than normalize); build `leaf_input = "P10-LeafEncodeV0\0" ‖ uint32_be(32) ‖ "application/scitt-statement+cose" ‖ uint64_be(len) ‖ statement`; call `Add(NewEntry(leaf_input))`.
-2. **Serialize registrations** (I5/I6): one statement in flight; wait for the awaited index before accepting the next. Refuse byte-identical resubmission.
+2. **Serialize registrations** (I5/I6): one statement in flight; wait for the awaited index before accepting the next. Refuse byte-identical resubmission persistently, including after a restart (**amended in r7: Tessera's antispam is best-effort and is not a deduplication guarantee; the prototype derives duplicate state from the log itself**).
 3. **Publication wait**: use `PublicationAwaiter` and obtain index and the checkpoint that commits to it; build the inclusion proof with `client.NewProofBuilder`; check `index == expected position` and `tree_size == index+1` (or record the actual values).
 4. **COSE Receipt issuer** with one stable ES256 key, its thumbprint and `ts_iss` fixed before the instance commitment (I7); Receipt issued at registration time and retained as issued (I8). Reference sketch: `dryrun/issue_receipts.py` (uses the S2b test encoders; **not production code**, and the sketch signs with a key supplied by `--keys-dir`).
 5. **Exporter**: read entry bundles for `[0,n)`, strip the 61-byte header, write `prefix/NNNNNN.cose`; independent of the submission files.
@@ -103,3 +103,11 @@ Evidence: `evidence/dry1`, `evidence/dry2` (retained submissions, exported leave
 ## 7. What was not done
 
 No Receipt was issued by a production issuer; no external anchor was used; no unclean-crash test; no multi-writer or load test; candidate A was not executed; no SCRAPI conformance check; the Lean/S2a pins were used as before and re-verified by the existing runner only.
+
+## 8. Amendment (r7): prototype follow-up
+
+A candidate Go facade and capture client over the pinned Tessera were built and exercised (`ts-prototype/`, results in `ts-prototype/RESULTS.md`). Refinements carried into it:
+the checkpoint is verified (pinned note key, expected origin), not only parsed, and the Receipt signs only the root reconstructed from a proof for that checkpoint's size
+(an operational invariant of this prototype, beyond RFC 9943's registration-before-Receipt rule); the limit is 65535 for `LeafEncodeV0(statement)` (statement 65474);
+detached statement payloads are retained as separate exact files and enter `detached_statement_payloads[idx]`; duplicate prevention is persistent and not based on antispam.
+The selection (OPEN item 3), bootstrap, glue, G5 and acceptance path remain OPEN.

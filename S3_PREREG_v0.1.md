@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r6 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r7 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r7 (relative to r6 at `8d154b5`/`dda0116`): a candidate Go facade over Tessera v1.0.4 and a separate HTTP-only capture client were built and exercised (`ts-prototype/`, `ts-prototype/RESULTS.md`): facade/public-read checks are reported apart from the frozen verdict; an exploratory seven-leaf lifecycle (synthetic, unenforced bootstrap statements) was captured through them, anchored, and run through G5 and the unchanged chain. Nothing is adopted; TS selection, bootstrap, policy enforcement, glue, G5 and the acceptance path remain OPEN.
 
 Revision r6 (relative to r5 at `8d154b5`): a bounded TS selection pass was run (`ts-selection/RECOMMENDATION.md`): two candidates pinned, a capability probe executed against Tessera v1.0.4, and a procedure dry run (not acceptance evidence) built `request.cbor` from retained engine bytes. It recommends, as a proposal only, Tessera plus an S3-owned SCITT facade; OPEN item 3 stays OPEN. The mixed-log plan's title and ML-2 row were corrected. Nothing is adopted.
 
@@ -74,7 +76,7 @@ An instance is P10 S3-compatible only if all of the following hold.
 
 RFC 9943 permits (a) preconfigured Registration Policy and trust anchors, (b) a first policy statement registered without registration checks, or (c) authenticated out-of-band management. S3 MUST NOT leave this choice to the implementation.
 
-`[OPEN]` Select exactly one mechanism and record: the mechanism; the content and hash of the initial Registration Policy and trust anchors; what occupies leaf index 0; and which policy version is active for each P10 statement (derivable from the prefix, since policy statements are leaves and the applicable policy is the last one committed before a registration). Whatever the choice, the policy statements are bytes in the prefix and are subject to I2 and I4. The selection is part of the deployment definition and of capture provenance, and MUST be recorded before S3-B begins. A leading preference for mechanism (b) is recorded in discussion only; it is not a decision.
+`[OPEN]` Select exactly one mechanism and record: the mechanism; the content and hash of the initial Registration Policy and trust anchors; what occupies leaf index 0; and which policy version is active for each P10 statement (derivable from the prefix, since policy statements are leaves and the applicable policy is the last one committed before a registration). Whatever the choice, the policy statements are bytes in the prefix and are subject to I2 and I4. The selection is part of the deployment definition and of capture provenance, and MUST be recorded before S3-B begins. A leading preference for mechanism (b) is recorded in discussion only; it is not a decision. A prototype of that candidate exists (`ts-prototype/`); it does not close the item.
 
 ---
 
@@ -264,7 +266,7 @@ Excluded from the repository and manifest: private keys, secrets, and any artifa
 6. The S3-owned glue (post-S2a input assembly, composer, correspondence checker): the spike contains experimental code; form, review against this preregistration, and how it is shown to add no rule are not decided. G4 inputs for a non-toy instance (A12–A14 digests) remain open; for the toy semantics the frozen values were reproduced by the spike (`spike/A12_A14_APPLICABILITY.md`).
 7. Toolchain carriage vs declared host prerequisites (Section 6.4); the spike found one prerequisite not covered by the frozen scripts (a native `libuv` development library for the Lean link step).
 8. Reason codes: candidate set in `spec/capture-format.md` (executed against the candidate checker); stability and review not decided. Exact recorded-but-not-compared field list (Section 8).
-9. Receipt payload form (attached vs detached) of the selected TS, which fixes the reason codes for Receipt-fault references (Section 7.4).
+9. Receipt payload form (attached vs detached) of the selected TS (the prototype issues detached Receipts, the frozen S2b form; not adopted), which fixes the reason codes for Receipt-fault references (Section 7.4).
 10. Adequacy of the runner-control fixtures (Section 7.3): the eight candidates were exercised in the spike with their own bound inputs; whether they suffice for the adopted runner is not decided.
 11. Python version and operating system pins for S3-C (the spike glue used only the standard library).
 12. Mixed-log test: ML-1 (two leading synthetic non-target test statements, then the lifecycle at shifted indices) and ML-6 (its capture packaging with `origin="ts"` leaves) were built and executed through the anchored path and the unchanged chain (`spec/mixed-log-test-plan.md` §8); they say nothing about Registration Policy content, bootstrap, enforcement or a live TS. ML-2 to ML-5 are not built (ML-3 to ML-5 are optional rule-coverage checks that reuse ratified vectors).

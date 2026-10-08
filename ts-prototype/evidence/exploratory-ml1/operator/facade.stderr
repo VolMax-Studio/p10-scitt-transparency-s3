@@ -1,0 +1,3 @@
+I1008 06:43:40.384678    7629 files.go:496] Initializing directory for POSIX log at "/tmp/tmp.skMWBktMGc/log" (this should only happen ONCE per log!)
+I1008 06:43:40.385841    7629 append_lifecycle.go:732] Failed to fetch old checkpoint: file does not exist
+s3-facade ready: register=http://127.0.0.1:19500 public=http://127.0.0.1:19501/ entries=0

@@ -1,0 +1,9 @@
+ok   mutation 'receipt signature byte flipped': expected F5 to fail; failed checks = ['F5']
+ok   mutation 'receipt proof path byte flipped': expected F5 to fail; failed checks = ['F5']
+ok   mutation 'public checkpoint signature altered': expected F3 to fail; failed checks = ['F3']
+ok   mutation 'export entry byte flipped': expected F1 to fail; failed checks = ['F1', 'F3', 'F5', 'F6']
+ok   mutation 'export entry replaced by a duplicate of another': expected F2 to fail; failed checks = ['F1', 'F2', 'F3', 'F5', 'F6']
+ok   mutation 'facade-returned checkpoint differs from the public one': expected F4 to fail; failed checks = ['F4']
+ok   mutation 'response root field wrong': expected F6 to fail; failed checks = ['F6']
+ok   mutation 'export entry missing': expected F0 to fail; failed checks = ['F0', 'F1', 'F3', 'F5', 'F6', 'F7', 'F8']
+CHECKER MUTATIONS: ALL DETECTED

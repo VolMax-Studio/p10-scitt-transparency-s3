@@ -1,0 +1,272 @@
+[
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 0,
+  "origin": "issuer",
+  "public_checkpoint_size": 1,
+  "recovered": false,
+  "tree_size_in_receipt": 1
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 1,
+  "origin": "issuer",
+  "public_checkpoint_size": 2,
+  "recovered": false,
+  "tree_size_in_receipt": 2
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 2,
+  "origin": "issuer",
+  "public_checkpoint_size": 3,
+  "recovered": false,
+  "tree_size_in_receipt": 3
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 3,
+  "origin": "issuer",
+  "public_checkpoint_size": 4,
+  "recovered": false,
+  "tree_size_in_receipt": 4
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 4,
+  "origin": "issuer",
+  "public_checkpoint_size": 5,
+  "recovered": true,
+  "tree_size_in_receipt": 5
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 5,
+  "origin": "issuer",
+  "public_checkpoint_size": 6,
+  "recovered": false,
+  "tree_size_in_receipt": 6
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 6,
+  "origin": "issuer",
+  "public_checkpoint_size": 7,
+  "recovered": false,
+  "tree_size_in_receipt": 7
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 7,
+  "origin": "issuer",
+  "public_checkpoint_size": 8,
+  "recovered": true,
+  "tree_size_in_receipt": 8
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 8,
+  "origin": "issuer",
+  "public_checkpoint_size": 9,
+  "recovered": false,
+  "tree_size_in_receipt": 9
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 9,
+  "origin": "issuer",
+  "public_checkpoint_size": 10,
+  "recovered": false,
+  "tree_size_in_receipt": 10
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 10,
+  "origin": "issuer",
+  "public_checkpoint_size": 11,
+  "recovered": false,
+  "tree_size_in_receipt": 11
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 11,
+  "origin": "issuer",
+  "public_checkpoint_size": 12,
+  "recovered": false,
+  "tree_size_in_receipt": 12
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 12,
+  "origin": "issuer",
+  "public_checkpoint_size": 13,
+  "recovered": false,
+  "tree_size_in_receipt": 13
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 13,
+  "origin": "issuer",
+  "public_checkpoint_size": 14,
+  "recovered": true,
+  "tree_size_in_receipt": 14
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 14,
+  "origin": "issuer",
+  "public_checkpoint_size": 15,
+  "recovered": true,
+  "tree_size_in_receipt": 15
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 15,
+  "origin": "issuer",
+  "public_checkpoint_size": 16,
+  "recovered": false,
+  "tree_size_in_receipt": 16
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 16,
+  "origin": "issuer",
+  "public_checkpoint_size": 17,
+  "recovered": false,
+  "tree_size_in_receipt": 17
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 17,
+  "origin": "issuer",
+  "public_checkpoint_size": 18,
+  "recovered": true,
+  "tree_size_in_receipt": 18
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 18,
+  "origin": "issuer",
+  "public_checkpoint_size": 19,
+  "recovered": false,
+  "tree_size_in_receipt": 19
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 19,
+  "origin": "issuer",
+  "public_checkpoint_size": 20,
+  "recovered": true,
+  "tree_size_in_receipt": 20
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 20,
+  "origin": "issuer",
+  "public_checkpoint_size": 21,
+  "recovered": false,
+  "tree_size_in_receipt": 21
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 21,
+  "origin": "issuer",
+  "public_checkpoint_size": 22,
+  "recovered": false,
+  "tree_size_in_receipt": 22
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 22,
+  "origin": "issuer",
+  "public_checkpoint_size": 23,
+  "recovered": true,
+  "tree_size_in_receipt": 23
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 23,
+  "origin": "issuer",
+  "public_checkpoint_size": 24,
+  "recovered": false,
+  "tree_size_in_receipt": 24
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 24,
+  "origin": "issuer",
+  "public_checkpoint_size": 25,
+  "recovered": true,
+  "tree_size_in_receipt": 25
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 25,
+  "origin": "issuer",
+  "public_checkpoint_size": 26,
+  "recovered": false,
+  "tree_size_in_receipt": 26
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 26,
+  "origin": "issuer",
+  "public_checkpoint_size": 27,
+  "recovered": false,
+  "tree_size_in_receipt": 27
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 27,
+  "origin": "issuer",
+  "public_checkpoint_size": 28,
+  "recovered": false,
+  "tree_size_in_receipt": 28
+ },
+ {
+  "duplicate": true,
+  "facade_checkpoint_equals_public": true,
+  "index": 28,
+  "origin": "issuer",
+  "public_checkpoint_size": 29,
+  "recovered": true,
+  "tree_size_in_receipt": 29
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 29,
+  "origin": "issuer",
+  "public_checkpoint_size": 30,
+  "recovered": false,
+  "tree_size_in_receipt": 30
+ }
+]

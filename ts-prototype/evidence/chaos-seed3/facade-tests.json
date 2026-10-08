@@ -1,0 +1,29 @@
+{
+ "T5": {
+  "ok": true,
+  "seconds": 28.1,
+  "observations": {
+   "seed": 3,
+   "statements": 60,
+   "submit_rc": 0,
+   "submit_out": "submitted 60 statements\n",
+   "export_rc": 0,
+   "leaves_in_log": 60,
+   "distinct": 60,
+   "each_statement_exactly_once_in_order": true,
+   "kills": 48,
+   "restart_failures": [],
+   "journal_counts": {
+    "duplicate": 20,
+    "integrated": 60,
+    "intent": 60,
+    "receipt": 60,
+    "start": 49
+   },
+   "retried_or_recovered": {
+    "duplicate_flag": 20,
+    "recovered_flag": 20
+   }
+  }
+ }
+}

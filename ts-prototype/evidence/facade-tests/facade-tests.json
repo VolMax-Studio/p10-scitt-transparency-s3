@@ -1,0 +1,444 @@
+{
+ "T1": {
+  "ok": true,
+  "seconds": 0.8,
+  "observations": {
+   "statement_65474": {
+    "http": 201,
+    "leaf_input_len": 65535,
+    "index": 0
+   },
+   "statement_65475": {
+    "http": 413,
+    "error": "E_TOO_LARGE",
+    "leaf_input_len": 65536
+   },
+   "checkpoint_size_after_refusal": 1,
+   "body_70000_bytes": {
+    "http": 413,
+    "error": "E_TOO_LARGE"
+   },
+   "max_entry_exported_exactly": true
+  }
+ },
+ "T2": {
+  "ok": true,
+  "seconds": 0.9,
+  "observations": {
+   "E_UNPROTECTED_NOT_EMPTY": {
+    "http": 400,
+    "error": "E_UNPROTECTED_NOT_EMPTY"
+   },
+   "E_NOT_COSE_SIGN1": {
+    "http": 400,
+    "error": "E_NOT_COSE_SIGN1"
+   },
+   "E_NOT_CBOR": {
+    "http": 400,
+    "error": "E_NOT_CBOR"
+   },
+   "E_CWT_CLAIMS_MISSING": {
+    "http": 400,
+    "error": "E_CWT_CLAIMS_MISSING"
+   },
+   "E_ISS_SUB_NOT_TEXT": {
+    "http": 400,
+    "error": "E_ISS_SUB_NOT_TEXT"
+   },
+   "E_NOT_CBOR(trailing)": {
+    "http": 400,
+    "error": "E_NOT_CBOR"
+   },
+   "checkpoint_size_after_refusals": 1
+  }
+ },
+ "T3": {
+  "ok": true,
+  "seconds": 1.5,
+  "observations": {
+   "resubmit": {
+    "http": 200,
+    "duplicate": true,
+    "same_index": true,
+    "same_receipt_bytes": true,
+    "receipt_reused": true
+   },
+   "resubmit_after_restart": {
+    "http": 200,
+    "duplicate": true,
+    "index": 0,
+    "same_receipt_bytes": true,
+    "log_entries_at_start": 3
+   },
+   "checkpoint_size": 3,
+   "public_read": {
+    "checkpoint": 200,
+    "tile_level0_partial": 200,
+    "entries_partial": 200,
+    "state_dir": 404,
+    "dir_listing": 404,
+    "root": 404,
+    "traversal": 404,
+    "POST_checkpoint": 405
+   },
+   "registration_endpoint_serves_no_log_data": 404
+  }
+ },
+ "T4": {
+  "ok": true,
+  "seconds": 23.5,
+  "observations": {
+   "pre-add": {
+    "client_saw": "RemoteDisconnected('Remote end closed connection without response')",
+    "process_returncode": -9,
+    "log_entries_after_crash_restart": 2,
+    "entry_survived_crash": false,
+    "exactly_once": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "submit_log": [
+     {
+      "index": 0,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 1,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 2,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 3,
+      "duplicate": false,
+      "recovered": false
+     }
+    ],
+    "leaves_in_log": 4,
+    "returned_receipt_equals_stored": true,
+    "journal_events": [
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt",
+     "start",
+     "intent",
+     "fault",
+     "start",
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt"
+    ],
+    "ok": true
+   },
+   "submitted": {
+    "client_saw": "RemoteDisconnected('Remote end closed connection without response')",
+    "process_returncode": -9,
+    "log_entries_after_crash_restart": 2,
+    "entry_survived_crash": false,
+    "exactly_once": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "submit_log": [
+     {
+      "index": 0,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 1,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 2,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 3,
+      "duplicate": false,
+      "recovered": false
+     }
+    ],
+    "leaves_in_log": 4,
+    "returned_receipt_equals_stored": true,
+    "journal_events": [
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt",
+     "start",
+     "intent",
+     "fault",
+     "start",
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt"
+    ],
+    "ok": true
+   },
+   "integrated": {
+    "client_saw": "RemoteDisconnected('Remote end closed connection without response')",
+    "process_returncode": -9,
+    "log_entries_after_crash_restart": 3,
+    "entry_survived_crash": true,
+    "exactly_once": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "submit_log": [
+     {
+      "index": 0,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 1,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 2,
+      "duplicate": true,
+      "recovered": true
+     },
+     {
+      "index": 3,
+      "duplicate": false,
+      "recovered": false
+     }
+    ],
+    "leaves_in_log": 4,
+    "returned_receipt_equals_stored": true,
+    "journal_events": [
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt",
+     "start",
+     "intent",
+     "integrated",
+     "fault",
+     "start",
+     "start",
+     "duplicate",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt"
+    ],
+    "ok": true
+   },
+   "receipt-stored": {
+    "client_saw": "RemoteDisconnected('Remote end closed connection without response')",
+    "process_returncode": -9,
+    "log_entries_after_crash_restart": 3,
+    "entry_survived_crash": true,
+    "exactly_once": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "submit_log": [
+     {
+      "index": 0,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 1,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 2,
+      "duplicate": true,
+      "recovered": false
+     },
+     {
+      "index": 3,
+      "duplicate": false,
+      "recovered": false
+     }
+    ],
+    "leaves_in_log": 4,
+    "returned_receipt_equals_stored": true,
+    "journal_events": [
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt",
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "fault",
+     "start",
+     "start",
+     "duplicate",
+     "intent",
+     "integrated",
+     "receipt"
+    ],
+    "ok": true
+   },
+   "pre-response": {
+    "client_saw": "RemoteDisconnected('Remote end closed connection without response')",
+    "process_returncode": -9,
+    "log_entries_after_crash_restart": 3,
+    "entry_survived_crash": true,
+    "exactly_once": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "submit_log": [
+     {
+      "index": 0,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 1,
+      "duplicate": false,
+      "recovered": false
+     },
+     {
+      "index": 2,
+      "duplicate": true,
+      "recovered": false
+     },
+     {
+      "index": 3,
+      "duplicate": false,
+      "recovered": false
+     }
+    ],
+    "leaves_in_log": 4,
+    "returned_receipt_equals_stored": true,
+    "journal_events": [
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "intent",
+     "integrated",
+     "receipt",
+     "start",
+     "intent",
+     "integrated",
+     "receipt",
+     "fault",
+     "start",
+     "start",
+     "duplicate",
+     "intent",
+     "integrated",
+     "receipt"
+    ],
+    "ok": true
+   }
+  }
+ },
+ "T5": {
+  "ok": true,
+  "seconds": 13.8,
+  "observations": {
+   "seed": 1,
+   "statements": 30,
+   "submit_rc": 0,
+   "submit_out": "submitted 30 statements\n",
+   "export_rc": 0,
+   "leaves_in_log": 30,
+   "distinct": 30,
+   "each_statement_exactly_once_in_order": true,
+   "kills": 25,
+   "restart_failures": [],
+   "journal_counts": {
+    "duplicate": 9,
+    "integrated": 30,
+    "intent": 30,
+    "receipt": 30,
+    "start": 26
+   },
+   "retried_or_recovered": {
+    "duplicate_flag": 9,
+    "recovered_flag": 9
+   }
+  }
+ },
+ "T6": {
+  "ok": true,
+  "seconds": 31.4,
+  "observations": {
+   "wrong_pinned_vkey": {
+    "returncode": 1,
+    "stderr_tail": "s3-facade: the signing key is not the pinned note key: note has no verifiable signatures"
+   },
+   "wrong_origin": {
+    "returncode": 1,
+    "stderr_tail": "s3-facade: checkpoint origin is the signer name: \"s3-proto/ts1\" != expected origin \"other/origin\""
+   },
+   "wrong_receipt_key_thumbprint": {
+    "returncode": 1,
+    "stderr_tail": "s3-facade: Receipt key thumbprint 87b27077c51ffcecdb7704b6ca8d960054c2e5b4f1cbab5ba0836dc9c9ca452b is not the committed 0000000000000000000000000000000000000000"
+   },
+   "client_wrong_pinned_key": {
+    "rc": 1,
+    "out": "s3-capture: checkpoint failed verification: failed to verify signatures on checkpoint: note has no verifiable signatures"
+   },
+   "client_wrong_origin": {
+    "rc": 1,
+    "out": "s3-capture: checkpoint failed verification: got Origin \"s3-proto/ts1\" but expected \"other/origin\""
+   },
+   "client_wrong_expected_size": {
+    "rc": 1,
+    "out": "s3-capture: no verified checkpoint of size 3 within 30s (last: <nil>)"
+   },
+   "client_correct": {
+    "rc": 0
+   },
+   "forged_checkpoint": {
+    "http": 502,
+    "error": "E_CHECKPOINT_UNVERIFIED",
+    "detail": "failed to parse Checkpoint: failed to verify signatures on checkpoint: note has no verifiable signatures",
+    "receipt_stored_for_index_2": false
+   }
+  }
+ }
+}

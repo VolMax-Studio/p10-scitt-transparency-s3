@@ -1,0 +1,52 @@
+{
+ "scope": "facade/public-read checks (NOT a frozen-chain verdict)",
+ "n": 7,
+ "all_ok": true,
+ "checks": [
+  {
+   "id": "F0",
+   "check": "export holds 7 entries (indices contiguous)",
+   "ok": true
+  },
+  {
+   "id": "F1",
+   "check": "public export[i] == LeafEncodeV0(submitted statement[i]) byte for byte (registered bytes preserved)",
+   "ok": true
+  },
+  {
+   "id": "F2",
+   "check": "no two exported leaves are identical (no duplicate append)",
+   "ok": true
+  },
+  {
+   "id": "F3",
+   "check": "each retained public checkpoint: pinned-key signature valid, expected origin, size == index+1, root == RFC 9162 MTH of the exported leaves",
+   "ok": true
+  },
+  {
+   "id": "F4",
+   "check": "checkpoint returned with each registration == original signed checkpoint fetched from the public endpoint (same bytes)",
+   "ok": true
+  },
+  {
+   "id": "F5",
+   "check": "each returned Receipt: tagged COSE_Sign1, detached payload, expected protected header, proof (size,index,path) == RFC 9162 for that log state, ES256 signature verifies under the committed TS key over the PUBLIC checkpoint root",
+   "ok": true
+  },
+  {
+   "id": "F6",
+   "check": "facade response fields (index, tree_size, leaf_hash, root) agree with the independently recomputed values",
+   "ok": true
+  },
+  {
+   "id": "F7",
+   "check": "submit log: every registration was fresh (no duplicate/recovered flag); public checkpoint size == index+1 at retention time",
+   "ok": true
+  },
+  {
+   "id": "F8",
+   "check": "capture client export result: size, root and per-entry proof count agree with the retained final checkpoint",
+   "ok": true
+  }
+ ]
+}

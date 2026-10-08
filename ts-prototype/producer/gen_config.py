@@ -17,6 +17,8 @@ import argparse, dataclasses, hashlib, json, os, subprocess, sys
 
 ap = argparse.ArgumentParser()
 for k in ("s2b", "s2a", "out", "issuer-keys-dir", "ts-keys-dir", "owner", "ts-iss", "origin"): ap.add_argument("--" + k, required=True)
+ap.add_argument("--expect-size", type=int, default=7, help="number of leaves of the configured layout (expectation written BEFORE the run)")
+ap.add_argument("--expect-subject-idx", default="2,3,4,5,6", help="log indices of statements about the instance subject in the configured layout")
 a = ap.parse_args()
 here = os.path.dirname(os.path.abspath(__file__))
 top = subprocess.run(["git", "-C", here, "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
@@ -106,8 +108,8 @@ meta = {"status": "NON-NORMATIVE EXPLORATORY CONFIGURATION; fresh test keys only
         "sanity_checks": checks, "file_sha256": {n: H(rd(os.path.join(a.out, n))).hex() for n in ("pB.json", "inst.bin", "iB.json")},
         "private_keys": "generated outside the repository, not committed, not recorded"}
 open(os.path.join(a.out, "PUBLIC_META.json"), "w").write(json.dumps(meta, indent=1, sort_keys=True) + "\n")
-# expectation fixed BEFORE the run from the configured sequence (7 leaves: 0-1 bootstrap non-target, 2-6 lifecycle)
+# expectation fixed BEFORE the run from the configured layout
 expect = {"s2b": {"status": "Verified"}, "s2a": ".accept", "e2e": "some", "post": {"verdict": "BINDING_MATCH", "rule": None},
-          "s2b_detail": {"checkpoint_size": 7, "subject_idx": [2, 3, 4, 5, 6], "unreadable": []}}
+          "s2b_detail": {"checkpoint_size": a.expect_size, "subject_idx": [int(x) for x in a.expect_subject_idx.split(",")], "unreadable": []}}
 open(os.path.join(a.out, "expect.json"), "w").write(json.dumps(expect, indent=1, sort_keys=True) + "\n")
 print(json.dumps({"subject": subj.decode(), "log_identity_digest": lid2.hex(), "profile_digest": H(pb).hex(), "ts_key_thumbprint": G.thumbprint(ts_key).hex(), "checks": len(checks)}, indent=1))

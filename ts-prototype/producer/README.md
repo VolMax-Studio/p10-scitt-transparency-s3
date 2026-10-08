@@ -6,6 +6,10 @@
 - `issuer_tool.py` is called by `s3-capture submit --producer` before each registration. It creates and signs statement N from the *authenticated prefix* it fetches from the public read endpoint (checkpoint verified with the
   pinned key, every entry proved into its root), cross-checked against the retained submissions and the indices the facade returned. Admission refs and adjudication refs are those actual indices; the closure's preclosure digest is the
   ratified S2b reference definition (`post_scenarios.preclosure_digest`) over the view decoded from that prefix; statements are built and signed with the ratified S2b test builders (`scenarios.statement_for`).
-- Scripts: `../scripts/run_lifecycle.sh` (prepare / capture / verify), `derive_expected_tb_from_prefix.py`, `assemble_capture_v2.py`.
+- **Ordinal, index and prefix size are separate** (from run3 on). The client derives the next expected append position from the verified public checkpoint and calls `issuer_tool.py --ordinal K --next-index N`;
+  N is also the size of the authenticated prefix the tool fetches. The facade's returned index is validated against N (a rogue concurrent writer is detected). `--operator-insert K:FILE` registers one operator statement
+  (`operator_note.py`: a classifiable non-target TEST note) through the same facade right after producer ordinal K, sequentially, not counted as a producer role. The strict fixture-submit mode (`--statements`, file number == expected index)
+  is unchanged. The run2 `--step N` interface is still accepted by the tool (ordinal == index) but the client no longer uses it.
+- Scripts: `../scripts/run_lifecycle.sh` (prepare / capture / verify), `derive_expected_tb_from_prefix.py`, `assemble_capture_v2.py`, `producer_index_record.py` (pre-verification record of ordinal vs index, closure/adjudication references and retention for the `ml2` layout; `LAYOUT=ml2`).
 
 The two bootstrap statements are explicitly experimental synthetic test statements; no policy exists and none is enforced.

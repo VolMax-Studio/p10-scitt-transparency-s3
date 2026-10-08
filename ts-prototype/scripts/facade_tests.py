@@ -6,6 +6,8 @@
   T3 persistent duplicate prevention: same bytes -> same index, same stored Receipt, also after a clean restart; public read whitelist
   T4 abrupt termination (self-SIGKILL) at pre-add | submitted | integrated | receipt-stored | pre-response, then restart and retry by the capture client
   T5 chaos: external SIGKILL at random times while the capture client submits N statements; exactly-once invariant at the end
+  T7 producer protocol: ordinal, next index (from the verified checkpoint) and prefix size are separate; an operator statement inserted between two producer roles shifts
+     the later indices; a rogue concurrent writer is detected by the returned-index validation; the strict fixture-submit mode still refuses an index mismatch
   T6 pinned-key / origin enforcement: wrong pin or origin refuses to start; the capture client rejects a wrong key/origin; a forged checkpoint on the public
      endpoint (valid format, wrong key) makes the facade fail closed (502, no Receipt issued, none stored)
 
@@ -16,7 +18,7 @@ import argparse, json, os, random, shutil, signal, subprocess, sys, threading, t
 ap = argparse.ArgumentParser()
 for k in ("bin", "py", "s2b", "keys-dir", "note-keys", "fixture", "out"):
     ap.add_argument("--" + k, required=True)
-ap.add_argument("--only", default="T1,T2,T3,T4,T5,T6")
+ap.add_argument("--only", default="T1,T2,T3,T4,T5,T6,T7")
 ap.add_argument("--chaos-n", type=int, default=30)
 ap.add_argument("--seed", type=int, default=1)
 a = ap.parse_args()
@@ -323,6 +325,51 @@ def T6():
         res["forged_checkpoint"] = {"http": st, "error": j.get("error"), "detail": str(j.get("detail"))[:140],
                                     "receipt_stored_for_index_2": os.path.exists(f"{f.dir}/state/receipts/000002.receipt.cbor")}
         ok &= st == 502 and j.get("error") == "E_CHECKPOINT_UNVERIFIED" and not res["forged_checkpoint"]["receipt_stored_for_index_2"]
+    finally: f.stop()
+    return ok, res
+
+def T7():
+    res, ok = {}, True
+    def fake_producer(f, name, rogue_at=None):
+        d = os.path.join(f.dir, name); os.makedirs(d, exist_ok=True)
+        for i in range(4): open(f"{d}/stmt-{i}.cose", "wb").write(stmt(700 + i))
+        open(f"{d}/note.cose", "wb").write(stmt(799)); open(f"{d}/rogue.cose", "wb").write(stmt(798))
+        sh = f"{d}/producer.sh"
+        open(sh, "w").write(f"""#!/usr/bin/env bash
+set -e
+while [ $# -gt 0 ]; do case "$1" in --ordinal) O="$2"; shift 2;; --next-index) N="$2"; shift 2;; --run) R="$2"; shift 2;; esac; done
+echo "$O $N" >> {d}/calls.log
+if [ "$O" -ge 4 ]; then echo '{{"done":true}}'; exit 0; fi
+{('if [ "$O" = ' + str(rogue_at) + ' ]; then curl -s -X POST --data-binary @' + d + '/rogue.cose ' + f.url() + '/register > /dev/null; fi') if rogue_at is not None else ''}
+mkdir -p {d}/staged; cp {d}/stmt-$O.cose {d}/staged/$N.cose
+printf '{{"file":"%s","origin":"issuer"}}\\n' "{d}/staged/$N.cose"
+""")
+        os.chmod(sh, 0o755); return d, sh
+    # (b) insert between producer ordinals 1 and 2
+    f = Facade("t7b", 19500); f.start()
+    try:
+        d, sh = fake_producer(f, "p")
+        rc, o = client("submit", "--facade", f.url(), "--public", f.purl(), "--note-vkey", VKEY, "--origin", ORIGIN, "--producer", sh, "--operator-insert", f"1:{d}/note.cose", "--out", os.path.join(f.dir, "run"))
+        calls = [tuple(map(int, l.split())) for l in open(f"{d}/calls.log")]
+        sl = json.load(open(f"{f.dir}/run/submit-log.json")) if rc == 0 else []
+        res["insert_between_producer_ordinals"] = {"client_rc": rc, "producer_calls_(ordinal,next_index)": calls, "submit_log": [(x["index"], x["producer_ordinal"], x["source"], x["origin"]) for x in sl]}
+        ok &= rc == 0 and calls == [(0, 0), (1, 1), (2, 3), (3, 4), (4, 5)] and [(x["index"], x["producer_ordinal"], x["source"]) for x in sl] == [(0, 0, "producer"), (1, 1, "producer"), (2, -1, "operator-insert"), (3, 2, "producer"), (4, 3, "producer")]
+    finally: f.stop()
+    # (c) rogue concurrent writer at ordinal 1: the facade's answer no longer matches the position derived from the checkpoint
+    f = Facade("t7c", 19510); f.start()
+    try:
+        d, sh = fake_producer(f, "p", rogue_at=1)
+        rc, o = client("submit", "--facade", f.url(), "--public", f.purl(), "--note-vkey", VKEY, "--origin", ORIGIN, "--producer", sh, "--out", os.path.join(f.dir, "run"))
+        res["rogue_concurrent_writer"] = {"client_rc": rc, "client_out": o[-160:]}
+        ok &= rc != 0 and "registered at index" in o
+    finally: f.stop()
+    # (d) strict fixture-submit mode: file number is the expected index
+    f = Facade("t7d", 19520); f.start()
+    try:
+        sd = os.path.join(f.dir, "st"); write_stmts(sd, [stmt(710)], first=5)
+        rc, o = client("submit", "--facade", f.url(), "--public", f.purl(), "--note-vkey", VKEY, "--origin", ORIGIN, "--statements", sd, "--out", os.path.join(f.dir, "run"))
+        res["strict_fixture_mode_index_mismatch"] = {"client_rc": rc, "client_out": o[-120:]}
+        ok &= rc != 0 and "registered at index 0, expected 5" in o
     finally: f.stop()
     return ok, res
 

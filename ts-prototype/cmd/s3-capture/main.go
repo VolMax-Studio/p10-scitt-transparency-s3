@@ -67,7 +67,8 @@ func submit(args []string) {
 	vkey := fs.String("note-vkey", "", "pinned note verifier key")
 	origin := fs.String("origin", "", "expected checkpoint origin")
 	stmts := fs.String("statements", "", "directory of NNNNNN.cose files to submit, in index order (the submitter's own files)")
-	producer := fs.String("producer", "", "RUNTIME ISSUER TOOLING: executable called as `PRODUCER --step N --run OUT` before each registration; it creates and signs statement N from what has been registered so far and prints one JSON line {\"file\",\"origin\",\"detached\"} or {\"done\":true} (replaces --statements)")
+	opInsert := fs.String("operator-insert", "", "producer mode: ORDINAL:FILE[,...] register the operator statement FILE through the same facade right after producer ordinal ORDINAL (not a producer role)")
+	producer := fs.String("producer", "", "RUNTIME ISSUER TOOLING: executable called as `PRODUCER --ordinal K --next-index N --run OUT` before each registration; it creates and signs statement N from what has been registered so far and prints one JSON line {\"file\",\"origin\",\"detached\"} or {\"done\":true} (replaces --statements; the arguments are --ordinal K --next-index N --run OUT)")
 	detached := fs.String("detached", "", "optional directory of NNNNNN.payload files: detached statement payloads held by the issuer (never sent to the facade)")
 	tsOrigin := fs.String("ts-origin", "", "comma list of indices submitted by the operator (bootstrap), kept apart from issuer submissions")
 	out := fs.String("out", "", "output directory (empty)")
@@ -95,7 +96,7 @@ func submit(args []string) {
 		json.Unmarshal(prev, &logl)
 	}
 	nsub := 0
-	process := func(i int, stmt []byte, sub string, detPayload []byte) {
+	process := func(i int, ordinal int, source string, stmt []byte, sub string, detPayload []byte) {
 		name := fmt.Sprintf("%06d", i)
 		writeFile(filepath.Join(*out, sub, "submissions", name+".cose"), stmt) // retained BEFORE the request
 		if detPayload != nil {
@@ -138,16 +139,39 @@ func submit(args []string) {
 		}
 		writeFile(filepath.Join(*out, "public-checkpoints", name+".checkpoint"), raw)
 		logl = append(logl, map[string]any{"index": rs.Index, "origin": sub, "tree_size_in_receipt": rs.TreeSize, "public_checkpoint_size": cp.Size,
-			"facade_checkpoint_equals_public": bytes.Equal(fcp, raw), "duplicate": rs.Duplicate, "recovered": rs.Recovered})
+			"facade_checkpoint_equals_public": bytes.Equal(fcp, raw), "duplicate": rs.Duplicate, "recovered": rs.Recovered,
+			"producer_ordinal": ordinal, "source": source})
 		nsub++
 	}
 	if *producer != "" {
-		for step := 0; ; step++ {
-			cmd := exec.Command(*producer, "--step", strconv.Itoa(step), "--run", *out)
+		// The producer's role ORDINAL, the statement's actual LOG INDEX and the size of the authenticated PREFIX are separate quantities. The next expected append
+		// position is derived from the verified public checkpoint before every registration (single sequential writer); the facade's answer is validated against it.
+		inserts := map[int]string{} // after producer ordinal K: register this operator statement through the same facade, not counted as a producer role
+		for _, kv := range strings.Split(*opInsert, ",") {
+			if kv == "" {
+				continue
+			}
+			parts := strings.SplitN(kv, ":", 2)
+			k, err := strconv.Atoi(parts[0])
+			if err != nil || len(parts) != 2 {
+				die("bad --operator-insert %q (want ORDINAL:FILE)", kv)
+			}
+			inserts[k] = parts[1]
+		}
+		nextIndex := func() int {
+			cp, _, err := p.WaitCurrent(ctx, *timeout)
+			if err != nil {
+				die("next expected index: %v", err)
+			}
+			return int(cp.Size)
+		}
+		for ordinal := 0; ; ordinal++ {
+			next := nextIndex()
+			cmd := exec.Command(*producer, "--ordinal", strconv.Itoa(ordinal), "--next-index", strconv.Itoa(next), "--run", *out)
 			cmd.Stderr = os.Stderr
 			o, err := cmd.Output()
 			if err != nil {
-				die("producer step %d: %v", step, err)
+				die("producer ordinal %d: %v", ordinal, err)
 			}
 			var pr struct {
 				Done     bool   `json:"done"`
@@ -156,13 +180,13 @@ func submit(args []string) {
 				Detached string `json:"detached"`
 			}
 			if err := json.Unmarshal(bytes.TrimSpace(o), &pr); err != nil {
-				die("producer step %d: bad output %q: %v", step, o, err)
+				die("producer ordinal %d: bad output %q: %v", ordinal, o, err)
 			}
 			if pr.Done {
 				break
 			}
 			if pr.Origin != "issuer" && pr.Origin != "operator" {
-				die("producer step %d: origin must be issuer or operator", step)
+				die("producer ordinal %d: origin must be issuer or operator", ordinal)
 			}
 			stmt, err := os.ReadFile(pr.File)
 			if err != nil {
@@ -174,7 +198,14 @@ func submit(args []string) {
 					die("%v", err)
 				}
 			}
-			process(step, stmt, pr.Origin, det)
+			process(next, ordinal, "producer", stmt, pr.Origin, det)
+			if f, ok := inserts[ordinal]; ok { // lifecycle production is paused; the same operator registers one statement, sequentially
+				ins, err := os.ReadFile(f)
+				if err != nil {
+					die("%v", err)
+				}
+				process(nextIndex(), -1, "operator-insert", ins, "operator", nil)
+			}
 		}
 	} else {
 		files, _ := filepath.Glob(filepath.Join(*stmts, "*.cose"))
@@ -197,7 +228,7 @@ func submit(args []string) {
 			if *detached != "" {
 				det, _ = os.ReadFile(filepath.Join(*detached, fmt.Sprintf("%06d.payload", i)))
 			}
-			process(i, stmt, sub, det)
+			process(i, -1, "fixture-file", stmt, sub, det)
 		}
 	}
 	b, _ := json.MarshalIndent(logl, "", " ")

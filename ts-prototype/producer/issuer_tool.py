@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """RUNTIME ISSUER TOOLING (candidate, non-normative). Called by `s3-capture submit --producer` once per statement, BEFORE that statement is registered.
 
-For step N it creates and signs statement N from what the log has actually registered so far:
+For role ORDINAL it creates and signs the statement that will be registered at log index NEXT from what the log has actually registered so far (ordinal, index and prefix size are separate):
   * the authenticated prefix [0,N) is obtained from the PUBLIC read endpoint (`s3-capture export`, HTTP only, checkpoint verified with the pinned key and every
     entry proved into its root) and cross-checked against the retained submissions and the returned registration indices;
   * every index used in a statement (admission refs, adjudication refs) is the index the facade ACTUALLY returned, recovered from that prefix by decoding
@@ -10,15 +10,22 @@ For step N it creates and signs statement N from what the log has actually regis
     (tests/s2a/post_scenarios.preclosure_digest), and statements are built and signed with the ratified S2b test builders (scenarios.statement_for).
 Issuer private keys are read from --issuer-keys (outside the repository); the Receipt key is never available to this tool.
 
-usage (by the client): issuer_tool.py --config RUN_CONFIG.json --step N --run RUN
+usage (by the client): issuer_tool.py --config RUN_CONFIG.json --ordinal K --next-index N --run RUN   (legacy strict form: --step N)
 prints one JSON line: {"file","origin"} or {"done":true}. Staged files and a derivation log are written under RUN/producer/.
 """
 import argparse, hashlib, json, os, subprocess, sys, types
 import cbor2
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--config", required=True); ap.add_argument("--step", type=int, required=True); ap.add_argument("--run", required=True)
+ap.add_argument("--config", required=True); ap.add_argument("--run", required=True)
+ap.add_argument("--ordinal", type=int, help="producer role ordinal: position in the configured role sequence (counts producer roles only)")
+ap.add_argument("--next-index", type=int, help="the log index the next registration will receive = size of the verified public checkpoint = size of the authenticated prefix")
+ap.add_argument("--step", type=int, help="legacy strict interface (run2): ordinal == next index == step")
 a = ap.parse_args()
+if a.step is not None:
+    assert a.ordinal is None and a.next_index is None; a.ordinal = a.next_index = a.step
+assert a.ordinal is not None and a.next_index is not None, "need --ordinal and --next-index"
+ORD, NEXT = a.ordinal, a.next_index
 cfg = json.load(open(a.config))
 for sub in ("tests/differential", "tests/s2a", "orchestration"): sys.path.insert(0, os.path.join(cfg["s2b"], sub))
 import jcs
@@ -34,9 +41,9 @@ H = lambda b: hashlib.sha256(b).digest()
 rd = lambda p: open(p, "rb").read()
 CD = cfg["config_dir"]
 seq = cfg["sequence"]
-if a.step >= len(seq):
+if ORD >= len(seq):
     print(json.dumps({"done": True})); sys.exit(0)
-role = seq[a.step]
+role = seq[ORD]
 
 owner_name = cfg["owner"]; owner = owner_name.encode()
 pj = json.loads(rd(os.path.join(CD, "pB.json"))); ib = rd(os.path.join(CD, "iB.json"))
@@ -73,18 +80,18 @@ def decode(i, st):
     return d
 
 # ---- authenticated prefix from the PUBLIC read endpoint
-prefix, derived = [], {"step": a.step, "role": role}
-if a.step > 0:
-    od = os.path.join(a.run, "producer", f"prefix-{a.step:06d}")
+prefix, derived = [], {"ordinal": ORD, "next_index": NEXT, "prefix_size": NEXT, "role": role, "ordinal_equals_index": ORD == NEXT}
+if NEXT > 0:
+    od = os.path.join(a.run, "producer", f"prefix-{NEXT:06d}")
     rc = subprocess.run([os.path.join(cfg["bin"], "s3-capture"), "export", "--public", cfg["public_url"], "--note-vkey", cfg["note_vkey"], "--origin", cfg["origin"],
-                         "--expect-size", str(a.step), "--out", od], capture_output=True, text=True)
+                         "--expect-size", str(NEXT), "--out", od], capture_output=True, text=True)
     if rc.returncode: sys.exit("authenticated prefix export failed: " + rc.stdout + rc.stderr)
-    for i in range(a.step):
+    for i in range(NEXT):
         le = rd(os.path.join(od, "export", f"{i:06d}.leaf_input")); assert le[:17] == b"P10-LeafEncodeV0\x00" and int.from_bytes(le[53:61], "big") == len(le) - 61
         st = le[61:]
         resp = json.load(open(os.path.join(a.run, "returned", f"{i:06d}.response.json")))
         who = "operator" if os.path.exists(os.path.join(a.run, "operator", "submissions", f"{i:06d}.cose")) else "issuer"
-        assert resp["index"] == i, f"facade returned index {resp['index']} for step {i}"
+        assert resp["index"] == i, f"facade returned index {resp['index']} for log position {i}"
         assert rd(os.path.join(a.run, who, "submissions", f"{i:06d}.cose")) == st, f"authenticated prefix differs from the retained submission at {i}"
         prefix.append(decode(i, st))
     derived["prefix_root"] = json.load(open(os.path.join(od, "export-result.json")))["root"]
@@ -118,7 +125,7 @@ if role in ("bootstrap-policy", "bootstrap-trust-anchor"):
     origin = "operator"
 else:
     origin = "issuer"
-    n = a.step   # the index this statement will be registered at (checked by the client against the facade's answer)
+    n = NEXT   # the index this statement will be registered at: derived from the verified checkpoint by the client and validated against the facade's answer
     if role == "profile":
         det = P.Detailed(n, owner, "profileCommit", "verified", "profileCommit", ic.profile_digest)
     elif role == "instance":
@@ -144,7 +151,7 @@ else:
         sys.exit("unknown role " + role)
     if role != "adjudication": st = build(det)
 sd = os.path.join(a.run, "producer", "staged"); os.makedirs(sd, exist_ok=True)
-f = os.path.join(sd, f"{a.step:06d}.cose"); open(f, "wb").write(st)
+f = os.path.join(sd, f"{NEXT:06d}.cose"); open(f, "wb").write(st)
 derived.update({"statement_sha256": H(st).hex(), "statement_len": len(st), "origin": origin})
 with open(os.path.join(a.run, "producer", "steps.jsonl"), "a") as lg: lg.write(json.dumps(derived, sort_keys=True) + "\n")
 print(json.dumps({"file": f, "origin": origin}))

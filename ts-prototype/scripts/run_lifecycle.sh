@@ -3,19 +3,22 @@
 #   run_lifecycle.sh prepare <env>   fresh keys (outside the repository), public configuration, candidate run configuration, tooling
 #   run_lifecycle.sh capture <env>   pin check, facade, runtime issuer tooling + capture client, public export, assemble capture, expected tB, ANCHOR  (stops here)
 #   run_lifecycle.sh verify  <env>   prototype checks, G5 with the recorded anchor, unchanged chain on G5-returned paths (network-isolated)
-# <env> defines: BIN PY S2A S2B ENTRY G5 GLUE ISS_KEYS TS_KEYS NOTE_KEYS OUT OWNER TS_ISS ORIGIN PORT LEAN_BIN LABEL
+# <env> defines: BIN PY S2A S2B ENTRY G5 GLUE ISS_KEYS TS_KEYS NOTE_KEYS OUT OWNER TS_ISS ORIGIN PORT LEAN_BIN LABEL; optional LAYOUT=ml1 (default, run2 shape) | ml2 (operator note after the profile)
 set -euo pipefail
 phase="$1"; . "$2"; HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"; PROTO="$REPO/ts-prototype"
+LAYOUT="${LAYOUT:-ml1}"
 SEQ='["bootstrap-policy","bootstrap-trust-anchor","profile","instance","admission","closure","adjudication"]'
 if [ "$phase" = prepare ]; then
   [ ! -e "$OUT" ] || [ -z "$(ls -A "$OUT")" ] || { echo "OUT not empty" >&2; exit 2; }
   for d in "$ISS_KEYS" "$TS_KEYS" "$NOTE_KEYS"; do [ ! -e "$d" ] || { echo "refusing: $d exists (fresh keys required)" >&2; exit 2; }; done
   mkdir -p "$OUT/tooling"
   VKEY="$("$BIN/s3-keygen" --name "$ORIGIN" --out "$NOTE_KEYS")"
-  "$PY" -B "$PROTO/producer/gen_config.py" --s2b "$S2B" --s2a "$S2A" --out "$OUT/config" --issuer-keys-dir "$ISS_KEYS" --ts-keys-dir "$TS_KEYS" --owner "$OWNER" --ts-iss "$TS_ISS" --origin "$ORIGIN" | tee "$OUT/gen_config.out"
-  "$PY" - "$OUT" "$VKEY" "$SEQ" "$OWNER" "$TS_ISS" "$ORIGIN" "$PORT" <<'P'
+  GCX=(); [ "$LAYOUT" = ml2 ] && GCX=(--expect-size 8 --expect-subject-idx 2,4,5,6,7)
+  "$PY" -B "$PROTO/producer/gen_config.py" --s2b "$S2B" --s2a "$S2A" --out "$OUT/config" --issuer-keys-dir "$ISS_KEYS" --ts-keys-dir "$TS_KEYS" --owner "$OWNER" --ts-iss "$TS_ISS" --origin "$ORIGIN" "${GCX[@]}" | tee "$OUT/gen_config.out"
+  if [ "$LAYOUT" = ml2 ]; then mkdir -p "$OUT/operator-staging"; "$PY" -B "$PROTO/producer/operator_note.py" --s2b "$S2B" --config "$OUT/config" --issuer-keys "$ISS_KEYS" --ts-iss "$TS_ISS" --out "$OUT/operator-staging/note.cose"; fi
+  "$PY" - "$OUT" "$VKEY" "$SEQ" "$OWNER" "$TS_ISS" "$ORIGIN" "$PORT" "$LAYOUT" <<'P'
 import json, sys
-out, vkey, seq, owner, ts_iss, origin, port = sys.argv[1:]
+out, vkey, seq, owner, ts_iss, origin, port, layout = sys.argv[1:]
 meta = json.load(open(f"{out}/config/PUBLIC_META.json"))
 cfg = {"status": "EXPLORATORY CANDIDATE RUN CONFIGURATION (non-normative; not adopted)",
        "log_engine": {"name": "github.com/transparency-dev/tessera", "version": "v1.0.4", "commit": "6bca8e8d5e23c9941f2b8a08f512b373f7131730", "storage": "posix", "antispam": False, "witnesses": False},
@@ -25,6 +28,12 @@ cfg = {"status": "EXPLORATORY CANDIDATE RUN CONFIGURATION (non-normative; not ad
        "issuer_key_thumbprints": meta["identity"]["issuer_key_thumbprints"], "receipt_payload": "detached", "sequence": json.loads(seq),
        "bootstrap": "leaves 0 and 1: EXPERIMENTAL synthetic test statements, operator-submitted through the facade, signed by a key in no key table; no policy exists and none is enforced",
        "unchanged_frozen_inputs": meta["unchanged_vs_ratified_toy"], "not_claimed": ["policy enforcement", "operator independence", "SCRAPI/RFC 9943 compliance", "witnessing", "rotation", "X.509"]}
+cfg["layout"] = layout
+if layout == "ml2":
+    cfg["operator_insert"] = {"after_producer_ordinal": 2, "expected_index": 3, "statement": "operator-staging/note.cose", "counted_as_producer_role": False}
+    cfg["expected_layout"] = {"leaves": 8, "instance_index": 4, "admission_index": 5, "closure_index": 6, "adjudication_index": 7, "adjudication_refs": [2, 4, 6],
+        "layout": [{"index": 0, "what": "bootstrap"}, {"index": 1, "what": "bootstrap"}, {"index": 2, "what": "profile"}, {"index": 3, "what": "note"}, {"index": 4, "what": "instance"},
+                   {"index": 5, "what": "admission"}, {"index": 6, "what": "closure"}, {"index": 7, "what": "adjudication"}]}
 json.dump(cfg, open(f"{out}/run-config.json", "w"), indent=1, sort_keys=True); open(f"{out}/run-config.json", "a").write("\n")
 P
   cat > "$OUT/tooling/issuer-tool-config.json" <<J
@@ -52,16 +61,24 @@ elif [ "$phase" = capture ]; then
      --register-addr 127.0.0.1:$PORT --public-addr 127.0.0.1:$((PORT+1)) 2> "$OUT/operator/facade.stderr" &
   FPID=$!; trap 'kill $FPID 2>/dev/null || true' EXIT
   for _ in $(seq 100); do curl -sf "http://127.0.0.1:$PORT/config" -o "$OUT/operator/facade-config.json" && break; sleep 0.1; done
+  INS=(); [ "$LAYOUT" = ml2 ] && INS=(--operator-insert "2:$OUT/operator-staging/note.cose")
   echo "== runtime issuer tooling creates, signs and submits each statement from the actually registered prefix"
-  "$BIN/s3-capture" submit --facade "http://127.0.0.1:$PORT" --public "http://127.0.0.1:$((PORT+1))" --note-vkey "$VKEY" --origin "$ORIGIN" --producer "$OUT/tooling/producer.sh" --out "$OUT/run"
-  N="$(python3 -c "import json;print(len(json.load(open('$OUT/run-config.json'))['sequence']))")"
+  "$BIN/s3-capture" submit --facade "http://127.0.0.1:$PORT" --public "http://127.0.0.1:$((PORT+1))" --note-vkey "$VKEY" --origin "$ORIGIN" --producer "$OUT/tooling/producer.sh" "${INS[@]}" --out "$OUT/run"
+  N="$(python3 -c "import json;c=json.load(open('$OUT/run-config.json'));print(c.get('expected_layout',{}).get('leaves', len(c['sequence'])))")"
   echo "== export from the PUBLIC read endpoint only"
   "$BIN/s3-capture" export --public "http://127.0.0.1:$((PORT+1))" --note-vkey "$VKEY" --origin "$ORIGIN" --expect-size "$N" --out "$OUT/run"
   kill $FPID; wait $FPID || true; trap - EXIT
   cp "$OUT/operator/state/journal.jsonl" "$OUT/extra/facade-journal.jsonl"; cp "$OUT/operator/facade-config.json" "$OUT/extra/"; printf '%s\n' "$VKEY" > "$OUT/extra/note.vkey"
   cp "$OUT/run/producer/steps.jsonl" "$OUT/extra/producer-steps.jsonl"
+  TSO=0,1; ROLES=0=registration-policy-test,1=trust-anchor-test
+  if [ "$LAYOUT" = ml2 ]; then
+    TSO=0,1,3; ROLES=0=registration-policy-test,1=trust-anchor-test,3=non-target-test-note
+    echo "== pre-verification record of the producer/index separation (retained data only)"
+    "$PY" -B "$HERE/producer_index_record.py" --s2b "$S2B" --config "$OUT/config" --run "$OUT/run" --run-config "$OUT/run-config.json" --out "$OUT/producer-index-record.json" | tee "$OUT/producer-index-record.out"
+    cp "$OUT/producer-index-record.json" "$OUT/extra/"
+  fi
   echo "== assemble capture and request.cbor from the retained bytes"
-  "$PY" -B "$HERE/assemble_capture_v2.py" --s2b "$S2B" --fixture "$OUT/config" --run "$OUT/run" --out "$OUT/capture" --extra "$OUT/extra" --ts-origin 0,1 --roles 0=registration-policy-test,1=trust-anchor-test \
+  "$PY" -B "$HERE/assemble_capture_v2.py" --s2b "$S2B" --fixture "$OUT/config" --run "$OUT/run" --out "$OUT/capture" --extra "$OUT/extra" --ts-origin "$TSO" --roles "$ROLES" \
      --issuers "$OWNER,admitter-one" --derive-target-payload | tee "$OUT/assemble.json"
   "$PY" -B "$HERE/derive_expected_tb_from_prefix.py" --s2b "$S2B" --config "$OUT/config" --run "$OUT/run" --out "$OUT/expected" > "$OUT/derive-expected-tb.out"
   python3 -c "import json;print(json.load(open('$OUT/assemble.json'))['capture_json_sha256'])" > "$OUT/ANCHOR.sha256"
@@ -70,7 +87,7 @@ elif [ "$phase" = verify ]; then
   VKEY="$(cat "$NOTE_KEYS/note.vkey")"
   TS_PUB="$OUT/config/public/ts.public.cose_key.cbor"
   echo "== prototype checks (facade/public-read; NOT a frozen-chain verdict)"
-  N="$(python3 -c "import json;print(len(json.load(open('$OUT/run-config.json'))['sequence']))")"
+  N="$(python3 -c "import json;c=json.load(open('$OUT/run-config.json'));print(c.get('expected_layout',{}).get('leaves', len(c['sequence'])))")"
   "$PY" -B "$HERE/s3check.py" --run "$OUT/run" --s2b "$S2B" --note-vkey "$VKEY" --origin "$ORIGIN" --ts-pub "$TS_PUB" --ts-iss "$TS_ISS" --out "$OUT/facade-checks.json" --expect "$N" | tee "$OUT/facade-checks.out"
   ANCHOR="$(cat "$OUT/ANCHOR.sha256")"
   echo "== G5 with the recorded anchor $ANCHOR"

@@ -112,6 +112,23 @@ func (p *Public) Checkpoint(ctx context.Context) (*log.Checkpoint, []byte, error
 // ErrCheckpointUnverified: the served checkpoint is not signed by the pinned key for the expected origin (or is malformed). Never retried.
 var ErrCheckpointUnverified = errors.New("checkpoint failed verification")
 
+// WaitCurrent returns the current VERIFIED checkpoint (a real context deadline bounds the wait for the endpoint to answer).
+func (p *Public) WaitCurrent(ctx context.Context, timeout time.Duration) (*log.Checkpoint, []byte, error) {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	for {
+		cp, raw, err := p.Checkpoint(ctx)
+		if err == nil || errors.Is(err, ErrCheckpointUnverified) {
+			return cp, raw, err
+		}
+		select {
+		case <-ctx.Done():
+			return nil, nil, fmt.Errorf("no verified checkpoint within %s (last: %v)", timeout, err)
+		case <-time.After(100 * time.Millisecond):
+		}
+	}
+}
+
 // WaitCheckpointSize polls until a verified checkpoint of exactly size has been published.
 func (p *Public) WaitCheckpointSize(ctx context.Context, size uint64, timeout time.Duration) (*log.Checkpoint, []byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout) // a real context deadline: it also interrupts a request the server accepted but never answers

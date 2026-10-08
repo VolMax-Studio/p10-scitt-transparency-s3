@@ -12,4 +12,4 @@
   is unchanged. The run2 `--step N` interface is still accepted by the tool (ordinal == index) but the client no longer uses it.
 - Scripts: `../scripts/run_lifecycle.sh` (prepare / capture / verify), `derive_expected_tb_from_prefix.py`, `assemble_capture_v2.py`, `producer_index_record.py` (pre-verification record of ordinal vs index, closure/adjudication references and retention for the `ml2` layout; `LAYOUT=ml2`).
 
-The two bootstrap statements are explicitly experimental synthetic test statements; no policy exists and none is enforced.
+`gen_config.py` also writes the facade's preconfigured issuer table (`public/issuers.json`) and the two bootstrap declaration payloads (`bootstrap/*.json`, hashed in `PUBLIC_META.json`); `issuer_tool.py` signs them with the operator key as leaves 0 and 1. The declarations are published bytes: they confer no key authority and are not read by the facade.

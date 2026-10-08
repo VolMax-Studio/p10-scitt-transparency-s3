@@ -24,6 +24,12 @@ ap.add_argument("--only", default="checkpoint,tile,entries,disconnect,client")
 a = ap.parse_args()
 sys.path.insert(0, os.path.join(a.s2b, "tests", "differential"))
 import gen_corpus as G
+import tempfile
+from cryptography.hazmat.primitives.asymmetric import ec
+TESTDIR = tempfile.mkdtemp(prefix="s3-timeout-tests-"); TKEY = ec.generate_private_key(ec.SECP256R1())
+open(os.path.join(TESTDIR, "timeout-test.cbor"), "wb").write(G.cose_key(TKEY))
+ISSUER_TABLE = os.path.join(TESTDIR, "issuers.json")
+open(ISSUER_TABLE, "w").write(json.dumps({"format": "S3-ISSUER-TABLE-V0", "issuers": [{"iss": "timeout-test", "key_thumbprint": G.thumbprint(TKEY).hex(), "cose_key_file": "timeout-test.cbor"}]}))
 meta = json.load(open(os.path.join(a.fixture, "PUBLIC_META.json")))
 TS_ISS, THUMB = meta["identity"]["ts_iss"], meta["identity"]["ts_key_thumbprint"]
 VKEY = open(os.path.join(a.note_keys, "note.vkey")).read().strip(); ORIGIN = VKEY.split("+")[0]
@@ -34,7 +40,8 @@ POST = a.mode == "post"
 
 def stmt(i):
     prot = G.cmap([(G.uint(1), G.integer(-7)), (G.uint(15), G.cmap([(G.uint(1), G.tstr("timeout-test")), (G.uint(2), G.tstr(f"urn:volmax:s3-test:timeout-{i}"))]))])
-    return G.tag(18, G.arr([G.bstr(prot), G.cmap([]), G.bstr(f"payload-{i}".encode()), G.bstr(b"\0" * 64)]))
+    payload = f"payload-{i}".encode()
+    return G.tag(18, G.arr([G.bstr(prot), G.cmap([]), G.bstr(payload), G.bstr(G.sign(TKEY, G.sig_structure(prot, payload)))]))
 
 class Facade:
     def __init__(self, name, port, proxy_port):
@@ -43,7 +50,7 @@ class Facade:
     def start(self):
         cmd = [os.path.join(a.bin, "s3-facade"), "--storage", f"{self.dir}/log", "--state", f"{self.dir}/state", "--origin", ORIGIN,
                "--note-skey-file", os.path.join(a.note_keys, "note.skey"), "--note-vkey", VKEY, "--cose-key", os.path.join(a.keys_dir, "ts.pem"), "--ts-iss", TS_ISS,
-               "--expect-thumbprint", THUMB, "--register-addr", f"127.0.0.1:{self.reg}", "--public-addr", f"127.0.0.1:{self.pub}", "--checkpoint-interval", "100ms",
+               "--expect-thumbprint", THUMB, "--issuers", ISSUER_TABLE, "--register-addr", f"127.0.0.1:{self.reg}", "--public-addr", f"127.0.0.1:{self.pub}", "--checkpoint-interval", "100ms",
                "--publish-timeout", f"{a.publish_timeout}s", "--public-read-url", f"http://127.0.0.1:{self.pp}/"]
         if POST: cmd += ["--fetch-timeout", f"{a.fetch_timeout}s"]
         self.err = open(os.path.join(self.dir, "facade.err"), "wb")

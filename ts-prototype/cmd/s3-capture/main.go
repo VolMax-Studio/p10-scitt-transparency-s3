@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
@@ -69,7 +70,7 @@ func submit(args []string) {
 	stmts := fs.String("statements", "", "directory of NNNNNN.cose files to submit, in index order (the submitter's own files)")
 	opInsert := fs.String("operator-insert", "", "producer mode: ORDINAL:FILE[,...] register the operator statement FILE through the same facade right after producer ordinal ORDINAL (not a producer role)")
 	producer := fs.String("producer", "", "RUNTIME ISSUER TOOLING: executable called as `PRODUCER --ordinal K --next-index N --run OUT` before each registration; it creates and signs statement N from what has been registered so far and prints one JSON line {\"file\",\"origin\",\"detached\"} or {\"done\":true} (replaces --statements; the arguments are --ordinal K --next-index N --run OUT)")
-	detached := fs.String("detached", "", "optional directory of NNNNNN.payload files: detached statement payloads held by the issuer (never sent to the facade)")
+	detached := fs.String("detached", "", "optional directory of NNNNNN.payload files: detached statement payloads held by the issuer; sent to the facade as the `payload` part (used there for issuer authentication only, never logged)")
 	tsOrigin := fs.String("ts-origin", "", "comma list of indices submitted by the operator (bootstrap), kept apart from issuer submissions")
 	out := fs.String("out", "", "output directory (empty)")
 	retries := fs.Int("retries", 3, "re-POSTs of the same bytes after a transport error")
@@ -104,8 +105,19 @@ func submit(args []string) {
 		}
 		var body []byte
 		var status int
+		ctype, reqBody := "application/cose", stmt
+		if detPayload != nil { // a statement whose COSE payload slot is null: the exact signed payload travels as a separate part; the statement bytes are unchanged
+			var mb bytes.Buffer
+			mw := multipart.NewWriter(&mb)
+			pw, _ := mw.CreateFormField("statement")
+			pw.Write(stmt)
+			pw, _ = mw.CreateFormField("payload")
+			pw.Write(detPayload)
+			mw.Close()
+			ctype, reqBody = mw.FormDataContentType(), mb.Bytes()
+		}
 		for try := 0; ; try++ {
-			r, err := hc.Post(strings.TrimRight(*facade, "/")+"/register", "application/cose", bytes.NewReader(stmt))
+			r, err := hc.Post(strings.TrimRight(*facade, "/")+"/register", ctype, bytes.NewReader(reqBody))
 			if err == nil {
 				body, _ = io.ReadAll(r.Body)
 				r.Body.Close()

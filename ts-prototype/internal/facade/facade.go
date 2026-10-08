@@ -20,6 +20,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -39,6 +41,7 @@ import (
 	"golang.org/x/mod/sumdb/note"
 
 	"github.com/volmax-studio/p10-s3-prototype/internal/admit"
+	"github.com/volmax-studio/p10-s3-prototype/internal/issuerauth"
 	"github.com/volmax-studio/p10-s3-prototype/internal/leafenc"
 	"github.com/volmax-studio/p10-s3-prototype/internal/receipt"
 )
@@ -59,6 +62,8 @@ type Config struct {
 	PublishTimeout       time.Duration // deadline of the WHOLE finalization (checkpoint wait, tiles, entry bundle), counted from its start
 	FetchTimeout         time.Duration // deadline of each single public HTTP read (0: none; the operation deadline still applies)
 	MaxLeafInput         int
+	IssuersFile          string // preconfigured issuer table (spec/registration-interface.md §2); mandatory: the facade does not start without a valid one
+	MaxDetachedPayload   int    // limit on a separately supplied statement payload (bytes)
 	FaultPoint           string // TEST ONLY: self-SIGKILL at pre-add | submitted | integrated | receipt-stored | pre-response
 	FaultOnRequest       int    // 1-based count of admitted registration requests in this process
 }
@@ -70,6 +75,7 @@ type Service struct {
 	rd       tessera.LogReader
 	verif    note.Verifier
 	iss      *receipt.Issuer
+	auth     *issuerauth.Table
 	fetch    *client.HTTPFetcher
 	mu       sync.Mutex
 	known    map[[32]byte]uint64
@@ -128,6 +134,14 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 	if tp := iss.Thumbprint(); hex.EncodeToString(tp[:]) != cfg.ExpectThumbprint {
 		return nil, fmt.Errorf("Receipt key thumbprint %x is not the committed %s", tp, cfg.ExpectThumbprint)
 	}
+	if cfg.IssuersFile == "" {
+		return nil, errors.New("--issuers is mandatory: the facade does not register statements it cannot authenticate")
+	}
+	tpr := iss.Thumbprint()
+	auth, err := issuerauth.Load(cfg.IssuersFile, tpr, cfg.TsIss)
+	if err != nil {
+		return nil, err
+	}
 	readURL := cfg.PublicURL
 	if cfg.PublicReadURL != "" {
 		readURL = cfg.PublicReadURL
@@ -156,7 +170,7 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	s := &Service{cfg: cfg, app: app, shutdown: shutdown, rd: rd, verif: verif, iss: iss, fetch: fetch, known: map[[32]byte]uint64{}}
+	s := &Service{cfg: cfg, app: app, shutdown: shutdown, rd: rd, verif: verif, iss: iss, auth: auth, fetch: fetch, known: map[[32]byte]uint64{}}
 	if s.jf, err = os.OpenFile(filepath.Join(cfg.StateDir, "journal.jsonl"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err != nil {
 		return nil, err
 	}
@@ -217,7 +231,8 @@ func (s *Service) fault(point string) {
 }
 
 // Register performs one registration. stmt is the exact statement byte string; it is never re-encoded.
-func (s *Service) Register(ctx context.Context, stmt []byte) (*Result, *HTTPError) {
+// detached is the separately supplied statement payload (haveDetached tells "supplied and empty" from "not supplied"); it is used for authentication only.
+func (s *Service) Register(ctx context.Context, stmt []byte, detached []byte, haveDetached bool) (*Result, *HTTPError) {
 	ctx = context.WithoutCancel(ctx) // an abandoned client request must not abort a half-done append
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -229,6 +244,11 @@ func (s *Service) Register(ctx context.Context, stmt []byte) (*Result, *HTTPErro
 	if _, aerr := admit.Check(stmt); aerr != nil {
 		s.journal(map[string]any{"event": "reject", "code": aerr.Code})
 		return nil, &HTTPError{http.StatusBadRequest, aerr.Code, aerr.Detail}
+	}
+	// issuer authentication: before the request is counted, before the duplicate index is consulted, before any intent is journaled, before Tessera is called
+	if aerr := s.auth.Verify(stmt, detached, haveDetached); aerr != nil {
+		s.journal(map[string]any{"event": "reject", "code": aerr.Code})
+		return nil, &HTTPError{aerr.Status, aerr.Code, aerr.Detail}
 	}
 	s.nreq++
 	h := sha256.Sum256(li)
@@ -437,12 +457,77 @@ func isTransient(err error) bool {
 func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /register", func(w http.ResponseWriter, r *http.Request) {
-		body, err := io.ReadAll(io.LimitReader(r.Body, int64(s.cfg.MaxLeafInput)+1))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+		reject := func(status int, code, detail string) {
+			s.mu.Lock()
+			s.journal(map[string]any{"event": "reject", "code": code})
+			s.mu.Unlock()
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(map[string]string{"error": code, "detail": detail})
 		}
-		res, herr := s.Register(r.Context(), body)
+		var body, detached []byte
+		haveDetached := false
+		if mt, params, _ := mime.ParseMediaType(r.Header.Get("Content-Type")); mt == "multipart/form-data" {
+			lim := int64(s.cfg.MaxLeafInput) + int64(s.cfg.MaxDetachedPayload) + 1<<16
+			mr := multipart.NewReader(io.LimitReader(r.Body, lim+1), params["boundary"])
+			total := int64(0)
+			for {
+				part, err := mr.NextPart()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					reject(http.StatusBadRequest, "E_BAD_REQUEST", "multipart: "+err.Error())
+					return
+				}
+				max := s.cfg.MaxLeafInput + 1
+				if part.FormName() == "payload" {
+					max = s.cfg.MaxDetachedPayload + 1
+				}
+				b, err := io.ReadAll(io.LimitReader(part, int64(max)))
+				total += int64(len(b))
+				if err != nil || total > lim {
+					reject(http.StatusBadRequest, "E_BAD_REQUEST", "multipart part unreadable or too large")
+					return
+				}
+				switch part.FormName() {
+				case "statement":
+					if body != nil {
+						reject(http.StatusBadRequest, "E_BAD_REQUEST", "repeated part statement")
+						return
+					}
+					body = b
+					if body == nil {
+						body = []byte{}
+					}
+				case "payload":
+					if haveDetached {
+						reject(http.StatusBadRequest, "E_BAD_REQUEST", "repeated part payload")
+						return
+					}
+					if len(b) > s.cfg.MaxDetachedPayload {
+						reject(http.StatusRequestEntityTooLarge, "E_TOO_LARGE", fmt.Sprintf("detached payload exceeds %d bytes", s.cfg.MaxDetachedPayload))
+						return
+					}
+					haveDetached, detached = true, b
+				default:
+					reject(http.StatusBadRequest, "E_BAD_REQUEST", fmt.Sprintf("unknown part %q", part.FormName()))
+					return
+				}
+			}
+			if body == nil {
+				reject(http.StatusBadRequest, "E_BAD_REQUEST", "part statement is required")
+				return
+			}
+		} else {
+			var err error
+			body, err = io.ReadAll(io.LimitReader(r.Body, int64(s.cfg.MaxLeafInput)+1))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+		}
+		res, herr := s.Register(r.Context(), body, detached, haveDetached)
 		w.Header().Set("Content-Type", "application/json")
 		if herr != nil {
 			w.WriteHeader(herr.Status)
@@ -461,7 +546,7 @@ func (s *Service) Handler() http.Handler {
 		tp := s.iss.Thumbprint()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]any{"origin": s.cfg.Origin, "note_vkey": s.cfg.NoteVKey, "ts_iss": s.cfg.TsIss, "cose_key_thumbprint": hex.EncodeToString(tp[:]),
-			"max_leaf_input": s.cfg.MaxLeafInput, "max_statement": s.cfg.MaxLeafInput - leafenc.HeaderLen, "antispam": false, "log_entries_at_start": s.Scanned,
+			"max_leaf_input": s.cfg.MaxLeafInput, "max_statement": s.cfg.MaxLeafInput - leafenc.HeaderLen, "antispam": false, "issuer_authentication": "ES256 against the preconfigured issuer table", "issuer_table_sha256": s.auth.Sha256, "issuers": s.auth.Entries(), "max_detached_payload": s.cfg.MaxDetachedPayload, "log_entries_at_start": s.Scanned,
 			"tessera": "github.com/transparency-dev/tessera v1.0.4 6bca8e8d5e23c9941f2b8a08f512b373f7131730", "storage": "posix"})
 	})
 	return mux

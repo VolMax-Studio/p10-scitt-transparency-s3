@@ -44,7 +44,7 @@ chk("exactly one registration is an operator insert, not a producer role", [s["s
 chk("producer prefix size equals the next index at every step", all(s["prefix_size"] == s["next_index"] for s in steps))
 # layout
 lay = exp["layout"]
-chk("registered layout equals the preregistered layout", [(d["idx"], d["kind"] or ("note" if d["sub"].endswith(":note") else "bootstrap")) for d in dec] == [(x["index"], x["what"]) for x in lay],
+chk("registered layout equals the preregistered layout", [(d["idx"], d["kind"] or ("note" if d["sub"].endswith("note") else "bootstrap")) for d in dec] == [(x["index"], x["what"]) for x in lay],
     [(d["idx"], d["kind"] or d["sub"]) for d in dec])
 # closure refs and preclosure recomputed from the actual authenticated subject view
 ci = by("closure")[0]; cl = [d for d in dec if d["idx"] == ci][0]["pred"]

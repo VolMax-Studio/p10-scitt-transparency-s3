@@ -27,6 +27,8 @@ func main() {
 	flag.StringVar(&c.CosePEM, "cose-key", "", "PEM ES256 Receipt-signing key (outside the repository)")
 	flag.StringVar(&c.TsIss, "ts-iss", "", "Receipt issuer (CWT iss) committed in the instance")
 	flag.StringVar(&c.ExpectThumbprint, "expect-thumbprint", "", "hex SHA-256 thumbprint the Receipt key must have")
+	flag.StringVar(&c.IssuersFile, "issuers", "", "preconfigured issuer table (S3-ISSUER-TABLE-V0 JSON; spec/registration-interface.md); mandatory")
+	flag.IntVar(&c.MaxDetachedPayload, "max-detached-payload", 1<<20, "limit on a separately supplied statement payload (bytes)")
 	flag.StringVar(&regAddr, "register-addr", "127.0.0.1:8080", "registration listener")
 	flag.StringVar(&pubAddr, "public-addr", "127.0.0.1:8081", "public read listener")
 	batch := flag.Uint("batch-size", 1, "Tessera batch max size")
@@ -41,7 +43,7 @@ func main() {
 	flag.IntVar(&c.FaultOnRequest, "fault-on-request", 0, "TEST ONLY: 1-based admitted registration request that triggers the fault")
 	flag.Parse()
 	c.BatchSize = *batch
-	for n, v := range map[string]string{"storage": c.StorageDir, "state": c.StateDir, "origin": c.Origin, "note-skey-file": c.NoteSKeyFile, "note-vkey": c.NoteVKey, "cose-key": c.CosePEM, "ts-iss": c.TsIss, "expect-thumbprint": c.ExpectThumbprint} {
+	for n, v := range map[string]string{"storage": c.StorageDir, "state": c.StateDir, "origin": c.Origin, "note-skey-file": c.NoteSKeyFile, "note-vkey": c.NoteVKey, "cose-key": c.CosePEM, "ts-iss": c.TsIss, "expect-thumbprint": c.ExpectThumbprint, "issuers": c.IssuersFile} {
 		if v == "" {
 			fmt.Fprintln(os.Stderr, "missing --"+n)
 			os.Exit(2)

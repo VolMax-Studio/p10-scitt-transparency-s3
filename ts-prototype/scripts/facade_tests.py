@@ -8,22 +8,37 @@
   T5 chaos: external SIGKILL at random times while the capture client submits N statements; exactly-once invariant at the end
   T7 producer protocol: ordinal, next index (from the verified checkpoint) and prefix size are separate; an operator statement inserted between two producer roles shifts
      the later indices; a rogue concurrent writer is detected by the returned-index validation; the strict fixture-submit mode still refuses an index mismatch
+  T8 issuer authentication (spec/registration-interface.md): valid attached and detached statements are registered; tampered signature, header or payload, identity-to-key
+     mismatch, unknown issuer, unsupported algorithm/label, kid mismatch and missing/incorrect/unexpected detached payloads are refused with their codes; every refusal appends nothing,
+     journals no intent and issues no Receipt; a duplicate is not answered without authentication; the real capture client transports a detached payload
   T6 pinned-key / origin enforcement: wrong pin or origin refuses to start; the capture client rejects a wrong key/origin; a forged checkpoint on the public
      endpoint (valid format, wrong key) makes the facade fail closed (502, no Receipt issued, none stored)
 
 usage: facade_tests.py --bin DIR --py PYTHON --s2b DIR --keys-dir DIR --note-keys DIR --fixture DIR --out DIR [--only T1,T4] [--chaos-n 30] [--seed 1]
 """
-import argparse, json, os, random, shutil, signal, subprocess, sys, threading, time, urllib.request, urllib.error, glob
+import argparse, hashlib, json, os, random, shutil, signal, subprocess, sys, threading, time, urllib.request, urllib.error, glob
 
 ap = argparse.ArgumentParser()
 for k in ("bin", "py", "s2b", "keys-dir", "note-keys", "fixture", "out"):
     ap.add_argument("--" + k, required=True)
-ap.add_argument("--only", default="T1,T2,T3,T4,T5,T6,T7")
+ap.add_argument("--only", default="T1,T2,T3,T4,T5,T6,T7,T8")
 ap.add_argument("--chaos-n", type=int, default=30)
 ap.add_argument("--seed", type=int, default=1)
 a = ap.parse_args()
 sys.path.insert(0, os.path.join(a.s2b, "tests", "differential"))
 import gen_corpus as G
+import tempfile
+from cryptography.hazmat.primitives.asymmetric import ec
+
+# throwaway test issuers (private keys live only in this process); the table is the preconfigured trust of every facade started by this script
+TESTDIR = tempfile.mkdtemp(prefix="s3-facade-tests-")
+ISSUERS = {"facade-test": ec.generate_private_key(ec.SECP256R1()), "facade-test-2": ec.generate_private_key(ec.SECP256R1())}
+def write_issuer_table(d, issuers):
+    os.makedirs(d, exist_ok=True); es = []
+    for iss, k in issuers.items():
+        open(os.path.join(d, iss + ".cbor"), "wb").write(G.cose_key(k)); es.append({"iss": iss, "key_thumbprint": G.thumbprint(k).hex(), "cose_key_file": iss + ".cbor"})
+    p = os.path.join(d, "issuers.json"); open(p, "w").write(json.dumps({"format": "S3-ISSUER-TABLE-V0", "issuers": es})); return p
+ISSUER_TABLE = write_issuer_table(TESTDIR, ISSUERS)
 
 meta = json.load(open(os.path.join(a.fixture, "PUBLIC_META.json")))
 TS_ISS, THUMB = meta["identity"]["ts_iss"], meta["identity"]["ts_key_thumbprint"]
@@ -34,13 +49,15 @@ OUT = os.path.abspath(a.out); os.makedirs(OUT, exist_ok=True)
 HERE = os.path.dirname(os.path.abspath(__file__))
 results = {}
 
-def stmt(i, size=None, prot_extra=None, unprot=None, sub=None):
-    """structurally conformant COSE_Sign1 (signature bytes are dummy: the facade does not verify issuer signatures)"""
+def stmt(i, size=None, prot_extra=None, unprot=None, sub=None, iss="facade-test", key=None, detached=False, alg=-7):
+    """conformant COSE_Sign1 signed (ES256, as submitted) by a configured test issuer; detached=True leaves the payload slot null (the payload is then `payload_of(i)`)"""
     sub = sub or f"urn:volmax:s3-test:facade-test-{i}"
-    prot = G.cmap([(G.uint(1), G.integer(-7)), (G.uint(15), G.cmap([(G.uint(1), G.tstr("facade-test")), (G.uint(2), G.tstr(sub))]))] + (prot_extra or []))
+    prot = G.cmap([(G.uint(1), G.integer(alg)), (G.uint(15), G.cmap([(G.uint(1), G.tstr(iss)), (G.uint(2), G.tstr(sub))]))] + (prot_extra or []))
+    k = key or ISSUERS.get(iss) or ISSUERS["facade-test"]
     def build(n):
         payload = (f"payload-{i}-".encode() + b"x" * n)
-        return G.tag(18, G.arr([G.bstr(prot), unprot if unprot is not None else G.cmap([]), G.bstr(payload), G.bstr(b"\0" * 64)]))
+        sg = G.sign(k, G.sig_structure(prot, payload))
+        return G.tag(18, G.arr([G.bstr(prot), unprot if unprot is not None else G.cmap([]), G.NULL if detached else G.bstr(payload), G.bstr(sg)]))
     if size is None:
         return build(8)
     base = len(build(0)); assert size >= base
@@ -48,6 +65,7 @@ def stmt(i, size=None, prot_extra=None, unprot=None, sub=None):
         s = build(size - base - d)
         if len(s) == size: return s
     raise AssertionError("cannot build a statement of the requested size")
+def payload_of(i): return f"payload-{i}-".encode() + b"x" * 8
 
 class Facade:
     def __init__(self, name, port, batch="1:10ms", cpint="200ms", extra=()):
@@ -59,7 +77,7 @@ class Facade:
         bs, ba = self.batch.split(":")
         cmd = [os.path.join(a.bin, "s3-facade"), "--storage", f"{self.dir}/log", "--state", f"{self.dir}/state", "--origin", ORIGIN,
                "--note-skey-file", os.path.join(a.note_keys, "note.skey"), "--note-vkey", VKEY, "--cose-key", os.path.join(a.keys_dir, "ts.pem"),
-               "--ts-iss", TS_ISS, "--expect-thumbprint", THUMB, "--register-addr", f"127.0.0.1:{self.reg}", "--public-addr", f"127.0.0.1:{self.pub}",
+               "--ts-iss", TS_ISS, "--expect-thumbprint", THUMB, "--issuers", ISSUER_TABLE, "--register-addr", f"127.0.0.1:{self.reg}", "--public-addr", f"127.0.0.1:{self.pub}",
                "--batch-size", bs, "--batch-age", ba, "--checkpoint-interval", self.cpint] + self.extra
         if fault: cmd += ["--fault-point", fault, "--fault-on-request", str(on_req)]
         self.starts += 1
@@ -81,8 +99,12 @@ class Facade:
             except subprocess.TimeoutExpired: self.proc.kill(); self.proc.wait()
     def kill(self):
         if self.proc and self.proc.poll() is None: self.proc.kill(); self.proc.wait()
-    def post(self, data, timeout=60):
-        rq = urllib.request.Request(self.url() + "/register", data=data, method="POST", headers={"Content-Type": "application/cose"})
+    def post(self, data, timeout=60, payload=None, ctype="application/cose"):
+        hdr = {"Content-Type": ctype}
+        if payload is not None:   # statement with a separately supplied payload: multipart/form-data, parts `statement` and `payload`
+            bd = "----s3test"; hdr = {"Content-Type": f"multipart/form-data; boundary={bd}"}
+            data = (f'--{bd}\r\nContent-Disposition: form-data; name="statement"\r\n\r\n').encode() + data + (f'\r\n--{bd}\r\nContent-Disposition: form-data; name="payload"\r\n\r\n').encode() + payload + f"\r\n--{bd}--\r\n".encode()
+        rq = urllib.request.Request(self.url() + "/register", data=data, method="POST", headers=hdr)
         try:
             r = urllib.request.urlopen(rq, timeout=timeout); return r.status, json.loads(r.read())
         except urllib.error.HTTPError as e:
@@ -291,13 +313,13 @@ def T6():
         kb = b"\x01" + other; vk = f"{name}+{hashlib.sha256(name.encode()+b'\n'+kb).digest()[:4].hex()}+{base64.b64encode(kb).decode()}"
         cmd = [os.path.join(a.bin, "s3-facade"), "--storage", f"{f.dir}/log-{label}", "--state", f"{f.dir}/state-{label}", "--origin", ORIGIN if label != "wrong_origin" else "other/origin",
                "--note-skey-file", os.path.join(a.note_keys, "note.skey"), "--note-vkey", vk if label == "wrong_pinned_vkey" else VKEY, "--cose-key", os.path.join(a.keys_dir, "ts.pem"),
-               "--ts-iss", TS_ISS, "--expect-thumbprint", THUMB, "--register-addr", "127.0.0.1:19402", "--public-addr", "127.0.0.1:19403"]
+               "--ts-iss", TS_ISS, "--expect-thumbprint", THUMB, "--issuers", ISSUER_TABLE, "--register-addr", "127.0.0.1:19402", "--public-addr", "127.0.0.1:19403"]
         r = sp.run(cmd, capture_output=True, text=True, timeout=30)
         res[label] = {"returncode": r.returncode, "stderr_tail": r.stderr.strip().splitlines()[-1][:160]}
         ok &= r.returncode != 0
     # wrong Receipt-key thumbprint
     cmd = [os.path.join(a.bin, "s3-facade"), "--storage", f"{f.dir}/log-tp", "--state", f"{f.dir}/state-tp", "--origin", ORIGIN, "--note-skey-file", os.path.join(a.note_keys, "note.skey"), "--note-vkey", VKEY,
-           "--cose-key", os.path.join(a.keys_dir, "ts.pem"), "--ts-iss", TS_ISS, "--expect-thumbprint", "00" * 32, "--register-addr", "127.0.0.1:19402", "--public-addr", "127.0.0.1:19403"]
+           "--cose-key", os.path.join(a.keys_dir, "ts.pem"), "--ts-iss", TS_ISS, "--expect-thumbprint", "00" * 32, "--issuers", ISSUER_TABLE, "--register-addr", "127.0.0.1:19402", "--public-addr", "127.0.0.1:19403"]
     r = sp.run(cmd, capture_output=True, text=True, timeout=30); res["wrong_receipt_key_thumbprint"] = {"returncode": r.returncode, "stderr_tail": r.stderr.strip().splitlines()[-1][:160]}; ok &= r.returncode != 0
     # (b) capture client with a wrong pin / origin
     f = Facade("t6b", 19410); f.start()
@@ -372,6 +394,84 @@ printf '{{"file":"%s","origin":"issuer"}}\\n' "{d}/staged/$N.cose"
         ok &= rc != 0 and "registered at index 0, expected 5" in o
     finally: f.stop()
     return ok, res
+
+# ------------------------------------------------------------------------------------------------ T8
+def T8():
+    f = Facade("t8", 19600); f.start(); res = {}; ok = True
+    try:
+        other = ec.generate_private_key(ec.SECP256R1())
+        def flip(b, off): c = bytearray(b); c[off] ^= 1; return bytes(c)
+        valid = stmt(0); s0, j0 = f.post(valid); res["valid_attached"] = s0; ok &= s0 == 201
+        dv = stmt(1, detached=True); s1, j1 = f.post(dv, payload=payload_of(1)); res["valid_detached"] = {"http": s1, "index": j1.get("index")}; ok &= s1 == 201 and j1.get("index") == 1
+        s2, j2 = f.post(stmt(2, iss="facade-test-2")); res["valid_second_issuer"] = s2; ok &= s2 == 201
+        time.sleep(0.6); base_size = f.checkpoint_size(); ok &= base_size == 3
+        n_intent = lambda: sum(1 for x in f.journal() if x["event"] == "intent")
+        n_receipts = lambda: len(glob.glob(f"{f.dir}/state/receipts/*.receipt.cbor"))
+        intents0, receipts0 = n_intent(), n_receipts()
+        a3 = stmt(3); body_off = a3.rindex(b"payload-3-")
+        prot_off = a3.index(b"urn:volmax")                               # inside the protected header (the sub claim): iss stays valid, so only the signature can catch it
+        cases = {
+            "signature_bit_flipped": (flip(a3, len(a3) - 5), None, 403, "E_SIGNATURE_INVALID"),
+            "payload_tampered": (flip(a3, body_off + 2), None, 403, "E_SIGNATURE_INVALID"),
+            "protected_header_tampered": (flip(a3, prot_off + 5), None, 403, "E_SIGNATURE_INVALID"),
+            "identity_to_key_mismatch": (stmt(4, iss="facade-test", key=ISSUERS["facade-test-2"]), None, 403, "E_SIGNATURE_INVALID"),
+            "unknown_issuer": (stmt(5, iss="nobody", key=other), None, 403, "E_ISSUER_UNKNOWN"),
+            "alg_es384": (stmt(6, alg=-35), None, 400, "E_ALG_UNSUPPORTED"),
+            "alg_eddsa": (stmt(7, alg=-8), None, 400, "E_ALG_UNSUPPORTED"),
+            "label_crit": (stmt(8, prot_extra=[(G.uint(2), G.arr([G.integer(1)]))]), None, 400, "E_PROTECTED_LABEL_UNSUPPORTED"),
+            "label_x5chain": (stmt(9, prot_extra=[(G.uint(33), G.bstr(b"x"))]), None, 400, "E_PROTECTED_LABEL_UNSUPPORTED"),
+            "kid_other_issuers_key": (stmt(10, prot_extra=[(G.uint(4), G.bstr(G.thumbprint(ISSUERS["facade-test-2"])))]), None, 400, "E_KID_MISMATCH"),
+            "detached_without_payload": (stmt(11, detached=True), None, 400, "E_PAYLOAD_PART_MISSING"),
+            "detached_wrong_payload": (stmt(12, detached=True), b"wrong payload", 403, "E_SIGNATURE_INVALID"),
+            "detached_payload_for_attached_statement": (stmt(13), payload_of(13), 400, "E_PAYLOAD_PART_UNEXPECTED"),
+        }
+        for name, (b, pl, want_http, want_code) in cases.items():
+            st, j = f.post(b, payload=pl); got = j.get("error")
+            res[name] = {"http": st, "error": got}
+            ok &= st == want_http and got == want_code
+        st, j = f.post(stmt(14, detached=True), payload=b"x" * ((1 << 20) + 1)); res["detached_payload_over_limit"] = {"http": st, "error": j.get("error")}; ok &= st == 413 and j.get("error") == "E_TOO_LARGE"
+        # a duplicate is not answered without authentication
+        for name, (b, pl) in {"duplicate_with_bad_signature": (flip(valid, len(valid) - 5), None), "duplicate_detached_payload_missing": (dv, None), "duplicate_detached_wrong_payload": (dv, b"x")}.items():
+            st, j = f.post(b, payload=pl); res[name] = {"http": st, "error": j.get("error")}; ok &= st in (400, 403) and "index" not in j
+        # a correct duplicate still gets the stored Receipt
+        st, j = f.post(dv, payload=payload_of(1)); res["duplicate_detached_correct"] = {"http": st, "duplicate": j.get("duplicate"), "index": j.get("index")}; ok &= st == 200 and j.get("duplicate") and j.get("index") == 1
+        # malformed multipart / unknown part / repeated part
+        for name, bd in {"unknown_part": ("evil", b"x"), "no_statement_part": None}.items():
+            if bd is None:
+                rq = urllib.request.Request(f.url() + "/register", data=b'--b\r\nContent-Disposition: form-data; name="payload"\r\n\r\nx\r\n--b--\r\n', method="POST", headers={"Content-Type": "multipart/form-data; boundary=b"})
+            else:
+                rq = urllib.request.Request(f.url() + "/register", data=(f'--b\r\nContent-Disposition: form-data; name="statement"\r\n\r\n').encode() + valid + (f'\r\n--b\r\nContent-Disposition: form-data; name="{bd[0]}"\r\n\r\nx\r\n--b--\r\n').encode(), method="POST", headers={"Content-Type": "multipart/form-data; boundary=b"})
+            try: r = urllib.request.urlopen(rq, timeout=10); st, j = r.status, json.loads(r.read())
+            except urllib.error.HTTPError as e: st, j = e.code, json.loads(e.read())
+            res[name] = {"http": st, "error": j.get("error")}; ok &= st == 400 and j.get("error") == "E_BAD_REQUEST"
+        time.sleep(0.6)
+        res["log_unchanged"] = {"checkpoint_size": f.checkpoint_size(), "intents_before": intents0, "intents_after": n_intent(), "receipts_before": receipts0, "receipts_after": n_receipts()}
+        ok &= res["log_unchanged"]["checkpoint_size"] == base_size and n_intent() == intents0 and n_receipts() == receipts0
+        res["journal_rejects"] = sum(1 for x in f.journal() if x["event"] == "reject")
+        # the real capture client transports a detached payload (fixture mode: NNNNNN.cose + NNNNNN.payload), and the exported leaf equals LeafEncodeV0 of the submitted bytes
+        run = os.path.join(f.dir, "run"); sd = os.path.join(run, "_st"); dd = os.path.join(run, "_det"); os.makedirs(dd, exist_ok=True)
+        d3 = stmt(20, detached=True); write_stmts(sd, [d3], first=3); open(f"{dd}/000003.payload", "wb").write(payload_of(20))
+        rc, o = client("submit", "--facade", f.url(), "--public", f.purl(), "--note-vkey", VKEY, "--origin", ORIGIN, "--statements", sd, "--detached", dd, "--out", run)
+        res["client_detached_submit"] = {"rc": rc, "out": o.strip()[-80:]}; ok &= rc == 0
+        rc2, o2 = client("export", "--public", f.purl(), "--note-vkey", VKEY, "--origin", ORIGIN, "--expect-size", "4", "--out", run)
+        e = exported(run); res["client_detached_export"] = {"rc": rc2, "leaf_is_submitted_bytes": len(e) == 4 and e[3] == G.leaf_input(d3), "detached_payload_not_in_log": all(payload_of(20) not in x for x in e)}
+        ok &= rc2 == 0 and res["client_detached_export"]["leaf_is_submitted_bytes"] and res["client_detached_export"]["detached_payload_not_in_log"]
+        # the same statement without its payload through the client fails closed
+        run2 = os.path.join(f.dir, "run2"); sd2 = os.path.join(run2, "_st"); d4 = stmt(21, detached=True); write_stmts(sd2, [d4], first=4)
+        rc3, o3 = client("submit", "--facade", f.url(), "--public", f.purl(), "--note-vkey", VKEY, "--origin", ORIGIN, "--statements", sd2, "--out", run2)
+        res["client_detached_without_payload"] = {"rc": rc3, "out": o3.strip()[-120:]}; ok &= rc3 != 0 and "E_PAYLOAD_PART_MISSING" in o3
+        # /config reports the authentication and the table
+        c = f.config(); res["config"] = {k: c.get(k) for k in ("issuer_authentication", "issuer_table_sha256", "issuers")}
+        ok &= c.get("issuer_table_sha256") == hashlib.sha256(open(ISSUER_TABLE, "rb").read()).hexdigest()
+        # restart with a valid table works; without --issuers or with a broken table the facade refuses to start
+        f.stop()
+        for label, extra in (("no_issuers_flag", None), ("broken_table", "/nonexistent/issuers.json")):
+            cmd = [os.path.join(a.bin, "s3-facade"), "--storage", f"{f.dir}/log-x", "--state", f"{f.dir}/state-x", "--origin", ORIGIN, "--note-skey-file", os.path.join(a.note_keys, "note.skey"),
+                   "--note-vkey", VKEY, "--cose-key", os.path.join(a.keys_dir, "ts.pem"), "--ts-iss", TS_ISS, "--expect-thumbprint", THUMB, "--register-addr", "127.0.0.1:19602", "--public-addr", "127.0.0.1:19603"] + (["--issuers", extra] if extra else [])
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30); res["start_" + label] = {"returncode": r.returncode, "stderr_tail": r.stderr.strip().splitlines()[-1][:120]}; ok &= r.returncode != 0
+        return ok, res
+    finally: f.stop()
+
 
 for t in a.only.split(","):
     t0 = time.time()

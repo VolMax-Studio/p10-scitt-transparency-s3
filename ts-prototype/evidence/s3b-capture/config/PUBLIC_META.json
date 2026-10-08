@@ -1,0 +1,98 @@
+{
+ "bootstrap": {
+  "issuer_table_sha256": "e1fffa936136135da54c518328b55cb4915cf858dadd73860ff3c3f77d03d1ba",
+  "operator_note_subject": "urn:volmax:s3:operator-note",
+  "policy_declaration_sha256": "c9ac82ddc94da80f87c68547e5ca84b0f0c98da80264614b8df9fb169818763e",
+  "policy_subject": "urn:volmax:s3:policy-declaration",
+  "verification_material_declaration_sha256": "c09e60ab6d7f36107245e3f8d5fa272eb8859b3f64c4f9cd39f26eaec8f27e68",
+  "verification_material_subject": "urn:volmax:s3:verification-material-declaration"
+ },
+ "closed_evidence_set_digest": "a8cf4ba58abe5f0245b1f3d6e1b5b4c8e718ce8dfdfb1137ec1f3a33e5e0fab0",
+ "file_sha256": {
+  "iB.json": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "inst.bin": "7f38622b51abebfed5374c3aefd7ded77f169f04cf6e02c00ecdad4d39d6eaaf",
+  "pB.json": "ac4895511c903e6836c471d197507793566f7d822c49aa5a02a6e0581e7a26ec"
+ },
+ "identity": {
+  "instance_subject": "p10s2sub:0fe1be115beb770330930911e69e4f2026c80809c64ada16e87fe63e7f9150d2",
+  "issuer_key_thumbprints": {
+   "admitter-one": "d670cdd06104880626929398bb2bfad40103801a7ba156393ef9d1cac6172f62",
+   "admitter-two": "43e39148af008041703b0ab2f5cd86071e94b3bc1364d319bfff9a4ea8bd9ac1",
+   "intruder-x": "17b4ef8d400dc85b201f3ecf489a451e1216b155d88f601048ed67c29ef1f25d",
+   "volmax-owner": "63759d03f57a34801b4405f54c6dd9a2ab6bf47e120fa8660f548e202dbce512"
+  },
+  "log_identity_digest": "6a510bcf3a122ae9af2714939d60a6a4e997ff9751836024dd480ebd60cd37c9",
+  "operator_iss": "volmax-s3-operator",
+  "operator_key_thumbprint": "f7cae36222deeaccc01ed6cf2508d7d5f9e7d8e323c17ab2f3a70a264620a45e",
+  "owner_iss": "volmax-owner",
+  "profile_digest": "ac4895511c903e6836c471d197507793566f7d822c49aa5a02a6e0581e7a26ec",
+  "ts_iss": "https://ts.example/volmax-s3",
+  "ts_key_thumbprint": "6bc5b0ae47f8726379ffbfb0e0858fe10ef74ba5b8801edeba0b3d3b89944056"
+ },
+ "note_vkey": "volmax-s3/ts+50425c42+ASw9Mfm5hEfaIJgQ06LI7FHWIyKZb0wvk/uli2w4MiRt",
+ "private_keys": "generated outside the repository, not committed, not recorded",
+ "sanity_checks": [
+  {
+   "check": "toy iB bytes are the S1 p1.instance.json bytes (sha256 62353069...)",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "SubjectDeriveV0 re-derivation reproduces the toy instance_subject",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "LogIdentityV0 re-derivation reproduces the toy log_identity_digest",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "owner name is not an admitter name",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "operator iss is neither an instance name, an admitter name nor the Receipt issuer string",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "only identity-dependent instance fields changed",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "pB differs from the toy pB only in key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "authorized admitters unchanged and the owner is not one",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "fresh keys: no key thumbprint (issuers, operator, TS) occurs in any committed fixture meta or profile",
+   "detail": "",
+   "ok": true
+  }
+ ],
+ "sources": {
+  "s2a_commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+  "s2b_commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+  "template_inst_sha256": "24316063d808800e66c610d3cbaeeb2010aaa76ea5fdfc59b41a0a5d0833e95d",
+  "template_pB_sha256": "7d840d07184049cb9ca97e68d267ab3be2cb53eed7a00e6f8c866323e03fa9ad"
+ },
+ "status": "NON-NORMATIVE EXPLORATORY CONFIGURATION; fresh test keys only; not S3 live-capture evidence",
+ "unchanged_vs_ratified_toy": {
+  "a12_a14": {
+   "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+   "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+   "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+  },
+  "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "request_id": "7265712d30303031",
+  "verifier_manifest_digest": "f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46"
+ }
+}

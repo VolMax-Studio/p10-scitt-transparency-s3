@@ -1,0 +1,90 @@
+[
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 0,
+  "origin": "operator",
+  "producer_ordinal": 0,
+  "public_checkpoint_size": 1,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 1
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 1,
+  "origin": "operator",
+  "producer_ordinal": 1,
+  "public_checkpoint_size": 2,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 2
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 2,
+  "origin": "issuer",
+  "producer_ordinal": 2,
+  "public_checkpoint_size": 3,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 3
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 3,
+  "origin": "operator",
+  "producer_ordinal": -1,
+  "public_checkpoint_size": 4,
+  "recovered": false,
+  "source": "operator-insert",
+  "tree_size_in_receipt": 4
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 4,
+  "origin": "issuer",
+  "producer_ordinal": 3,
+  "public_checkpoint_size": 5,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 5
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 5,
+  "origin": "issuer",
+  "producer_ordinal": 4,
+  "public_checkpoint_size": 6,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 6
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 6,
+  "origin": "issuer",
+  "producer_ordinal": 5,
+  "public_checkpoint_size": 7,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 7
+ },
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 7,
+  "origin": "issuer",
+  "producer_ordinal": 6,
+  "public_checkpoint_size": 8,
+  "recovered": false,
+  "source": "producer",
+  "tree_size_in_receipt": 8
+ }
+]

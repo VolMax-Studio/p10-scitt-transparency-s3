@@ -1,0 +1,17 @@
+Build-reproducibility observations for the executable-pinning proposal (D10). Exploratory, one host, one pass; no source or binary of the repository was modified.
+Host: Linux 6.18 container; Go 1.24.7; Rust 1.82.0 (selected by rust-toolchain.toml; the default toolchain of the host is a newer stable, not used). Builds were made in copies of the sources placed in different directories; S2b checkout linked at <copy>/.deps/s2b (the entry and G5 crates depend on it by the relative path ../.deps/s2b).
+
+Go facade and capture client (ts-prototype, CGO_ENABLED=0, -trimpath, -buildvcs=false, module graph from go.sum):
+  s3-facade   copy 1 == copy 2 (different directories)   sha256 9d00c38f16aa83522cd8da50f4f5e86fd12c25044eeddd135c182c3b60c53a59
+  s3-capture  copy 1 == copy 2                           sha256 315bd5bb4c7c43cad7e4a13290031c9defaaf61edc9ccf0f34442471135a509c
+  The same facade built with the default -mod mode gave the same hash. => byte-identical across directories in this experiment.
+
+Rust (cargo build --locked, separate CARGO_TARGET_DIR per build):
+  same directory, clean rebuild twice, release, s3-spike-entry: identical (44ccf4fa...)
+  different directories (copy 1 vs copy 2):
+     entry debug    differ   entry release  differ   G5 debug  differ   G5 release  differ
+     with RUSTFLAGS=--remap-path-prefix for the copy directory, cargo home and the S2b checkout: entry release and G5 release still differ
+  The cause of the remaining difference was not investigated.
+  The binaries used by the validated runner runs (entry 53ba4440..., G5 a2b4b1ef..., debug profile, built in the repository tree) were NOT reproduced by these copies (different directories); they were not compared to the copies' hashes as an acceptance matter.
+
+Reading: the Go components can be pinned by a reproducible build recipe; the Rust components can be pinned by the identity of the built artifact (or by a fixed build directory), not by a claim of directory-independent reproducible compilation.

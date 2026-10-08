@@ -27,7 +27,7 @@ A service can be fully RFC 9943-compliant and still not be P10 S3-compatible. S3
 
 ```
 S3_PREREG_v0.1.md   draft preregistration (r14)
-spec/               acceptance-runner-map.md, capture-format.md, mixed-log-test-plan.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: deployment profile, registration policy
+spec/               acceptance-runner-map.md, deployment-profile.md (candidate proposals, nothing adopted), capture-format.md, mixed-log-test-plan.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: registration policy
 ts/                 TS deployment (planned)
 capture/            frozen live capture (planned)
 vectors/            committed vectors (planned)

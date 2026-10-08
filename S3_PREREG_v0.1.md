@@ -1,8 +1,10 @@
 # S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r5 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r6 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r6 (relative to r5 at `8d154b5`): a bounded TS selection pass was run (`ts-selection/RECOMMENDATION.md`): two candidates pinned, a capability probe executed against Tessera v1.0.4, and a procedure dry run (not acceptance evidence) built `request.cbor` from retained engine bytes. It recommends, as a proposal only, Tessera plus an S3-owned SCITT facade; OPEN item 3 stays OPEN. The mixed-log plan's title and ML-2 row were corrected. Nothing is adopted.
 
 Revision r5 (relative to r4 at `5f73d22`): G5 inventory defect fixed (file names on disk are no longer converted lossily or rewritten; a backslash-named file used to merge with a legitimate path and escape hashing); the host runner gained an anchored capture path (external anchor required, chain inputs taken only from G5-returned paths, kept separate from the direct ratified controls); the mixed-log test ML-1 and the packaging case ML-6 were built and executed (`spec/mixed-log-test-plan.md` §8); the plan's description of ratified fixtures was corrected. Nothing is adopted; bootstrap, policy enforcement and TS selection remain OPEN.
 
@@ -256,7 +258,7 @@ Excluded from the repository and manifest: private keys, secrets, and any artifa
 
 1. Non-target `sub` value(s) (I2).
 2. Bootstrap mechanism and index-0 content (Section 4).
-3. TS implementation selection (Option A).
+3. TS implementation selection (Option A). A recommendation exists (`ts-selection/RECOMMENDATION.md`, Tessera v1.0.4 plus an S3-owned facade; unresolved choices listed there); it is not a decision.
 4. Lifecycle sequence and capture format (Section 5). Provenance of `pB`/`inst`/`iB` for the S3 instance: a `volmax-owner` fixture with generated test keys was accepted by the unchanged chain in the spike (feasibility only); whether S3 adopts this profile material, and how its keys are governed, is not decided.
 5. Form of the Rust entry: the spike uses a thin S3-owned binary over the unchanged pinned S2b crate; adoption versus the separately versioned `p10-replay-cli` adapter is not decided (`spec/acceptance-runner-map.md` §3).
 6. The S3-owned glue (post-S2a input assembly, composer, correspondence checker): the spike contains experimental code; form, review against this preregistration, and how it is shown to add no rule are not decided. G4 inputs for a non-toy instance (A12–A14 digests) remain open; for the toy semantics the frozen values were reproduced by the spike (`spike/A12_A14_APPLICABILITY.md`).

@@ -1,4 +1,4 @@
-# Mixed-log test plan (candidate; not executed)
+# Mixed-log test plan (candidate; ML-1 and ML-6 executed, ML-2 to ML-5 not executed)
 
 Status: **DRAFT CANDIDATE plan.** ML-1 and ML-6 were built and executed in the r5 pass (§8); ML-2 to ML-5 were not built or executed. This document is a plan plus the pointer to those results; it is not itself a result. Not ratified, not frozen, not adopted.
 
@@ -23,7 +23,7 @@ Merely prepending `k` leaves to an existing request would invalidate the Receipt
 | 6 | adjudication (Receipt target) | | 6 | closure |
 | | | | 7 | adjudication (Receipt target) |
 
-ML-2 is not built. (An earlier revision of this plan called it "`k = 3`", which did not say where the extra leaf sits.)
+ML-2 is not built. (An earlier revision of this plan, including the §6 table row, called it "`k = 3`", which did not say where the extra leaf sits; the table above is the precise map, corrected in the r6 pass.)
 
 ## 3. Constraints each leading leaf must satisfy (from the frozen sources)
 
@@ -56,7 +56,7 @@ The ratified S2b test builder `tests/s2a/scenarios.py::build_log` already fills 
 | ID | Log | Expected |
 |---|---|---|
 | ML-1 (**executed**, §8) | mixed log, `k = 2`, all leading leaves compliant | G5 pass; S2b `Verified`; `tB` rows 0–1 `available(other)`, detailed entries at `2..6`; S2a `accept`; S1 e2e `some`; post-S2a `BINDING_MATCH` with A1–A15 `match` |
-| ML-2 | `k = 3` with one compliant non-target leaf between lifecycle statements | same verdicts; confirms only relative lifecycle order matters |
+| ML-2 | 8 leaves; index map in §2 (leading test statements at 0-1, profile 2, one compliant non-target note at 3 *between* lifecycle statements, instance 4, admission 5, closure 6, adjudication 7 = target); leading count is 2 as in ML-1 | same verdicts; confirms only relative lifecycle order matters |
 | ML-3 | leading leaf with a protected header lacking `sub` | `unavailable` row; S2a HALT `c2_rowUnavailable` (cf. ratified `E5-sub-notstr`) |
 | ML-4 | leading leaf with a non-empty unprotected header, authenticated | `Invalid(binding, LeafInputDomainViolation)`, REJECT (cf. ratified `E10-unprotected`) |
 | ML-5 | leading leaf with the same `sub` as the instance subject but unparsable P10 content | the S2a C2 liveness limitation (`c2_subjectPayloadUnavailable` HALT), documented as an accepted incompleteness, not a failure |

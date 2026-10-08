@@ -1,0 +1,12 @@
+{
+ "index": 2,
+ "tree_size": 3,
+ "root": "61154b135bda81053db9a00cae6f7e0a41e9e06bbd5dff07848225ea81e52929",
+ "leaf_hash": "0959d94729ba260afaa6f2f3b3d193859b2826785380a42d28a1bd6e83de9a98",
+ "inclusion_path": [
+  "abb81ad23849578d121fa201f95fe20780067f47063bc38733c07ac2760dfc28"
+ ],
+ "checkpoint_b64": "cDEwLXMzLXByb2JlLWxvZwozCllSVkxFMXZhZ1FVOXVhQU1ybTkrQ2tIcDRHdTlYZjhIaElJbDZvSGxLU2s9CgrigJQgcDEwLXMzLXByb2JlLWxvZyAvSUV6MktVOHJCL0hHcWtGeVNISGgzdUJVeXpuSzh0NkJKUHBOOUgrL2FrU3pIeElGZm96VWNDM0FhSndwY3Zjd0RESW9pNVI5VVVGREQwV1VsbGwwWVFnRVFBPQo=",
+ "is_dup": false,
+ "await_millis": 253
+}

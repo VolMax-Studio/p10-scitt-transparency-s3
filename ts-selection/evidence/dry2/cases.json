@@ -1,0 +1,37 @@
+[
+ {
+  "id": "DRYRUN",
+  "source": "anchored capture /tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dry2/capture",
+  "request": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dry2/capture/request.cbor",
+  "pb": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dry2/capture/material/pB.json",
+  "inst": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dry2/capture/material/inst.bin",
+  "ib": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dry2/capture/material/iB.json",
+  "retained_target_payload": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dry2/capture/material/target_payload.json",
+  "tb_expected": "/home/user/p10-scitt-transparency-s3/tests/offline/ml/fixtures/ml1/tB.expected",
+  "expect": {
+   "e2e": "some",
+   "post": {
+    "rule": null,
+    "verdict": "BINDING_MATCH",
+    "code": "BindingMatch",
+    "helper_required": true,
+    "rows_all_match": true
+   },
+   "s2a": ".accept",
+   "s2b": {
+    "status": "Verified"
+   },
+   "s2b_detail": {
+    "checkpoint_size": 7,
+    "subject_idx": [
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "unreadable": []
+   }
+  }
+ }
+]

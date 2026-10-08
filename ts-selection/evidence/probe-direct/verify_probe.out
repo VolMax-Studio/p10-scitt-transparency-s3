@@ -1,0 +1,30 @@
+ok   submissions equal the committed prefix files
+ok   [0] index == position and tree_size == index+1
+ok   [0] Tessera leaf hash == S2b leaf_hash(LeafEncodeV0)
+ok   [0] checkpoint root == S2b RFC 9162 MTH of the first 1 leaves
+ok   [0] inclusion path == S2b path
+ok   [0] not a duplicate
+ok   [1] index == position and tree_size == index+1
+ok   [1] Tessera leaf hash == S2b leaf_hash(LeafEncodeV0)
+ok   [1] checkpoint root == S2b RFC 9162 MTH of the first 2 leaves
+ok   [1] inclusion path == S2b path
+ok   [1] not a duplicate
+ok   [2] index == position and tree_size == index+1
+ok   [2] Tessera leaf hash == S2b leaf_hash(LeafEncodeV0)
+ok   [2] checkpoint root == S2b RFC 9162 MTH of the first 3 leaves
+ok   [2] inclusion path == S2b path
+ok   [2] not a duplicate
+ok   [3] index == position and tree_size == index+1
+ok   [3] Tessera leaf hash == S2b leaf_hash(LeafEncodeV0)
+ok   [3] checkpoint root == S2b RFC 9162 MTH of the first 4 leaves
+ok   [3] inclusion path == S2b path
+ok   [3] not a duplicate
+ok   [4] index == position and tree_size == index+1
+ok   [4] Tessera leaf hash == S2b leaf_hash(LeafEncodeV0)
+ok   [4] checkpoint root == S2b RFC 9162 MTH of the first 5 leaves
+ok   [4] inclusion path == S2b path
+ok   [4] not a duplicate
+ok   exported entry count == 5
+ok   exported entries == LeafEncodeV0(submitted) byte for byte
+ok   statement recovered from the exported entry == submitted bytes
+ALL OK

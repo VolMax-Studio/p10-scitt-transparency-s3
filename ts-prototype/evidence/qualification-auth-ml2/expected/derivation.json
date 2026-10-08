@@ -1,0 +1,38 @@
+{
+ "root_from_exported_bytes": "96df1a6973865e0f69c010bc0e522a1250080932125e435527fdca0b619304c5",
+ "size": 8,
+ "rows": 8,
+ "detailed_indices": [
+  2,
+  4,
+  5,
+  6,
+  7
+ ],
+ "detailed_kinds": [
+  "profileCommit",
+  "instanceCommit",
+  "admission",
+  "closure",
+  "adjudication"
+ ],
+ "signature_status": [
+  "verified",
+  "verified",
+  "verified",
+  "verified",
+  "verified"
+ ],
+ "tB_expected_sha256": "f33efdb8d7956424f7615e65a9a854736ebf8f61b6bf7351c55b8419d21d10ba",
+ "chain_output_read": false,
+ "export_leaf_input_sha256": {
+  "000000.leaf_input": "1075e3c02ba2111b521778c11e5c9f9462a579515fad01835b986a4dcefc1f53",
+  "000001.leaf_input": "8f40869eca087f216f5144d5f8520e6277e2788c76b49b916247ebb47f734dff",
+  "000002.leaf_input": "31b0b07699afdd41e90286a9af28011dae81424e58d140505dd2d860cd0dcec5",
+  "000003.leaf_input": "fd6ba492e85acbab3d57a193b5cc7c1975b38c8852e8774e308e34a677dbfb02",
+  "000004.leaf_input": "56f5d50dcf5d85fbe95fbc34363d587d0ceac259b3b7a30dceeefb492b2cb87a",
+  "000005.leaf_input": "c5529742576c8ab31f4115dc6288c99b153ee46668a04241bc2ebdc27f001d0e",
+  "000006.leaf_input": "ccadeea217250d10e14f7f3a1a9a7c24f5723026d698fea18120f1373e813047",
+  "000007.leaf_input": "8c8078a41b23ef8a88dc5286d9bd6b4ed63cd6f5915936c970b6afbdc2e7712d"
+ }
+}

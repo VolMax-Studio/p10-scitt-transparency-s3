@@ -2,7 +2,7 @@
 
 P10 Transparency Log Deployment and Offline Capture Verification.
 
-**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r16). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
+**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r17). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
 
 ## Layers
 
@@ -26,7 +26,7 @@ A service can be fully RFC 9943-compliant and still not be P10 S3-compatible. S3
 ## Layout
 
 ```
-S3_PREREG_v0.1.md   draft preregistration (r16)
+S3_PREREG_v0.1.md   draft preregistration (r17)
 spec/               acceptance-runner-map.md, deployment-profile.md (candidate definition, nothing adopted), registration-interface.md, open-items-resolution.md (proposals), operator-record-receipt-key-retirement.md (template), capture-format.md, mixed-log-test-plan.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: registration policy
 ts/                 TS deployment (planned)
 capture/            frozen live capture (planned)

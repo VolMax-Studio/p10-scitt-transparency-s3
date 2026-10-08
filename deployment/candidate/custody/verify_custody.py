@@ -22,9 +22,15 @@ def report(good, msg):
 sha = lambda b: hashlib.sha256(b).hexdigest()
 man = json.load(open(a.manifest)); idn = man["identity"]; rec = json.load(open(a.record))
 
+# FAIL CLOSED: both package hashes are checked before `age` or `tar` is ever invoked; any mismatch exits nonzero with nothing decrypted or extracted.
+hash_ok = True
 for label, path in (("issuer-archive", a.issuers), ("one-use-receipt-checkpoint", a.one_use)):
     h = sha(open(path, "rb").read())
-    report(h == rec["packages"][label]["sha256"], f"package {label} sha256 {h}")
+    good = h == rec["packages"][label]["sha256"]; hash_ok &= good
+    report(good, f"package {label} sha256 {h}")
+if not hash_ok:
+    print("FAILURES (package hash mismatch: nothing was decrypted or extracted)")
+    sys.exit(1)
 
 def run(cmd, stdin=None):
     return subprocess.run(cmd, input=stdin, capture_output=True)   # stderr captured, never echoed: it could quote paths or key text

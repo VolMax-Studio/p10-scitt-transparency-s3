@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# FRESH EXPLORATORY LIFECYCLE with RUNTIME ISSUER TOOLING (NON-NORMATIVE; not acceptance evidence).
+#   run_lifecycle.sh prepare <env>   fresh keys (outside the repository), public configuration, candidate run configuration, tooling
+#   run_lifecycle.sh capture <env>   pin check, facade, runtime issuer tooling + capture client, public export, assemble capture, expected tB, ANCHOR  (stops here)
+#   run_lifecycle.sh verify  <env>   prototype checks, G5 with the recorded anchor, unchanged chain on G5-returned paths (network-isolated)
+# <env> defines: BIN PY S2A S2B ENTRY G5 GLUE ISS_KEYS TS_KEYS NOTE_KEYS OUT OWNER TS_ISS ORIGIN PORT LEAN_BIN LABEL
+set -euo pipefail
+phase="$1"; . "$2"; HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"; PROTO="$REPO/ts-prototype"
+SEQ='["bootstrap-policy","bootstrap-trust-anchor","profile","instance","admission","closure","adjudication"]'
+if [ "$phase" = prepare ]; then
+  [ ! -e "$OUT" ] || [ -z "$(ls -A "$OUT")" ] || { echo "OUT not empty" >&2; exit 2; }
+  for d in "$ISS_KEYS" "$TS_KEYS" "$NOTE_KEYS"; do [ ! -e "$d" ] || { echo "refusing: $d exists (fresh keys required)" >&2; exit 2; }; done
+  mkdir -p "$OUT/tooling"
+  VKEY="$("$BIN/s3-keygen" --name "$ORIGIN" --out "$NOTE_KEYS")"
+  "$PY" -B "$PROTO/producer/gen_config.py" --s2b "$S2B" --s2a "$S2A" --out "$OUT/config" --issuer-keys-dir "$ISS_KEYS" --ts-keys-dir "$TS_KEYS" --owner "$OWNER" --ts-iss "$TS_ISS" --origin "$ORIGIN" | tee "$OUT/gen_config.out"
+  "$PY" - "$OUT" "$VKEY" "$SEQ" "$OWNER" "$TS_ISS" "$ORIGIN" "$PORT" <<'P'
+import json, sys
+out, vkey, seq, owner, ts_iss, origin, port = sys.argv[1:]
+meta = json.load(open(f"{out}/config/PUBLIC_META.json"))
+cfg = {"status": "EXPLORATORY CANDIDATE RUN CONFIGURATION (non-normative; not adopted)",
+       "log_engine": {"name": "github.com/transparency-dev/tessera", "version": "v1.0.4", "commit": "6bca8e8d5e23c9941f2b8a08f512b373f7131730", "storage": "posix", "antispam": False, "witnesses": False},
+       "facade": {"batch": "1:10ms", "checkpoint_interval": "200ms", "publish_timeout": "30s", "fetch_timeout": "10s", "max_leaf_input": 65535, "register_port": int(port), "public_port": int(port) + 1},
+       "origin": origin, "note_vkey": vkey, "ts_iss": ts_iss, "owner_iss": owner, "instance_subject": meta["identity"]["instance_subject"],
+       "log_identity_digest": meta["identity"]["log_identity_digest"], "profile_digest": meta["identity"]["profile_digest"], "receipt_key_thumbprint": meta["identity"]["ts_key_thumbprint"],
+       "issuer_key_thumbprints": meta["identity"]["issuer_key_thumbprints"], "receipt_payload": "detached", "sequence": json.loads(seq),
+       "bootstrap": "leaves 0 and 1: EXPERIMENTAL synthetic test statements, operator-submitted through the facade, signed by a key in no key table; no policy exists and none is enforced",
+       "unchanged_frozen_inputs": meta["unchanged_vs_ratified_toy"], "not_claimed": ["policy enforcement", "operator independence", "SCRAPI/RFC 9943 compliance", "witnessing", "rotation", "X.509"]}
+json.dump(cfg, open(f"{out}/run-config.json", "w"), indent=1, sort_keys=True); open(f"{out}/run-config.json", "a").write("\n")
+P
+  cat > "$OUT/tooling/issuer-tool-config.json" <<J
+{"s2b": "$S2B", "config_dir": "$OUT/config", "issuer_keys": "$ISS_KEYS", "bin": "$BIN", "public_url": "http://127.0.0.1:$((PORT+1))/", "note_vkey": "$VKEY", "origin": "$ORIGIN",
+ "owner": "$OWNER", "ts_iss": "$TS_ISS", "sequence": $SEQ}
+J
+  printf '#!/usr/bin/env bash\nexec %s -B %s --config %s "$@"\n' "$PY" "$PROTO/producer/issuer_tool.py" "$OUT/tooling/issuer-tool-config.json" > "$OUT/tooling/producer.sh"; chmod +x "$OUT/tooling/producer.sh"
+  echo "prepared: $OUT (keys outside the repository: $ISS_KEYS $TS_KEYS $NOTE_KEYS)"
+elif [ "$phase" = capture ]; then
+  # ---- pin: the producer source must be committed and unmodified
+  cd "$REPO"; PINC="$(git rev-parse HEAD)"
+  if [ -n "$(git status --porcelain -- ts-prototype ':!ts-prototype/evidence')" ]; then
+    [ "${ALLOW_DIRTY:-}" = 1 ] || { echo "refusing: uncommitted changes under ts-prototype (pin the producer source first)" >&2; exit 2; }
+    PINC="$PINC + UNCOMMITTED CHANGES (development dry run, NOT a pinned run)"
+  fi
+  VKEY="$(cat "$NOTE_KEYS/note.vkey")"
+  mkdir -p "$OUT/run" "$OUT/operator" "$OUT/extra"
+  { echo "producer source pinned at commit $PINC"; echo "label: $LABEL"; echo "go: $(go version)"; } > "$OUT/extra/producer-source-pin.txt"
+  git ls-files -- ts-prototype/cmd ts-prototype/internal ts-prototype/producer ts-prototype/scripts ts-prototype/go.mod ts-prototype/go.sum | xargs sha256sum >> "$OUT/extra/producer-source-pin.txt"
+  sha256sum "$BIN/s3-facade" "$BIN/s3-capture" "$BIN/s3-keygen" > "$OUT/extra/binaries-sha256.txt"
+  cp "$OUT/run-config.json" "$OUT/extra/run-config.json"
+  WORK="$(mktemp -d)"
+  "$BIN/s3-facade" --storage "$WORK/log" --state "$OUT/operator/state" --origin "$ORIGIN" --note-skey-file "$NOTE_KEYS/note.skey" --note-vkey "$VKEY" --cose-key "$TS_KEYS/ts.pem" --ts-iss "$TS_ISS" \
+     --expect-thumbprint "$(jq -r .receipt_key_thumbprint "$OUT/run-config.json" 2>/dev/null || python3 -c "import json;print(json.load(open('$OUT/run-config.json'))['receipt_key_thumbprint'])")" \
+     --register-addr 127.0.0.1:$PORT --public-addr 127.0.0.1:$((PORT+1)) 2> "$OUT/operator/facade.stderr" &
+  FPID=$!; trap 'kill $FPID 2>/dev/null || true' EXIT
+  for _ in $(seq 100); do curl -sf "http://127.0.0.1:$PORT/config" -o "$OUT/operator/facade-config.json" && break; sleep 0.1; done
+  echo "== runtime issuer tooling creates, signs and submits each statement from the actually registered prefix"
+  "$BIN/s3-capture" submit --facade "http://127.0.0.1:$PORT" --public "http://127.0.0.1:$((PORT+1))" --note-vkey "$VKEY" --origin "$ORIGIN" --producer "$OUT/tooling/producer.sh" --out "$OUT/run"
+  N="$(python3 -c "import json;print(len(json.load(open('$OUT/run-config.json'))['sequence']))")"
+  echo "== export from the PUBLIC read endpoint only"
+  "$BIN/s3-capture" export --public "http://127.0.0.1:$((PORT+1))" --note-vkey "$VKEY" --origin "$ORIGIN" --expect-size "$N" --out "$OUT/run"
+  kill $FPID; wait $FPID || true; trap - EXIT
+  cp "$OUT/operator/state/journal.jsonl" "$OUT/extra/facade-journal.jsonl"; cp "$OUT/operator/facade-config.json" "$OUT/extra/"; printf '%s\n' "$VKEY" > "$OUT/extra/note.vkey"
+  cp "$OUT/run/producer/steps.jsonl" "$OUT/extra/producer-steps.jsonl"
+  echo "== assemble capture and request.cbor from the retained bytes"
+  "$PY" -B "$HERE/assemble_capture_v2.py" --s2b "$S2B" --fixture "$OUT/config" --run "$OUT/run" --out "$OUT/capture" --extra "$OUT/extra" --ts-origin 0,1 --roles 0=registration-policy-test,1=trust-anchor-test \
+     --issuers "$OWNER,admitter-one" --derive-target-payload | tee "$OUT/assemble.json"
+  "$PY" -B "$HERE/derive_expected_tb_from_prefix.py" --s2b "$S2B" --config "$OUT/config" --run "$OUT/run" --out "$OUT/expected" > "$OUT/derive-expected-tb.out"
+  python3 -c "import json;print(json.load(open('$OUT/assemble.json'))['capture_json_sha256'])" > "$OUT/ANCHOR.sha256"
+  echo "anchor recorded: $(cat "$OUT/ANCHOR.sha256")  -- commit it before running the verify phase"
+elif [ "$phase" = verify ]; then
+  VKEY="$(cat "$NOTE_KEYS/note.vkey")"
+  TS_PUB="$OUT/config/public/ts.public.cose_key.cbor"
+  echo "== prototype checks (facade/public-read; NOT a frozen-chain verdict)"
+  N="$(python3 -c "import json;print(len(json.load(open('$OUT/run-config.json'))['sequence']))")"
+  "$PY" -B "$HERE/s3check.py" --run "$OUT/run" --s2b "$S2B" --note-vkey "$VKEY" --origin "$ORIGIN" --ts-pub "$TS_PUB" --ts-iss "$TS_ISS" --out "$OUT/facade-checks.json" --expect "$N" | tee "$OUT/facade-checks.out"
+  ANCHOR="$(cat "$OUT/ANCHOR.sha256")"
+  echo "== G5 with the recorded anchor $ANCHOR"
+  "$G5" --capture "$OUT/capture" --index-sha256 "$ANCHOR" | tee "$OUT/g5.json"; grep -q '"g5":"PASS"' "$OUT/g5.json"
+  echo "== unchanged chain on G5-returned paths (network-isolated)"
+  python3 -B "$REPO/spike/host/make_capture_cases.py" --id "$LABEL" --g5-result "$OUT/g5.json" --expect "$OUT/expected/expect.json" --out "$OUT/cases.json"
+  P10_LEAN_BIN_DIR="${LEAN_BIN:-}" unshare -n python3 -B "$GLUE" --cases "$OUT/cases.json" --out "$OUT/chain" --s2b "$S2B" --s2a "$S2A" --entry "$ENTRY"
+else echo "bad phase" >&2; exit 2; fi

@@ -13,6 +13,7 @@ Pinned log engine: `github.com/transparency-dev/tessera` `v1.0.4` = `6bca8e8d5e2
 | `internal/facade` | registration flow, persistent duplicate prevention, checkpoint verification, Receipt issuance, state |
 | `internal/admit`, `internal/leafenc`, `internal/receipt`, `internal/cborx` | structural admission, LeafEncodeV0, COSE Receipt (ES256, detached payload), minimal CBOR |
 | `internal/capture`, `internal/publicread` | HTTP-only log reader with verification; read-only whitelist handler |
+| `producer/` | fresh public configuration generator and runtime issuer tooling (`gen_config.py`, `issuer_tool.py`; see its README) |
 | `scripts/` | independent Python checks and tests (`s3check.py`, `facade_tests.py`, `s3check_mutations.py`), capture assembly, exploratory run driver |
 | `evidence/` | executed outputs (raw; do not edit) |
 

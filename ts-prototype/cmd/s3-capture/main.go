@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -66,13 +67,14 @@ func submit(args []string) {
 	vkey := fs.String("note-vkey", "", "pinned note verifier key")
 	origin := fs.String("origin", "", "expected checkpoint origin")
 	stmts := fs.String("statements", "", "directory of NNNNNN.cose files to submit, in index order (the submitter's own files)")
+	producer := fs.String("producer", "", "RUNTIME ISSUER TOOLING: executable called as `PRODUCER --step N --run OUT` before each registration; it creates and signs statement N from what has been registered so far and prints one JSON line {\"file\",\"origin\",\"detached\"} or {\"done\":true} (replaces --statements)")
 	detached := fs.String("detached", "", "optional directory of NNNNNN.payload files: detached statement payloads held by the issuer (never sent to the facade)")
 	tsOrigin := fs.String("ts-origin", "", "comma list of indices submitted by the operator (bootstrap), kept apart from issuer submissions")
 	out := fs.String("out", "", "output directory (empty)")
 	retries := fs.Int("retries", 3, "re-POSTs of the same bytes after a transport error")
 	timeout := fs.Duration("timeout", 30*time.Second, "deadline of each wait for a published checkpoint")
 	fs.Parse(args)
-	if *facade == "" || *pub == "" || *vkey == "" || *origin == "" || *stmts == "" || *out == "" {
+	if *facade == "" || *pub == "" || *vkey == "" || *origin == "" || (*stmts == "") == (*producer == "") || *out == "" {
 		die("submit: missing flag")
 	}
 	ctx := context.Background()
@@ -87,33 +89,17 @@ func submit(args []string) {
 			ops[n] = true
 		}
 	}
-	files, _ := filepath.Glob(filepath.Join(*stmts, "*.cose"))
-	sort.Strings(files)
 	hc := &http.Client{Timeout: 90 * time.Second}
 	var logl []map[string]any
 	if prev, err := os.ReadFile(filepath.Join(*out, "submit-log.json")); err == nil { // continue an earlier invocation's log
 		json.Unmarshal(prev, &logl)
 	}
-	for _, f := range files {
-		// the file name NNNNNN.cose is the statement's expected log index (a later invocation may continue an earlier one)
-		i, err := strconv.Atoi(strings.TrimSuffix(filepath.Base(f), ".cose"))
-		if err != nil || i < 0 {
-			die("statement file %q is not named NNNNNN.cose", f)
-		}
-		stmt, err := os.ReadFile(f)
-		if err != nil {
-			die("%v", err)
-		}
+	nsub := 0
+	process := func(i int, stmt []byte, sub string, detPayload []byte) {
 		name := fmt.Sprintf("%06d", i)
-		sub := "issuer"
-		if ops[i] {
-			sub = "operator"
-		}
 		writeFile(filepath.Join(*out, sub, "submissions", name+".cose"), stmt) // retained BEFORE the request
-		if *detached != "" {
-			if d, err := os.ReadFile(filepath.Join(*detached, name+".payload")); err == nil {
-				writeFile(filepath.Join(*out, sub, "detached", name+".payload"), d)
-			}
+		if detPayload != nil {
+			writeFile(filepath.Join(*out, sub, "detached", name+".payload"), detPayload)
 		}
 		var body []byte
 		var status int
@@ -153,10 +139,70 @@ func submit(args []string) {
 		writeFile(filepath.Join(*out, "public-checkpoints", name+".checkpoint"), raw)
 		logl = append(logl, map[string]any{"index": rs.Index, "origin": sub, "tree_size_in_receipt": rs.TreeSize, "public_checkpoint_size": cp.Size,
 			"facade_checkpoint_equals_public": bytes.Equal(fcp, raw), "duplicate": rs.Duplicate, "recovered": rs.Recovered})
+		nsub++
+	}
+	if *producer != "" {
+		for step := 0; ; step++ {
+			cmd := exec.Command(*producer, "--step", strconv.Itoa(step), "--run", *out)
+			cmd.Stderr = os.Stderr
+			o, err := cmd.Output()
+			if err != nil {
+				die("producer step %d: %v", step, err)
+			}
+			var pr struct {
+				Done     bool   `json:"done"`
+				File     string `json:"file"`
+				Origin   string `json:"origin"`
+				Detached string `json:"detached"`
+			}
+			if err := json.Unmarshal(bytes.TrimSpace(o), &pr); err != nil {
+				die("producer step %d: bad output %q: %v", step, o, err)
+			}
+			if pr.Done {
+				break
+			}
+			if pr.Origin != "issuer" && pr.Origin != "operator" {
+				die("producer step %d: origin must be issuer or operator", step)
+			}
+			stmt, err := os.ReadFile(pr.File)
+			if err != nil {
+				die("%v", err)
+			}
+			var det []byte
+			if pr.Detached != "" {
+				if det, err = os.ReadFile(pr.Detached); err != nil {
+					die("%v", err)
+				}
+			}
+			process(step, stmt, pr.Origin, det)
+		}
+	} else {
+		files, _ := filepath.Glob(filepath.Join(*stmts, "*.cose"))
+		sort.Strings(files)
+		for _, f := range files {
+			// the file name NNNNNN.cose is the statement's expected log index (a later invocation may continue an earlier one)
+			i, err := strconv.Atoi(strings.TrimSuffix(filepath.Base(f), ".cose"))
+			if err != nil || i < 0 {
+				die("statement file %q is not named NNNNNN.cose", f)
+			}
+			stmt, err := os.ReadFile(f)
+			if err != nil {
+				die("%v", err)
+			}
+			sub := "issuer"
+			if ops[i] {
+				sub = "operator"
+			}
+			var det []byte
+			if *detached != "" {
+				det, _ = os.ReadFile(filepath.Join(*detached, fmt.Sprintf("%06d.payload", i)))
+			}
+			process(i, stmt, sub, det)
+		}
 	}
 	b, _ := json.MarshalIndent(logl, "", " ")
 	writeFile(filepath.Join(*out, "submit-log.json"), append(b, '\n'))
-	fmt.Printf("submitted %d statements\n", len(files))
+	fmt.Printf("submitted %d statements\n", nsub)
 }
 
 func export(args []string) {

@@ -22,6 +22,7 @@ for k in ("s2b", "fixture", "run", "out", "extra"):
 ap.add_argument("--ts-origin", default="")
 ap.add_argument("--roles", default="")
 ap.add_argument("--issuers", default="volmax-owner,admitter-one")
+ap.add_argument("--derive-target-payload", action="store_true", help="the fixture has no target_payload.json: take the retained target payload from the retained, exported target statement")
 a = ap.parse_args()
 sys.path.insert(0, os.path.join(a.s2b, "tests", "differential"))
 import gen_corpus as G
@@ -72,8 +73,14 @@ idx["receipts"] = [{"index": str(i), **w(f"receipts/{i:06d}.receipt.cbor", recei
 idx["detached_payloads"] = [{"index": str(i), **w(f"detached/{i:06d}.payload", p)} for i, p in sorted(detached.items())]
 idx["target"] = {"index": str(target)}
 cp = lambda src, rel: w(rel, rd(os.path.join(a.fixture, src)))
+if a.derive_target_payload:
+    sys.path.insert(0, os.path.join(a.s2b, "tests", "s2a")); sys.path.insert(0, os.path.join(a.s2b, "orchestration"))
+    import post_scenarios as PS
+    tp = [w("material/target_payload.json", PS.stmt_payload(leaves[target]))]
+else:
+    tp = [cp("target_payload.json", "material/target_payload.json")]
 idx["material"] = {"profile_artifact": cp("pB.json", "material/pB.json"), "instance_commitment": cp("inst.bin", "material/inst.bin"),
-                   "s1_instance": cp("iB.json", "material/iB.json"), "retained_target_payload": [cp("target_payload.json", "material/target_payload.json")]}
+                   "s1_instance": cp("iB.json", "material/iB.json"), "retained_target_payload": tp}
 idx["public_keys"] = [{"name": f[:-len(".public.cose_key.cbor")], **cp(os.path.join("public", f), "public-keys/" + f)} for f in sorted(os.listdir(os.path.join(a.fixture, "public")))]
 prov = []
 def addtree(srcdir, dstprefix):

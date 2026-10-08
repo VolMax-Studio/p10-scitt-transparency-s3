@@ -267,8 +267,13 @@ def inner(a, anchor, launcher_claim):
     exe, pinned_flags = {}, {}
     for lab, src in (("entry", a.entry), ("g5", a.g5)):
         dst = os.path.join(bindir, lab)
-        shutil.copyfile(src, dst); os.chmod(dst, 0o500)
-        got = C.sha256_file(dst); info[lab + "_binary_sha256"] = got
+        try:
+            shutil.copyfile(src, dst); os.chmod(dst, 0o500)
+            got = C.sha256_file(dst)
+        except OSError as e:       # a failed copy is an infrastructure failure with a diagnostic, not an unclassified crash and not a P10 outcome
+            v["executables_pinned"] = pinned_flags
+            return infra("preflight", "EXECUTABLE_COPY", f"cannot copy or read the {lab} executable: {type(e).__name__}: {e}")
+        info[lab + "_binary_sha256"] = got
         want = (pinned.get("executables") or {}).get(lab, {}).get("sha256")
         pinned_flags[lab] = want is not None
         if want is not None and want != got:
@@ -324,8 +329,11 @@ def inner(a, anchor, launcher_claim):
 
     # ---- chain, from G5-returned snapshot paths only
     inp = C.ChainInputs(paths["request"], paths["profile_artifact"], paths["instance_commitment"], paths["s1_instance"], paths["retained_target_payload"])
-    res = C.run_chain(inp, out, a.s2b, a.s2a, exe["entry"], log)
-    info["input_sha256"] = {k: C.sha256_file(p) for k, p in paths.items() if p}
+    try:
+        res = C.run_chain(inp, out, a.s2b, a.s2a, exe["entry"], log)
+        info["input_sha256"] = {k: C.sha256_file(p) for k, p in paths.items() if p}
+    except Exception as e:         # nothing unexpected may escape as an unclassified failure, and none of it is a P10 verdict or reason
+        return infra("chain", "UNEXPECTED_EXCEPTION", f"{type(e).__name__}: {e}")
     return finish(res["outcome"], res["stage"], res["reason"], res)
 
 

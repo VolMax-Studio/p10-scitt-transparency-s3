@@ -96,4 +96,4 @@ Reuse is reported here so that review can find it. Successful execution of any o
 
 ## 9. Open points
 
-Python version and OS pins; whether an S2A strict-codec failure is infrastructure or a P10 HALT; the exact recorded-not-compared list; whether the entry and G5 are adopted in this form; carriage of toolchains vs host prerequisites; the exit-code numbers (candidate); whether `--no-offline` should exist in an adopted runner.
+Python version and OS pins; whether an S2A strict-codec failure is infrastructure or a P10 HALT; the exact recorded-not-compared list; whether the entry and G5 are adopted in this form; carriage of toolchains vs host prerequisites; the exit-code numbers (candidate); whether `--no-offline` should exist in an adopted runner; the capture is not snapshotted between G5 and the later stages (a concurrent writer to the capture directory would not be detected; a second G5 check after the chain or a verified copy of the G5-returned inputs are candidate remedies, not implemented).

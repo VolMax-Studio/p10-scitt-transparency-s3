@@ -1,0 +1,1 @@
+{"anchor_sha256":"fcb96dcfce071524befe781a17bb9765fff6b4197c384e5b847ce27bcf73a7e7","format":"P10-S3-C-Verdict-v0-candidate","frozen_a12_a14":null,"g5":{"reason":"E_PATH_UNSAFE","result":"FAIL"},"outcome":"S3-FAIL(packaging)","post":null,"reason":{"code":"E_PATH_UNSAFE"},"request_sha256":null,"s2a":null,"s2a_result_lines_sha256":null,"s2b":null,"stage":"g5","tB_sha256":null}

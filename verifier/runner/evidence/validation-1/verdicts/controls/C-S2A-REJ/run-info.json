@@ -1,0 +1,122 @@
+{
+ "capture": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture",
+ "chain_info": {
+  "s2a_helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+  "s2a_helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+  "s2a_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "s2a_lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/venv/bin/python",
+    "-B",
+    "/home/user/p10-scitt-transparency-s3/spike/host/preflight.py",
+    "--s1",
+    "/home/user/volmax-studio/s1",
+    "--s2a",
+    "/home/user/volmax-studio/s2a",
+    "--s2b",
+    "/home/user/volmax-studio/s2b-8eaa91c",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/run/preflight.json",
+    "--lean-bin-dir",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "preflight",
+   "seconds": 0.55,
+   "stderr": "logs/001-preflight.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-preflight.stdout",
+   "stdout_sha256": "e4335fc54f8167af53f371ffdb4ca7e61de34c97dac28830d2b5e739e707e86c"
+  },
+  {
+   "argv": [
+    "verifier/g5/target/debug/s3-g5",
+    "--capture",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture",
+    "--index-sha256",
+    "04bf09b4a57db3d3cd11cde555d54e4af2fa5c4daf433f45b91f62a2bd07d2b7"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "g5",
+   "seconds": 0.0,
+   "stderr": "logs/002-g5.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-g5.stdout",
+   "stdout_sha256": "70c0425e05569ffd7a3f276ccd28efca70833eeda88da1165ebf6a5fbf4720be"
+  },
+  {
+   "argv": [
+    "spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture/request.cbor",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/run/s2b"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "s2b-entry",
+   "seconds": 0.03,
+   "stderr": "logs/003-s2b-entry.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/003-s2b-entry.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/run/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 4,
+   "name": "s2a-runner",
+   "seconds": 8.86,
+   "stderr": "logs/004-s2a-runner.stderr",
+   "stderr_sha256": "a56b610d314394f2e16916cdf66a2fae19ea7e3d68e8c95b17f3468e61c105e8",
+   "stdout": "logs/004-s2a-runner.stdout",
+   "stdout_sha256": "702727ee8d93b6b322164bf2648c255bcd053fd1f970775b07b3d163a9d9f729"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "g5_output": {
+  "anchor_checked": true,
+  "files_indexed": 16,
+  "g5": "PASS",
+  "instance_commitment": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture/material/inst.bin",
+  "prefix_leaves": 5,
+  "profile_artifact": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture/material/pB.json",
+  "request": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture/request.cbor",
+  "retained_target_payload": null,
+  "root": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture",
+  "s1_instance": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2A-REJ/capture/material/iB.json"
+ },
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "input_sha256": {
+  "instance_commitment": "24316063d808800e66c610d3cbaeeb2010aaa76ea5fdfc59b41a0a5d0833e95d",
+  "profile_artifact": "7d840d07184049cb9ca97e68d267ab3be2cb53eed7a00e6f8c866323e03fa9ad",
+  "request": "b7947f8fb765ccf3ed2c1099918d1704beb8b00d39c6622651fd31dead516e06",
+  "s1_instance": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824"
+ },
+ "isolation": "unshare -n",
+ "lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "network_isolated": true,
+ "problems": [],
+ "runner_source_sha256": {
+  "s3c_chain.py": "297731354ecc3f693160c7a361521ba72a8c1049e74ccbed768b86710a8e5def",
+  "s3c_verify.py": "e9a56d947b6884d62456a7a1cf07756be1bc233c25e23a1f68b14cfab9422c66"
+ },
+ "seconds": 9.5,
+ "started": "2026-10-08T07:53:46Z",
+ "tcb_source_mismatch": []
+}

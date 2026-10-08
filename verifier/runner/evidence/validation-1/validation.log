@@ -1,0 +1,46 @@
+captures/run2               ok  
+captures/run3-ml2           ok  
+captures/detached-closure   ok  
+controls/C-ACC        ok  BINDING_MATCH@post-s2a  via=single command on the packaged  
+controls/C-POST-REJ   ok  REJECT@post-s2a  via=single command on the packaged  
+controls/C-POST-HALT  ok  HALT@post-s2a  via=single command on the packaged  
+controls/C-S2A-REJ    ok  REJECT@s2a  via=single command on the packaged  
+controls/C-S2A-HALT   ok  HALT@s2a  via=single command on the packaged  
+controls/C-S2B-REJ    ok  REJECT@s2b  via=single command on the packaged  
+controls/C-S2B-HALT   ok  HALT@s2b  via=single command on the packaged  
+controls/C-S2B-UNAV   ok  HALT@s2b  via=chain stages directly (harness  
+packaging/BASE                   ok  expected=PASS then BINDING_MATCH  actual=BINDING_MATCH (exit 0)
+packaging/N-P1a                  ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P1b                  ok  expected=E_LEAF_BYTES_MISMATCH  actual=E_LEAF_BYTES_MISMATCH
+packaging/N-P2a                  ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P2b                  ok  expected=E_LEAF_BYTES_MISMATCH  actual=E_LEAF_BYTES_MISMATCH
+packaging/N-P3                   ok  expected=E_PREFIX_FILE_UNMATCHED  actual=E_PREFIX_FILE_UNMATCHED
+packaging/N-P4                   ok  expected=E_REQUEST_LEAF_DUPLICATE  actual=E_REQUEST_LEAF_DUPLICATE
+packaging/N-P5                   ok  expected=E_FILE_NOT_INDEXED  actual=E_FILE_NOT_INDEXED
+packaging/N-P6a                  ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P6b                  ok  expected=E_RECEIPT_BYTES_MISMATCH  actual=E_RECEIPT_BYTES_MISMATCH
+packaging/N-D1                   ok  expected=PASS then BINDING_MATCH  actual=BINDING_MATCH (exit 0)
+packaging/X-S1                   ok  expected=E_SUBMISSION_MISMATCH  actual=E_SUBMISSION_MISMATCH
+packaging/X-S2                   ok  expected=E_SUBMISSION_MISSING  actual=E_SUBMISSION_MISSING
+packaging/X-P1                   ok  expected=E_PATH_UNSAFE  actual=E_PATH_UNSAFE
+packaging/X-P2                   ok  expected=E_PATH_UNSAFE  actual=E_PATH_UNSAFE
+packaging/X-P3                   ok  expected=E_PATH_UNSAFE  actual=E_PATH_UNSAFE
+packaging/X-P4                   ok  expected=E_PATH_UNSAFE  actual=E_PATH_UNSAFE
+packaging/X-P5                   ok  expected=E_PATH_UNSAFE  actual=E_PATH_UNSAFE
+packaging/X-I1                   ok  expected=E_INDEX_MALFORMED  actual=E_INDEX_MALFORMED
+packaging/X-I2                   ok  expected=E_INDEX_MALFORMED  actual=E_INDEX_MALFORMED
+packaging/X-T1                   ok  expected=E_TARGET_BYTES_MISMATCH  actual=E_TARGET_BYTES_MISMATCH
+packaging/X-R1                   ok  expected=E_RECEIPT_ABSENT  actual=E_RECEIPT_ABSENT
+packaging/X-D1                   ok  expected=E_DETACHED_UNMATCHED  actual=E_DETACHED_UNMATCHED
+packaging/X-X1                   ok  expected=E_REQUEST_DECODE  actual=E_REQUEST_DECODE
+packaging/N-P7-pB-a              ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P7-pB-b              ok  expected=E_INDEX_ANCHOR_MISMATCH  actual=E_INDEX_ANCHOR_MISMATCH
+packaging/N-P7-inst-a            ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P7-inst-b            ok  expected=E_INDEX_ANCHOR_MISMATCH  actual=E_INDEX_ANCHOR_MISMATCH
+packaging/N-P7-iB-a              ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P7-iB-b              ok  expected=E_INDEX_ANCHOR_MISMATCH  actual=E_INDEX_ANCHOR_MISMATCH
+packaging/N-P7-target-payload-a  ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P7-target-payload-b  ok  expected=E_INDEX_ANCHOR_MISMATCH  actual=E_INDEX_ANCHOR_MISMATCH
+packaging/N-P7-request-a         ok  expected=E_FILE_HASH_MISMATCH  actual=E_FILE_HASH_MISMATCH
+packaging/N-P7-request-b         ok  expected=E_INDEX_ANCHOR_MISMATCH  actual=E_INDEX_ANCHOR_MISMATCH
+VALIDATION: ALL OK

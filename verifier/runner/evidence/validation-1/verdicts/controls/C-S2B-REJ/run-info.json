@@ -1,0 +1,101 @@
+{
+ "capture": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture",
+ "chain_info": {},
+ "commands": [
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/venv/bin/python",
+    "-B",
+    "/home/user/p10-scitt-transparency-s3/spike/host/preflight.py",
+    "--s1",
+    "/home/user/volmax-studio/s1",
+    "--s2a",
+    "/home/user/volmax-studio/s2a",
+    "--s2b",
+    "/home/user/volmax-studio/s2b-8eaa91c",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/run/preflight.json",
+    "--lean-bin-dir",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "preflight",
+   "seconds": 0.63,
+   "stderr": "logs/001-preflight.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-preflight.stdout",
+   "stdout_sha256": "e4335fc54f8167af53f371ffdb4ca7e61de34c97dac28830d2b5e739e707e86c"
+  },
+  {
+   "argv": [
+    "verifier/g5/target/debug/s3-g5",
+    "--capture",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture",
+    "--index-sha256",
+    "4aa5e4383575bb57fe6df5145b7efa6090f2736b4359c5804d09ad24f550b1c4"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "g5",
+   "seconds": 0.0,
+   "stderr": "logs/002-g5.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-g5.stdout",
+   "stdout_sha256": "84bb1761890025d0cc24396171e8d4e9696f056c5d4b9dcc8b1c968d3cccc278"
+  },
+  {
+   "argv": [
+    "spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture/request.cbor",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/run/s2b"
+   ],
+   "exit": 10,
+   "n": 3,
+   "name": "s2b-entry",
+   "seconds": 0.01,
+   "stderr": "logs/003-s2b-entry.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/003-s2b-entry.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "g5_output": {
+  "anchor_checked": true,
+  "files_indexed": 10,
+  "g5": "PASS",
+  "instance_commitment": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture/material/inst.bin",
+  "prefix_leaves": 2,
+  "profile_artifact": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture/material/pB.json",
+  "request": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture/request.cbor",
+  "retained_target_payload": null,
+  "root": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture",
+  "s1_instance": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/ctl-C-S2B-REJ/capture/material/iB.json"
+ },
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "input_sha256": {
+  "instance_commitment": "24316063d808800e66c610d3cbaeeb2010aaa76ea5fdfc59b41a0a5d0833e95d",
+  "profile_artifact": "7d840d07184049cb9ca97e68d267ab3be2cb53eed7a00e6f8c866323e03fa9ad",
+  "request": "7b4bd1377cbc4e84c966173e74fd33c7043798cf1312ad42e4911bc9e6211705",
+  "s1_instance": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824"
+ },
+ "isolation": "unshare -n",
+ "lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "network_isolated": true,
+ "problems": [],
+ "runner_source_sha256": {
+  "s3c_chain.py": "297731354ecc3f693160c7a361521ba72a8c1049e74ccbed768b86710a8e5def",
+  "s3c_verify.py": "e9a56d947b6884d62456a7a1cf07756be1bc233c25e23a1f68b14cfab9422c66"
+ },
+ "seconds": 0.7,
+ "started": "2026-10-08T07:54:05Z",
+ "tcb_source_mismatch": []
+}

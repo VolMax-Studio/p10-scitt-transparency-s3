@@ -1,0 +1,147 @@
+{
+ "capture": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE",
+ "chain_info": {
+  "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "closureat_helper-binary-sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "closureat_helper-source-sha256": "bcf18c4eccdfcf5176a16df62980c1760ad529351bce5ba826701d8ae919313f",
+  "closureat_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "closureat_lean-toolchain": "leanprover/lean4:v4.33.0",
+  "s2a_helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+  "s2a_helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+  "s2a_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "s2a_lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/venv/bin/python",
+    "-B",
+    "/home/user/p10-scitt-transparency-s3/spike/host/preflight.py",
+    "--s1",
+    "/home/user/volmax-studio/s1",
+    "--s2a",
+    "/home/user/volmax-studio/s2a",
+    "--s2b",
+    "/home/user/volmax-studio/s2b-8eaa91c",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/out-BASE/preflight.json",
+    "--lean-bin-dir",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "preflight",
+   "seconds": 0.79,
+   "stderr": "logs/001-preflight.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-preflight.stdout",
+   "stdout_sha256": "618488e4ab0e92a1ddfc721b993523348d4056582125b2ee63cfa206c6f79eaa"
+  },
+  {
+   "argv": [
+    "verifier/g5/target/debug/s3-g5",
+    "--capture",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE",
+    "--index-sha256",
+    "6fb6826c6c8d067f5234e32dd97ed48dcee284df800b13ba4f258f661d7c9a09"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "g5",
+   "seconds": 0.0,
+   "stderr": "logs/002-g5.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-g5.stdout",
+   "stdout_sha256": "57ddfaaa1c598c6fc633453a2a5bcb264f9f74914dd46876175fd59a728b1ad4"
+  },
+  {
+   "argv": [
+    "spike/s3-entry/target/debug/s3-spike-entry",
+    "verify",
+    "--request",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/request.cbor",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/out-BASE/s2b",
+    "--expect-target-payload",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "s2b-entry",
+   "seconds": 0.03,
+   "stderr": "logs/003-s2b-entry.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/003-s2b-entry.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/out-BASE/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 4,
+   "name": "s2a-runner",
+   "seconds": 8.87,
+   "stderr": "logs/004-s2a-runner.stderr",
+   "stderr_sha256": "19360ab16a76d4c1acb36858921c44a44bd271009fe4f7f9a3d67bb37b729b79",
+   "stdout": "logs/004-s2a-runner.stdout",
+   "stdout_sha256": "361d0aa7a4d18520a55b7319c82fde499ff04ab7e349b9409ef285aa07c9a062"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_closureat.sh",
+    "--batch",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/out-BASE/closureat/jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 5,
+   "name": "closureat-batch",
+   "seconds": 8.92,
+   "stderr": "logs/005-closureat-batch.stderr",
+   "stderr_sha256": "9d7997c3282ff351237132cda01466e18a73e175aa154448f8c2852f5f190027",
+   "stdout": "logs/005-closureat-batch.stdout",
+   "stdout_sha256": "5a2c216236228fb45d5eb698c3c15b39ad78e001c84a8b1ec695a30150d72092"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "g5_output": {
+  "anchor_checked": true,
+  "files_indexed": 23,
+  "g5": "PASS",
+  "instance_commitment": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/material/inst.bin",
+  "prefix_leaves": 5,
+  "profile_artifact": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/material/pB.json",
+  "request": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/request.cbor",
+  "retained_target_payload": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/material/target_payload.json",
+  "root": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE",
+  "s1_instance": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val-work/pk/BASE/material/iB.json"
+ },
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "input_sha256": {
+  "instance_commitment": "5eaab62ebcda9faed39dc40197daeb66b14c5eeb1f6437ca0d081fe1d206a3ab",
+  "profile_artifact": "a921c0d425d7fe4f0882264a68131f4233491e1ad6efdaef8f2d4e2eee80076c",
+  "request": "6e4dd60f97b908c0b12d1da249f12807a9da175f49bdea888bc5708de7055e7d",
+  "retained_target_payload": "ca8fbce856544615eb6a0c8c73b38a4a40662a01b38b7489fd1be474d1d03181",
+  "s1_instance": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824"
+ },
+ "isolation": "unshare -n",
+ "lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "network_isolated": true,
+ "problems": [],
+ "runner_source_sha256": {
+  "s3c_chain.py": "297731354ecc3f693160c7a361521ba72a8c1049e74ccbed768b86710a8e5def",
+  "s3c_verify.py": "e9a56d947b6884d62456a7a1cf07756be1bc233c25e23a1f68b14cfab9422c66"
+ },
+ "seconds": 18.7,
+ "started": "2026-10-08T07:54:07Z",
+ "tcb_source_mismatch": []
+}

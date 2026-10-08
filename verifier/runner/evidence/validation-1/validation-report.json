@@ -1,0 +1,580 @@
+{
+ "all_ok": true,
+ "captures": [
+  {
+   "checks": {
+    "G5 PASS with the anchor": true,
+    "S2a accept and S1 e2e some": true,
+    "S2b Verified with the expected checkpoint size and target index": true,
+    "closureAt helper binary hash attested": true,
+    "exit 0 and outcome BINDING_MATCH (both runs)": true,
+    "network isolated": true,
+    "post-S2a BINDING_MATCH with A1-A15 all match": true,
+    "tB equals the independently derived expectation stored beside the capture (comparison here only)": true,
+    "tB equals the tB of the earlier spike-glue chain run": true,
+    "verdict.json byte-identical across the two runs": true
+   },
+   "id": "run2",
+   "ok": true,
+   "verdict_sha256": "278ae1553f6868247efe74c266d77ae0d4c7d9be95ef7bc560ad553b4d003539"
+  },
+  {
+   "checks": {
+    "G5 PASS with the anchor": true,
+    "S2a accept and S1 e2e some": true,
+    "S2b Verified with the expected checkpoint size and target index": true,
+    "closureAt helper binary hash attested": true,
+    "exit 0 and outcome BINDING_MATCH (both runs)": true,
+    "network isolated": true,
+    "post-S2a BINDING_MATCH with A1-A15 all match": true,
+    "tB equals the independently derived expectation stored beside the capture (comparison here only)": true,
+    "tB equals the tB of the earlier spike-glue chain run": true,
+    "verdict.json byte-identical across the two runs": true
+   },
+   "id": "run3-ml2",
+   "ok": true,
+   "verdict_sha256": "d4798ed30785572a7ece95c8c48da59b6b6e2bdced62cc70f205da7b8d62466f"
+  },
+  {
+   "checks": {
+    "G5 PASS with the anchor": true,
+    "S2a accept and S1 e2e some": true,
+    "S2b Verified with the expected checkpoint size and target index": true,
+    "closureAt helper binary hash attested": true,
+    "exit 0 and outcome BINDING_MATCH (both runs)": true,
+    "network isolated": true,
+    "post-S2a BINDING_MATCH with A1-A15 all match": true,
+    "tB equals the independently derived expectation stored beside the capture (comparison here only)": true,
+    "tB equals the tB of the earlier spike-glue chain run": true,
+    "verdict.json byte-identical across the two runs": true
+   },
+   "id": "detached-closure",
+   "ok": true,
+   "verdict_sha256": "79f9a3680e021901f81bb5e02a8deab4f5efcb3bd18a0c4fd9ed35b81489ee52"
+  }
+ ],
+ "controls": [
+  {
+   "exit": 0,
+   "id": "C-ACC",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "BINDING_MATCH",
+   "packaged": true,
+   "reason": {
+    "code": "BindingMatch",
+    "rule": null
+   },
+   "source": "s2a-post/POST-BASE-match",
+   "stage": "post-s2a",
+   "supplied_from_profile_or_filler": [
+    "pB.json",
+    "inst.bin"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "exit": 11,
+   "id": "C-POST-REJ",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "REJECT",
+   "packaged": true,
+   "reason": {
+    "code": "BindingMismatch",
+    "rule": "A10"
+   },
+   "source": "s2a-post/BIND-A10-mismatch",
+   "stage": "post-s2a",
+   "supplied_from_profile_or_filler": [
+    "pB.json",
+    "inst.bin"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "exit": 12,
+   "id": "C-POST-HALT",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "HALT",
+   "packaged": true,
+   "reason": {
+    "code": "TargetAdjudicationNotEstablished",
+    "rule": "T5"
+   },
+   "source": "s2a-post/T13-T5-closureAt-none",
+   "stage": "post-s2a",
+   "supplied_from_profile_or_filler": [
+    "pB.json",
+    "inst.bin"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "exit": 11,
+   "id": "C-S2A-REJ",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "REJECT",
+   "packaged": true,
+   "reason": {
+    "token": "c3_profileAfterFirstAdmission"
+   },
+   "source": "s2a-t11/N13b",
+   "stage": "s2a",
+   "supplied_from_profile_or_filler": [
+    "iB.json"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "exit": 12,
+   "id": "C-S2A-HALT",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "HALT",
+   "packaged": true,
+   "reason": {
+    "token": "c2_subjectPayloadUnavailable"
+   },
+   "source": "s2a-t11/N7a",
+   "stage": "s2a",
+   "supplied_from_profile_or_filler": [
+    "iB.json"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "exit": 11,
+   "id": "C-S2B-REJ",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "REJECT",
+   "packaged": true,
+   "reason": {
+    "class": "Binding",
+    "reason": "LeafInputDomainViolation",
+    "status": "Invalid"
+   },
+   "source": "E/E10-unprotected",
+   "stage": "s2b",
+   "supplied_from_profile_or_filler": [
+    "pB.json",
+    "inst.bin",
+    "iB.json"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "exit": 12,
+   "id": "C-S2B-HALT",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "HALT",
+   "packaged": true,
+   "reason": {
+    "class": "Replay",
+    "reason": "RootMismatch",
+    "status": "Invalid"
+   },
+   "source": "M/M1",
+   "stage": "s2b",
+   "supplied_from_profile_or_filler": [
+    "pB.json",
+    "inst.bin",
+    "iB.json"
+   ],
+   "via": "single command on the packaged fixture"
+  },
+  {
+   "id": "C-S2B-UNAV",
+   "mismatches": [],
+   "ok": true,
+   "outcome": "HALT",
+   "packaged": false,
+   "reason": {
+    "class": "Material",
+    "reason": "MissingIndex { first_missing: 2 }",
+    "status": "Unavailable"
+   },
+   "source": "M/M8",
+   "stage": "s2b",
+   "via": "chain stages directly (harness), fixture's own request",
+   "why_not_packaged": "leaf indices [0, 1, 3, 4] are not 0..n-1 (the capture format requires a complete prefix)"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "packaging": [
+  {
+   "actual": "BINDING_MATCH (exit 0)",
+   "expected": "PASS then BINDING_MATCH",
+   "id": "BASE",
+   "ok": true
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P1a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_LEAF_BYTES_MISMATCH",
+   "exit": 30,
+   "expected": "E_LEAF_BYTES_MISMATCH",
+   "id": "N-P1b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P2a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_LEAF_BYTES_MISMATCH",
+   "exit": 30,
+   "expected": "E_LEAF_BYTES_MISMATCH",
+   "id": "N-P2b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_PREFIX_FILE_UNMATCHED",
+   "exit": 30,
+   "expected": "E_PREFIX_FILE_UNMATCHED",
+   "id": "N-P3",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_REQUEST_LEAF_DUPLICATE",
+   "exit": 30,
+   "expected": "E_REQUEST_LEAF_DUPLICATE",
+   "id": "N-P4",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_NOT_INDEXED",
+   "exit": 30,
+   "expected": "E_FILE_NOT_INDEXED",
+   "id": "N-P5",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P6a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_RECEIPT_BYTES_MISMATCH",
+   "exit": 30,
+   "expected": "E_RECEIPT_BYTES_MISMATCH",
+   "id": "N-P6b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "BINDING_MATCH (exit 0)",
+   "expected": "PASS then BINDING_MATCH",
+   "id": "N-D1",
+   "ok": true
+  },
+  {
+   "actual": "E_SUBMISSION_MISMATCH",
+   "exit": 30,
+   "expected": "E_SUBMISSION_MISMATCH",
+   "id": "X-S1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_SUBMISSION_MISSING",
+   "exit": 30,
+   "expected": "E_SUBMISSION_MISSING",
+   "id": "X-S2",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_PATH_UNSAFE",
+   "exit": 30,
+   "expected": "E_PATH_UNSAFE",
+   "id": "X-P1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_PATH_UNSAFE",
+   "exit": 30,
+   "expected": "E_PATH_UNSAFE",
+   "id": "X-P2",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_PATH_UNSAFE",
+   "exit": 30,
+   "expected": "E_PATH_UNSAFE",
+   "id": "X-P3",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_PATH_UNSAFE",
+   "exit": 30,
+   "expected": "E_PATH_UNSAFE",
+   "id": "X-P4",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_PATH_UNSAFE",
+   "exit": 30,
+   "expected": "E_PATH_UNSAFE",
+   "id": "X-P5",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_MALFORMED",
+   "exit": 30,
+   "expected": "E_INDEX_MALFORMED",
+   "id": "X-I1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_MALFORMED",
+   "exit": 30,
+   "expected": "E_INDEX_MALFORMED",
+   "id": "X-I2",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_TARGET_BYTES_MISMATCH",
+   "exit": 30,
+   "expected": "E_TARGET_BYTES_MISMATCH",
+   "id": "X-T1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_RECEIPT_ABSENT",
+   "exit": 30,
+   "expected": "E_RECEIPT_ABSENT",
+   "id": "X-R1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_DETACHED_UNMATCHED",
+   "exit": 30,
+   "expected": "E_DETACHED_UNMATCHED",
+   "id": "X-D1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_REQUEST_DECODE",
+   "exit": 30,
+   "expected": "E_REQUEST_DECODE",
+   "id": "X-X1",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P7-pB-a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "exit": 30,
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "id": "N-P7-pB-b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P7-inst-a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "exit": 30,
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "id": "N-P7-inst-b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P7-iB-a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "exit": 30,
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "id": "N-P7-iB-b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P7-target-payload-a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "exit": 30,
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "id": "N-P7-target-payload-b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_FILE_HASH_MISMATCH",
+   "exit": 30,
+   "expected": "E_FILE_HASH_MISMATCH",
+   "id": "N-P7-request-a",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  },
+  {
+   "actual": "E_INDEX_ANCHOR_MISMATCH",
+   "exit": 30,
+   "expected": "E_INDEX_ANCHOR_MISMATCH",
+   "id": "N-P7-request-b",
+   "ok": true,
+   "stages_run": [
+    "preflight",
+    "g5"
+   ]
+  }
+ ],
+ "runner_sha256": {
+  "PINNED_INPUTS.json": "261279b79c764365b85af742a738d3b95ce25a4ab5d39ead97b9199af0edc67d",
+  "s3c_chain.py": "297731354ecc3f693160c7a361521ba72a8c1049e74ccbed768b86710a8e5def",
+  "s3c_verify.py": "e9a56d947b6884d62456a7a1cf07756be1bc233c25e23a1f68b14cfab9422c66"
+ }
+}

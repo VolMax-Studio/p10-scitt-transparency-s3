@@ -1,0 +1,19 @@
+test_attested_well_formed_answer_is_read (__main__.Stages.test_attested_well_formed_answer_is_read) ... ok
+test_binding_invalid_is_reject_and_stops (__main__.Stages.test_binding_invalid_is_reject_and_stops) ... ok
+test_closureat_not_run_or_malformed_is_infrastructure (__main__.Stages.test_closureat_not_run_or_malformed_is_infrastructure) ... ok
+test_e2e_must_be_explicit (__main__.Stages.test_e2e_must_be_explicit) ... ok
+test_entry_exit_must_match_status (__main__.Stages.test_entry_exit_must_match_status) ... ok
+test_entry_without_result_is_infrastructure (__main__.Stages.test_entry_without_result_is_infrastructure) ... ok
+test_replay_invalid_and_unavailable_are_halt (__main__.Stages.test_replay_invalid_and_unavailable_are_halt) ... ok
+test_s2a_codec_and_cov_errors (__main__.Stages.test_s2a_codec_and_cov_errors) ... ok
+test_s2a_reject_and_halt_are_frozen_outcomes (__main__.Stages.test_s2a_reject_and_halt_are_frozen_outcomes) ... ok
+test_s2a_runner_failure_is_infrastructure (__main__.Stages.test_s2a_runner_failure_is_infrastructure) ... ok
+test_s2a_short_or_non_json_output (__main__.Stages.test_s2a_short_or_non_json_output) ... ok
+test_target_failure_is_packaging (__main__.Stages.test_target_failure_is_packaging) ... ok
+test_unattested_closureat_answer_is_not_accepted (__main__.Stages.test_unattested_closureat_answer_is_not_accepted) ... ok
+test_unknown_status_is_infrastructure (__main__.Stages.test_unknown_status_is_infrastructure) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.933s
+
+OK

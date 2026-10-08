@@ -1,0 +1,9 @@
+{
+ "index": 2,
+ "tree_size": 3,
+ "leaf_hash": "ed98a9d132d35e31df4d59bfb5427c5288575a21c6a13fe61247267871754211",
+ "root": "0728a3f1025f3269f91b2f914f770c9f00ac10595a349d6b1acdc13dd61de42f",
+ "recovered": false,
+ "issued_at": "2026-10-08T14:25:32.721429448Z",
+ "leaf_input_sha256": "af1a0d682c52affec70e04214910cdb6e435927e3b1ce6b98146df89863f9520"
+}

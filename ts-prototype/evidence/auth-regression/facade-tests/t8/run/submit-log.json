@@ -1,0 +1,13 @@
+[
+ {
+  "duplicate": false,
+  "facade_checkpoint_equals_public": true,
+  "index": 3,
+  "origin": "issuer",
+  "producer_ordinal": -1,
+  "public_checkpoint_size": 4,
+  "recovered": false,
+  "source": "fixture-file",
+  "tree_size_in_receipt": 4
+ }
+]

@@ -1,0 +1,11 @@
+?   	github.com/volmax-studio/p10-s3-prototype/cmd/s3-capture	[no test files]
+?   	github.com/volmax-studio/p10-s3-prototype/cmd/s3-facade	[no test files]
+?   	github.com/volmax-studio/p10-s3-prototype/cmd/s3-keygen	[no test files]
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/admit	0.009s
+?   	github.com/volmax-studio/p10-s3-prototype/internal/capture	[no test files]
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/cborx	0.003s
+?   	github.com/volmax-studio/p10-s3-prototype/internal/facade	[no test files]
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/issuerauth	0.036s
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/leafenc	0.011s
+?   	github.com/volmax-studio/p10-s3-prototype/internal/publicread	[no test files]
+ok  	github.com/volmax-studio/p10-s3-prototype/internal/receipt	0.017s

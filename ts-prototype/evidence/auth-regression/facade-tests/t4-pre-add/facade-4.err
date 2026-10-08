@@ -1,0 +1,1 @@
+s3-facade ready: register=http://127.0.0.1:19200 public=http://127.0.0.1:19201/ entries=2

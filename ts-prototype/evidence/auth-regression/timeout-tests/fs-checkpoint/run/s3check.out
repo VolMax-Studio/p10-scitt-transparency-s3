@@ -1,0 +1,10 @@
+ok   F0 export holds 2 entries (indices contiguous)
+ok   F1 public export[i] == LeafEncodeV0(submitted statement[i]) byte for byte (registered bytes preserved)
+ok   F2 no two exported leaves are identical (no duplicate append)
+ok   F3 each retained public checkpoint: pinned-key signature valid, expected origin, size == index+1, root == RFC 9162 MTH of the exported leaves
+ok   F4 checkpoint returned with each registration == original signed checkpoint fetched from the public endpoint (same bytes)
+ok   F5 each returned Receipt: tagged COSE_Sign1, detached payload, expected protected header, proof (size,index,path) == RFC 9162 for that log state, ES256 signature verifies under the committed TS key over the PUBLIC checkpoint root
+ok   F6 facade response fields (index, tree_size, leaf_hash, root) agree with the independently recomputed values
+ok   F7 submit log: registrations may be retries (duplicate/recovered flags allowed); public checkpoint size == index+1 at retention time
+ok   F8 capture client export result: size, root and per-entry proof count agree with the retained final checkpoint
+FACADE/PUBLIC-READ CHECKS: ALL OK

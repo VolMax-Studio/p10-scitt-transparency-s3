@@ -1,0 +1,16 @@
+test_direct_inner_call_does_not_skip_the_isolation_test (__main__.Cli.test_direct_inner_call_does_not_skip_the_isolation_test) ... ok
+test_executable_identity_pin_is_checked_before_the_binary_runs (__main__.Cli.test_executable_identity_pin_is_checked_before_the_binary_runs) ... ok
+test_no_offline_records_the_actual_network_state (__main__.Cli.test_no_offline_records_the_actual_network_state) ... ok
+test_non_empty_out_is_refused_on_every_invocation_path (__main__.Cli.test_non_empty_out_is_refused_on_every_invocation_path) ... ok
+test_unavailable_isolation_is_infrastructure (__main__.Cli.test_unavailable_isolation_is_infrastructure) ... ok
+test_usage_errors_exit_2 (__main__.Cli.test_usage_errors_exit_2) ... ok
+test_wrong_anchor_is_packaging_failure_and_only_g5_runs (__main__.Cli.test_wrong_anchor_is_packaging_failure_and_only_g5_runs) ... ok
+test_wrong_pin_is_infrastructure_and_runs_no_stage (__main__.Cli.test_wrong_pin_is_infrastructure_and_runs_no_stage) ... ok
+test_no_expectation_fixture_or_producer_inputs (__main__.Static.test_no_expectation_fixture_or_producer_inputs) ... ok
+test_pinned_hashes_match_sources (__main__.Static.test_pinned_hashes_match_sources) ... ok
+test_reused_functions_are_textually_identical (__main__.Static.test_reused_functions_are_textually_identical) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 2.866s
+
+OK

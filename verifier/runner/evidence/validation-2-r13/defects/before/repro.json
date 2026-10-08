@@ -1,0 +1,103 @@
+{
+ "R1a_direct_inner_without_isolation": {
+  "exit": 30,
+  "outcome": "S3-FAIL(packaging)",
+  "reason": {
+   "code": "E_INDEX_ANCHOR_MISMATCH"
+  },
+  "run_info_isolation_label": "unshare -n",
+  "run_info_network_isolated": true,
+  "stage": "g5"
+ },
+ "R1b_direct_inner_non_empty_out": {
+  "exit": 30,
+  "outcome": "S3-FAIL(packaging)",
+  "ran_stages": [
+   "preflight",
+   "g5"
+  ],
+  "stale_file_still_present": true
+ },
+ "R1c_normal_path_non_empty_out": {
+  "exit": 2
+ },
+ "R2_capture_modified_after_G5": {
+  "bytes_used_equal_anchored_bytes": {
+   "instance_commitment": true,
+   "profile_artifact": true,
+   "request": true,
+   "s1_instance": false
+  },
+  "exit": 11,
+  "original_directory_iB_changed": true,
+  "outcome": "REJECT",
+  "reason": {
+   "code": "BindingMismatch",
+   "rule": "A8"
+  },
+  "stage": "post-s2a"
+ },
+ "harness_process_interfaces": [
+  "lo",
+  "ifb0",
+  "ifb1",
+  "eth0"
+ ],
+ "label": "before",
+ "runner_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/old-runner/verifier/runner",
+ "stub_stage_cases": {
+  "R3_duplicate_json_key_in_result": {
+   "outcome": "REJECT",
+   "reason": {
+    "class": "Binding",
+    "reason": "X",
+    "status": "Invalid"
+   },
+   "stage": "s2b"
+  },
+  "R3_s2a_reject_with_garbage_repr": {
+   "outcome": "REJECT",
+   "reason": {
+    "token": null
+   },
+   "stage": "s2a"
+  },
+  "R3_unavailable_without_reason": {
+   "outcome": "HALT",
+   "reason": {
+    "status": "Unavailable"
+   },
+   "stage": "s2b"
+  },
+  "R3_unknown_s2b_class_Typo": {
+   "outcome": "HALT",
+   "reason": {
+    "class": "Typo",
+    "reason": "X",
+    "status": "Invalid"
+   },
+   "stage": "s2b"
+  },
+  "R4_instance_decode_false_cov_error": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2A_CODEC"
+   },
+   "stage": "s2a"
+  },
+  "R4_pb_decode_false_with_frozen_coverage_reject": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2A_CODEC"
+   },
+   "stage": "s2a"
+  },
+  "R4_transcript_decode_false_cov_error": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2A_CODEC"
+   },
+   "stage": "s2a"
+  }
+ }
+}

@@ -23,3 +23,51 @@ Candidate runner source pinned before the evidence runs: commit `ffeaf5c56f23e03
 - Binary-to-source reproducibility of the entry and G5 builds is not shown (binary hashes are recorded only); no OS or Python pin; one host, one run environment.
 - The controls prove propagation on ratified fixtures, not S3 live behavior; seven were packaged by mechanics (all files derived from the one request), so they exercise the runner, not source independence. Filler pB/inst/iB (recorded in each control's `provenance/CONTROL.json`) were supplied where a vector carries none; the chain stops before they matter, as the outcomes show.
 - Nothing here changes the preregistration's non-claims: no operator independence, no claim about policy verification or enforcement, no rotation, no X.509.
+
+---
+
+# r13 correction pass: reviewed defects, regressions and re-validation
+
+Review of `7b4d466` found four defects. The corrected source was pinned at commit `300417156f1518fcf5e3322155d0ba2a4937b799` before the evidence runs below (clean tree under `verifier/` and `tests/offline/runner/`); runner source SHA-256 `s3c_verify.py` `45e5b96c…5677`, `s3c_chain.py` `de3450bb…0494`, `PINNED_INPUTS.json` `3a1550f8…c991`. The first validation record above is unchanged. Evidence: `evidence/validation-2-r13/` (report, every `verdict.json`/`run-info.json`, harness outputs, and `defects/before|after`). `before` is the runner source of `7b4d466` exercised by `tests/offline/runner/repro_defects.py`; `after` is the pinned corrected source. Expectations stay in the harness.
+
+## Before / after behaviour
+
+| Defect | Before (`7b4d466`) | After (`3004171`) |
+|---|---|---|
+| 1a. direct `--_inner "unshare -n"` call without isolation (harness process has `eth0`) | ran, G5 reached, `run-info`: `network_isolated=true` | `S3-FAIL(infrastructure)` `NETWORK_ISOLATION`, exit 40, no stage run, `network_isolated=false` (measured in the stage process; the argument is recorded as `launcher_claim_not_evidence`) |
+| 1b. direct `--_inner` call with a non-empty `--out` | accepted, ran preflight and G5 into the stale directory | exit 2 (usage), nothing written; normal path and `--no-offline` also exit 2 |
+| 2. the supplied capture directory modified after G5 returned (wrapper G5 swaps `material/iB.json` in the original) | chain used the swapped bytes: `REJECT` post-S2a A8; the S1 instance hash used ≠ the anchored one | `BINDING_MATCH`; every input hash used equals the anchored index hash; the original directory is no longer read after the snapshot |
+| 3a. S2b `Invalid` with class `Typo` | `HALT` | infrastructure `S2B_UNKNOWN_CLASS` |
+| 3b. S2b `Unavailable` without reason | `HALT` | infrastructure `S2B_REASON_MISSING` |
+| 3c. duplicate JSON key in `result.json` (`Verified`, then `Invalid`) | last member won: `REJECT` | infrastructure `ENTRY_RESULT` |
+| 3d. S2A `reject` with `repr="garbage"` | `REJECT` with an empty token | infrastructure `S2A_COV_MALFORMED` |
+| 4a. `pb decode=false` with the frozen coverage REJECT `c1_profileDecode` | infrastructure `S2A_CODEC` | `REJECT` stage `s2a`, token `c1_profileDecode`; the `pb` diagnostic is kept in `s2a.codec` |
+| 4b. `tb decode=false`, `cov` error "tB does not strict-decode" | infrastructure `S2A_CODEC` | infrastructure `S2A_TRANSCRIPT_DECODE` |
+| 4c. `inst decode=false`, `cov` error "instB does not strict-decode" | infrastructure `S2A_CODEC` | infrastructure `S2A_INSTANCE_DECODE` |
+
+## What changed
+
+1. **Isolation** is tested inside the process that executes the stages; the result is recorded as measured. The empty-`--out` rule is applied by every invocation path.
+2. **Private snapshot**: the capture is copied once (regular files byte for byte, symlinks and FIFOs recreated not followed, names as raw bytes), G5 runs on the copy against the external anchor, and only G5-returned snapshot paths feed the chain. Symlink and unsafe-name rejection are preserved (packaging cases X-P1..X-P5 below). A socket/device file ends as `S3-FAIL(packaging)` `SNAPSHOT_SPECIAL_FILE`. A post-chain G5 re-check was not used as a substitute.
+3. **Strict readers**: duplicate keys and non-finite numbers rejected; S2b classes checked against the frozen `ResultClass` set and the combinations of the frozen composition table; non-empty reasons; `tB.bin` must hash to the `transcript_sha256` of `result.json`; S2A lines have closed schemas; `cov` repr must agree with the outcome and carry a recognizable `RejectReason`/`HaltReason` token of the matching type (token shape only; no list of P10 reasons).
+4. **Codec diagnostics per input and stage**; a frozen coverage outcome is never preempted. Transcript and instance decode failures (no frozen outcome exists) are their own infrastructure codes, documented in `CONTRACT.md` §5 without inventing a P10 HALT/REJECT reason; contradictory helper outputs are `S2A_CONTRADICTION`. Whether the preregistration should define a composed outcome for these two cases is OPEN.
+5. **Executable identity** (implemented, enabled): the entry and G5 binaries are copied into `OUT/bin/` and checked against SHA-256 pins in `PINNED_INPUTS.json` before the copies run (`EXECUTABLE_HASH` otherwise; verified by a regression test that G5 never runs on a mismatch). The pins are the hashes of the builds used in validation: `entry` `53ba4440…`, `g5` `a2b4b1ef…` (unchanged from the first validation). **This is identity, not reproducible compilation**: how adopted binaries are produced and pinned is an explicit adoption prerequisite and remains OPEN.
+
+## Regressions and re-validation (all pass)
+
+| Check | Result |
+|---|---|
+| `test_stages.py` (22 tests; was 14) | OK: unknown/unlisted/missing S2b classes and reasons, duplicate keys, `tB` hash mismatch, closed S2A schemas, outcome/reason representation consistency, profile decode with frozen REJECT, transcript/instance decode failures, contradictions, e2e, closureAt |
+| `test_runner_static.py` (11; was 7) | OK: adds the isolation bypass, `--no-offline` measurement, non-empty `--out` on all paths, executable-pin mismatch; the reused-function list is now exactly `HEX64`, `sha256_file`, `sha256_bytes`, `Log`, `compose_s2b`, `frozen_a12_a14`, `INFRA_POST_CODES` |
+| `test_snapshot.py` (5) | OK |
+| three existing captures, twice each | all `BINDING_MATCH`; `tB`, request hash and S2A result lines identical to the first validation; `verdict.json` byte-identical between the two runs of each capture (the verdict gained `s2a.codec` and `executables_pinned`, so its hash differs from the first validation) |
+| eight ratified propagation controls | all reproduce the fixture's recorded expectation (seven through the command, `M8` through the chain stages as before) |
+| 34 packaging cases through the command | all as preregistered, including unsafe-name and symlink rejection through the snapshot |
+
+## Remaining limits
+
+- The snapshot is private to the run but not a security boundary against a hostile process of the same user; the S1/S2a/S2b checkouts and the Lean directory are verified by preflight and then used in place.
+- Executable identity pins bind the validated builds only; no reproducible-build claim, no OS/Python pin.
+- The S2A/closureAt launchers and the Lean build remain the frozen scripts; the harness's stub-based tests do not authenticate the real helper.
+- Transcript/instance decode failure handling (infrastructure) is a candidate classification pending a preregistered decision.
+- Nothing is adopted; the first-validation limits that this pass did not touch still apply.

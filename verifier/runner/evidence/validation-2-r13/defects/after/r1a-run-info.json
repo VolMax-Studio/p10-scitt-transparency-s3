@@ -1,0 +1,27 @@
+{
+ "capture": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run2/capture",
+ "commands": [],
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "isolation_test": {
+  "interfaces": [
+   "lo",
+   "ifb0",
+   "ifb1",
+   "eth0"
+  ]
+ },
+ "launcher_claim_not_evidence": "unshare -n",
+ "network_isolated": false,
+ "problems": [
+  "this process is not network-isolated ({'interfaces': ['lo', 'ifb0', 'ifb1', 'eth0']}); stages are not run (pass --no-offline to accept a CONNECTED run)"
+ ],
+ "runner_source_sha256": {
+  "s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494",
+  "s3c_verify.py": "45e5b96c82aaa7a48d4a551f6b15e90daab8cad53746dd83c5b643e091a05677"
+ },
+ "seconds": 0.0,
+ "started": "2026-10-08T08:27:54Z"
+}

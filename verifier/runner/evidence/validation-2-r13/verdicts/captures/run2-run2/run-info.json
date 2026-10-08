@@ -1,0 +1,152 @@
+{
+ "capture": "/home/user/p10-scitt-transparency-s3/ts-prototype/evidence/lifecycle-run2/capture",
+ "chain_info": {
+  "closure_helper_binary_sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "closureat_helper-binary-sha256": "960341c0c137b606fdfe953b5412fc3ee7e82b176ceab8485dcf453bec408702",
+  "closureat_helper-source-sha256": "bcf18c4eccdfcf5176a16df62980c1760ad529351bce5ba826701d8ae919313f",
+  "closureat_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "closureat_lean-toolchain": "leanprover/lean4:v4.33.0",
+  "s2a_helper-binary-sha256": "c682d73c0a6c260a1212b3427b1215461b04fd86f8188a99343283adf2fb3651",
+  "s2a_helper-source-sha256": "8344baa3fc01d697ba71bf06dbf87c93b689e7acb17da90d055a7296329b98b0",
+  "s2a_lean-executable-sha256": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847",
+  "s2a_lean-toolchain": "leanprover/lean4:v4.33.0"
+ },
+ "commands": [
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/venv/bin/python",
+    "-B",
+    "/home/user/p10-scitt-transparency-s3/spike/host/preflight.py",
+    "--s1",
+    "/home/user/volmax-studio/s1",
+    "--s2a",
+    "/home/user/volmax-studio/s2a",
+    "--s2b",
+    "/home/user/volmax-studio/s2b-8eaa91c",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/preflight.json",
+    "--lean-bin-dir",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "preflight",
+   "seconds": 0.6,
+   "stderr": "logs/001-preflight.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-preflight.stdout",
+   "stdout_sha256": "e4335fc54f8167af53f371ffdb4ca7e61de34c97dac28830d2b5e739e707e86c"
+  },
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/bin/g5",
+    "--capture",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot",
+    "--index-sha256",
+    "2ca34344ff01c64e754c702873671810442a82babab515f49833d82833b15b75"
+   ],
+   "exit": 0,
+   "n": 2,
+   "name": "g5",
+   "seconds": 0.01,
+   "stderr": "logs/002-g5.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-g5.stdout",
+   "stdout_sha256": "926c9cbc7ad4e0491809db2461654880e6d4205dc594e383e4a849f562620db3"
+  },
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/bin/entry",
+    "verify",
+    "--request",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/request.cbor",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/s2b",
+    "--expect-target-payload",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/material/target_payload.json"
+   ],
+   "exit": 0,
+   "n": 3,
+   "name": "s2b-entry",
+   "seconds": 0.03,
+   "stderr": "logs/003-s2b-entry.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/003-s2b-entry.stdout",
+   "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_s2a_runner.sh",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/s2a_jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 4,
+   "name": "s2a-runner",
+   "seconds": 10.94,
+   "stderr": "logs/004-s2a-runner.stderr",
+   "stderr_sha256": "9e49ec55b1d8ed545be32a8a23831643c559fda0d6c7a1f9b2147c1735163b80",
+   "stdout": "logs/004-s2a-runner.stdout",
+   "stdout_sha256": "361d0aa7a4d18520a55b7319c82fde499ff04ab7e349b9409ef285aa07c9a062"
+  },
+  {
+   "argv": [
+    "bash",
+    "/home/user/volmax-studio/s2b-8eaa91c/orchestration/launch_closureat.sh",
+    "--batch",
+    "/home/user/volmax-studio/s2a",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/closureat/jobs.tsv"
+   ],
+   "exit": 0,
+   "n": 5,
+   "name": "closureat-batch",
+   "seconds": 10.28,
+   "stderr": "logs/005-closureat-batch.stderr",
+   "stderr_sha256": "62552a3c2bc016e7586f0c567aac62da16cb117ad709fccbd846aab0e587ef83",
+   "stdout": "logs/005-closureat-batch.stdout",
+   "stdout_sha256": "125118160c0edeede4680ca9158edf98813accfddad39c2ceeaa6a6d759993be"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "g5_output": {
+  "anchor_checked": true,
+  "files_indexed": 49,
+  "g5": "PASS",
+  "instance_commitment": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/material/inst.bin",
+  "prefix_leaves": 7,
+  "profile_artifact": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/material/pB.json",
+  "request": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/request.cbor",
+  "retained_target_payload": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/material/target_payload.json",
+  "root": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot",
+  "s1_instance": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/cap-run2-2/snapshot/material/iB.json"
+ },
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "input_sha256": {
+  "instance_commitment": "81238e495727a9ffcc58a4ae3f617bde20c742911fb5e0cb70c171a697827221",
+  "profile_artifact": "733512cb4dc4561980757c3dcee444d35eb5dfb0dc8442dd4ff5a3280de4de50",
+  "request": "7503d8f5ca2fbd1c46e9fface4cb77b18c5fc5a9a9604d0426ab1b12dbac9459",
+  "retained_target_payload": "0c92a5a882722058031d235598a65753f5044624324e5f13fbd98c7d2bef2595",
+  "s1_instance": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824"
+ },
+ "isolation_test": {
+  "interfaces": [
+   "lo"
+  ]
+ },
+ "launcher_claim_not_evidence": "unshare -n",
+ "lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "network_isolated": true,
+ "problems": [],
+ "runner_source_sha256": {
+  "s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494",
+  "s3c_verify.py": "45e5b96c82aaa7a48d4a551f6b15e90daab8cad53746dd83c5b643e091a05677"
+ },
+ "seconds": 22.0,
+ "started": "2026-10-08T08:28:49Z",
+ "tcb_source_mismatch": []
+}

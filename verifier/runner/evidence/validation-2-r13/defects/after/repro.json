@@ -1,0 +1,96 @@
+{
+ "R1a_direct_inner_without_isolation": {
+  "exit": 40,
+  "outcome": "S3-FAIL(infrastructure)",
+  "reason": {
+   "code": "NETWORK_ISOLATION"
+  },
+  "run_info_isolation_label": null,
+  "run_info_network_isolated": false,
+  "stage": "preflight"
+ },
+ "R1b_direct_inner_non_empty_out": {
+  "exit": 2,
+  "outcome": null,
+  "ran_stages": [],
+  "stale_file_still_present": true
+ },
+ "R1c_normal_path_non_empty_out": {
+  "exit": 2
+ },
+ "R2_capture_modified_after_G5": {
+  "bytes_used_equal_anchored_bytes": {
+   "instance_commitment": true,
+   "profile_artifact": true,
+   "request": true,
+   "s1_instance": true
+  },
+  "exit": 0,
+  "original_directory_iB_changed": true,
+  "outcome": "BINDING_MATCH",
+  "reason": {
+   "code": "BindingMatch",
+   "rule": null
+  },
+  "stage": "post-s2a"
+ },
+ "harness_process_interfaces": [
+  "lo",
+  "ifb0",
+  "ifb1",
+  "eth0"
+ ],
+ "label": "after",
+ "runner_dir": "verifier/runner",
+ "stub_stage_cases": {
+  "R3_duplicate_json_key_in_result": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "ENTRY_RESULT"
+   },
+   "stage": "s2b"
+  },
+  "R3_s2a_reject_with_garbage_repr": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2A_COV_MALFORMED"
+   },
+   "stage": "s2a"
+  },
+  "R3_unavailable_without_reason": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2B_REASON_MISSING"
+   },
+   "stage": "s2b"
+  },
+  "R3_unknown_s2b_class_Typo": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2B_UNKNOWN_CLASS"
+   },
+   "stage": "s2b"
+  },
+  "R4_instance_decode_false_cov_error": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2A_INSTANCE_DECODE"
+   },
+   "stage": "s2a"
+  },
+  "R4_pb_decode_false_with_frozen_coverage_reject": {
+   "outcome": "REJECT",
+   "reason": {
+    "token": "c1_profileDecode"
+   },
+   "stage": "s2a"
+  },
+  "R4_transcript_decode_false_cov_error": {
+   "outcome": "S3-FAIL(infrastructure)",
+   "reason": {
+    "code": "S2A_TRANSCRIPT_DECODE"
+   },
+   "stage": "s2a"
+  }
+ }
+}

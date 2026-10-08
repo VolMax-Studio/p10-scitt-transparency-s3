@@ -1,0 +1,76 @@
+{
+ "capture": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/pk/N-P4",
+ "commands": [
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/venv/bin/python",
+    "-B",
+    "/home/user/p10-scitt-transparency-s3/spike/host/preflight.py",
+    "--s1",
+    "/home/user/volmax-studio/s1",
+    "--s2a",
+    "/home/user/volmax-studio/s2a",
+    "--s2b",
+    "/home/user/volmax-studio/s2b-8eaa91c",
+    "--out",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/pk/out-N-P4/preflight.json",
+    "--lean-bin-dir",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+   ],
+   "exit": 0,
+   "n": 1,
+   "name": "preflight",
+   "seconds": 0.84,
+   "stderr": "logs/001-preflight.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/001-preflight.stdout",
+   "stdout_sha256": "618488e4ab0e92a1ddfc721b993523348d4056582125b2ee63cfa206c6f79eaa"
+  },
+  {
+   "argv": [
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/pk/out-N-P4/bin/g5",
+    "--capture",
+    "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/val2-work/pk/out-N-P4/snapshot",
+    "--index-sha256",
+    "a6f3ab27e187c73c184946b5f532aa2a06af8a9d53705f87a845d0330fd484c8"
+   ],
+   "exit": 30,
+   "n": 2,
+   "name": "g5",
+   "seconds": 0.01,
+   "stderr": "logs/002-g5.stderr",
+   "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "stdout": "logs/002-g5.stdout",
+   "stdout_sha256": "ae67963415b3b3da0bef4d1ca1b206a7f04241f18caa5078a5a7902acd0793c3"
+  }
+ ],
+ "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+ "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+ "g5_output": {
+  "detail": "request.cbor carries 2 records for index 2",
+  "g5": "FAIL",
+  "reason": "E_REQUEST_LEAF_DUPLICATE"
+ },
+ "host": {
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "python": "3.13.16"
+ },
+ "isolation_test": {
+  "interfaces": [
+   "lo"
+  ]
+ },
+ "launcher_claim_not_evidence": "unshare -n",
+ "lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "network_isolated": true,
+ "problems": [
+  "request.cbor carries 2 records for index 2"
+ ],
+ "runner_source_sha256": {
+  "s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494",
+  "s3c_verify.py": "45e5b96c82aaa7a48d4a551f6b15e90daab8cad53746dd83c5b643e091a05677"
+ },
+ "seconds": 0.9,
+ "started": "2026-10-08T08:32:35Z",
+ "tcb_source_mismatch": []
+}

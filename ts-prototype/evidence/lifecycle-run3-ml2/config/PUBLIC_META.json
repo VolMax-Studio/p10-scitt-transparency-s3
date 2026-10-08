@@ -1,0 +1,83 @@
+{
+ "closed_evidence_set_digest": "a8cf4ba58abe5f0245b1f3d6e1b5b4c8e718ce8dfdfb1137ec1f3a33e5e0fab0",
+ "file_sha256": {
+  "iB.json": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "inst.bin": "e42f46ffe6016047aca29563919bdbeab04e3f0c31d2bfe7ab2f0f7ac1110453",
+  "pB.json": "8ecc7fcf64e95cab13555a7675b835b4bad193c767f3f0c7858d720d1a090653"
+ },
+ "identity": {
+  "instance_subject": "p10s2sub:8312aedef03f23f6f94524e3f842b97ac8d4fbcf145aeeb0f2fd74a988f5aaa7",
+  "issuer_key_thumbprints": {
+   "admitter-one": "3278f9ee5db99618efdd99b762cc9cd6bdb6f021352c1bdb2083626c1cc42efc",
+   "admitter-two": "7fca3f6f2bc862b0f6db4aa5a3679d64716e75801320d5527caec00d08489acd",
+   "intruder-x": "063ac5e45bba8d6b465a83c82637e6cf075225f17b9edc3927072a59cab3d143",
+   "s3-owner-run3": "59b0aebb6f9580dd718cdb5a5b8312dbdd6a73529ac808f731856f79dfeed577"
+  },
+  "log_identity_digest": "62b338012a3d343b746dd62e2a511447f0a3e6a3de4b0354e9ce250f486678ea",
+  "owner_iss": "s3-owner-run3",
+  "policy_test_key_thumbprint": "ca05439f5e40fbecfae8934c7f45864f94c65fc2d28fa9dd568b2f94a3ee5c9a",
+  "profile_digest": "8ecc7fcf64e95cab13555a7675b835b4bad193c767f3f0c7858d720d1a090653",
+  "ts_iss": "https://ts.example/volmax-s3-run3",
+  "ts_key_thumbprint": "329a34a7c6870bac3a13956ba36efe55410dc450fa2482ed0bbd68e66b888765"
+ },
+ "private_keys": "generated outside the repository, not committed, not recorded",
+ "sanity_checks": [
+  {
+   "check": "toy iB bytes are the S1 p1.instance.json bytes (sha256 62353069...)",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "SubjectDeriveV0 re-derivation reproduces the toy instance_subject",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "LogIdentityV0 re-derivation reproduces the toy log_identity_digest",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "owner name is not an admitter name",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "only identity-dependent instance fields changed",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "pB differs from the toy pB only in key_resolution",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "authorized admitters unchanged and the owner is not one",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "fresh keys: no key thumbprint (issuers, policy-test, TS) occurs in any committed fixture meta or profile",
+   "detail": "",
+   "ok": true
+  }
+ ],
+ "sources": {
+  "s2a_commit": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+  "s2b_commit": "8eaa91cad1ffa963158b365c6d0d7316f4965e89",
+  "template_inst_sha256": "24316063d808800e66c610d3cbaeeb2010aaa76ea5fdfc59b41a0a5d0833e95d",
+  "template_pB_sha256": "7d840d07184049cb9ca97e68d267ab3be2cb53eed7a00e6f8c866323e03fa9ad"
+ },
+ "status": "NON-NORMATIVE EXPLORATORY CONFIGURATION; fresh test keys only; not S3 live-capture evidence",
+ "unchanged_vs_ratified_toy": {
+  "a12_a14": {
+   "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+   "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+   "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+  },
+  "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "request_id": "7265712d30303031",
+  "verifier_manifest_digest": "f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46"
+ }
+}

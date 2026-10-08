@@ -1,0 +1,41 @@
+{
+ "all_expectations_hold": true,
+ "checks": [
+  [
+   "the instance producer ordinal differs from its returned index",
+   true
+  ],
+  [
+   "returned indices equal log positions and every registration was fresh",
+   true
+  ],
+  [
+   "exactly one registration is an operator insert, not a producer role",
+   true
+  ],
+  [
+   "producer prefix size equals the next index at every step",
+   true
+  ],
+  [
+   "registered layout equals the preregistered layout",
+   true
+  ],
+  [
+   "closure references the actual admission index",
+   true
+  ],
+  [
+   "closure preclosure digest equals the recomputation from the retained a",
+   true
+  ],
+  [
+   "adjudication references the actual profile, instance and closure indic",
+   true
+  ],
+  [
+   "retention: submission, Receipt, response, public checkpoint and public",
+   true
+  ]
+ ]
+}

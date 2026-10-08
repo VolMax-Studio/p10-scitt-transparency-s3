@@ -1,4 +1,4 @@
-# Operator record: one-use Receipt-key retirement (template; nothing has been done)
+# Operator record: one-use Receipt/checkpoint key retirement (template; nothing has been done)
 
 Status: **TEMPLATE FOR THE OPERATOR. No key has been deleted by any tool or by Claude, and no step below is automated.** The procedure is a proposal for deployment-profile decision D8. It is performed, if at all, by the operator (Ivan) after the capture is frozen and verified, and the filled record is an operator-generated, self-attested document.
 
@@ -11,6 +11,7 @@ Status: **TEMPLATE FOR THE OPERATOR. No key has been deleted by any tool or by C
 
 ## Preconditions (all must hold before any key is touched)
 
+0. The operator has confirmed local decryption of the custody packages and matching public fingerprints (`verify_custody.py`), and holds the issuer archive.
 1. The capture is frozen, its anchor is recorded and the offline acceptance (`BINDING_MATCH` through the pinned runner) succeeded twice with identical `verdict.json`.
 2. Every original Receipt, response, submission and public checkpoint is retained in the capture and hashed in the manifest (I8). No registration is planned under this identity.
 3. The decision to retire (instead of archiving) is recorded as taken by the operator, not by Claude.
@@ -18,7 +19,7 @@ Status: **TEMPLATE FOR THE OPERATOR. No key has been deleted by any tool or by C
 ## Procedure (operator)
 
 1. Stop the facade (SIGTERM) and confirm no process still holds the key files open. Record the final log size, the final public checkpoint file and its SHA-256, and the facade state directory hash listing.
-2. Inventory every known copy of the **Receipt private key** (PEM, outside the repository), and the same for the **checkpoint (note) signing key**, which has the same property for checkpoints. List path, device, backup or snapshot membership, and whether the storage can securely erase (ordinary files on SSD or copy-on-write file systems cannot be assumed erased by overwriting).
+2. Inventory every known copy of the **Receipt private key**, **including the encrypted transit package `one-use-receipt-checkpoint.tar.age` (and every copy of it), its decrypted copies on the operator's machines, and the plaintext in the session container** (`deployment/candidate/custody/transit-record.json` lists the package hashes and members) (PEM, outside the repository), and the same for the **checkpoint (note) signing key**, which has the same property for checkpoints. List path, device, backup or snapshot membership, and whether the storage can securely erase (ordinary files on SSD or copy-on-write file systems cannot be assumed erased by overwriting).
 3. Remove each copy by a method that fits its storage. Preferred where available: keep the keys only on an encrypted volume or tmpfs created for the capture and destroy that volume key or unmount the tmpfs; otherwise delete the files and remove backups and snapshots that contain them. Note the method per copy. Do **not** claim secure overwriting on storage where it is not reliable.
 4. Verify absence by listing each location again and, for backups, by the backup tool's listing. Record anything that could not be verified.
 5. Issuer keys (owner, admitters, operator) are **not** retired by this procedure: they stay archived offline under the operator's custody (they are needed to regenerate negative material); their archive location is recorded, not their content.
@@ -37,7 +38,7 @@ Status: **TEMPLATE FOR THE OPERATOR. No key has been deleted by any tool or by C
 | Final log size and root (hex) | |
 | Final public checkpoint SHA-256 | |
 | Facade stopped at (UTC), process confirmed gone | |
-| Copies of the Receipt private key found (path, device, backup) | |
+| Copies of the Receipt private key found (path, device, backup), including the encrypted transit package, its copies and decrypted copies | |
 | Method of removal per copy | |
 | Copies of the checkpoint private key found and removed | |
 | Locations or media that could not be checked or erased | |

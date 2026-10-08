@@ -1,12 +1,12 @@
 # p10-scitt-transparency-s3
 
-P10 S3 — SCITT Transparency Service Deployment and Offline Capture Verification.
+P10 Transparency Log Deployment and Offline Capture Verification.
 
-**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r15). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
+**Status: candidate preparation only.** Nothing here is ratified, frozen, signed, or verified. See `S3_PREREG_v0.1.md` (draft, revision r16). Manifest coverage (`MANIFEST.sha256`) is provenance only and confers no normative authority.
 
 ## Layers
 
-- **S3-A — deployment definition.** What a P10-compatible Transparency Service instance is: frozen `LeafEncodeV0`, VDS 1 (`RFC9162_SHA256`), fixed Receipt key, frozen bootstrap and registration policy, empty unprotected header on every leaf, exact full-prefix export.
+- **S3-A — deployment definition.** What a P10-compatible transparency-log instance is: frozen `LeafEncodeV0`, VDS 1 (`RFC9162_SHA256`), fixed Receipt key, frozen bootstrap and registration policy, empty unprotected header on every leaf, exact full-prefix export.
 - **S3-B — live capture.** A one-time live event: register exact Signed Statements sequentially, retain the original Receipts, export `[0,n)`, assemble `request.cbor`, freeze the capture. Not required to reproduce identical bytes when repeated.
 - **S3-C — offline acceptance.** The unchanged frozen chain (S2b `decode_request` → `replay_p0_p9` → `tB` → pinned S2a runner → existing post-S2a orchestration) run over the frozen capture with public material only, offline, in the declared pinned environment. This is the byte-reproducible part. Its traced path and S3-owned glue are described in `spec/acceptance-runner-map.md`.
 
@@ -26,8 +26,8 @@ A service can be fully RFC 9943-compliant and still not be P10 S3-compatible. S3
 ## Layout
 
 ```
-S3_PREREG_v0.1.md   draft preregistration (r15)
-spec/               acceptance-runner-map.md, deployment-profile.md (candidate definition, nothing adopted), registration-interface.md, operator-record-receipt-key-retirement.md (template), capture-format.md, mixed-log-test-plan.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: registration policy
+S3_PREREG_v0.1.md   draft preregistration (r16)
+spec/               acceptance-runner-map.md, deployment-profile.md (candidate definition, nothing adopted), registration-interface.md, open-items-resolution.md (proposals), operator-record-receipt-key-retirement.md (template), capture-format.md, mixed-log-test-plan.md, CLOSURE_REPORT_OPEN_1_4_6.md; planned: registration policy
 ts/                 TS deployment (planned)
 capture/            frozen live capture (planned)
 vectors/            committed vectors (planned)

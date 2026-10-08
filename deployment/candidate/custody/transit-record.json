@@ -1,0 +1,39 @@
+{
+ "copies_at_creation": [
+  "plaintext originals in the session container: /home/user/s3-custody/ (not deleted)",
+  "encrypted packages in the session container: /home/user/s3-custody-transit/",
+  "a copy of the encrypted packages in the session scratchpad (staged for file transfer to the operator)",
+  "encrypted packages delivered to the operator by file transfer, and every copy he makes of them"
+ ],
+ "deleted": "nothing. No key copy has been deleted; deletion waits for the operator's confirmation of successful local decryption and matching public fingerprints (verify_custody.py).",
+ "encryption": "age 1.1.1, X25519 recipient; `tar --sort=name --owner=0 --group=0 --numeric-owner -cf - DIRS | age -r RECIPIENT -o PACKAGE` (streamed; no plaintext archive was created)",
+ "packages": {
+  "issuer-archive": {
+   "bytes": 10440,
+   "file": "issuer-archive.tar.age",
+   "files": [
+    "candidate-issuers/admitter-one.pem",
+    "candidate-issuers/admitter-two.pem",
+    "candidate-issuers/intruder-x.pem",
+    "candidate-issuers/operator.pem",
+    "candidate-issuers/volmax-owner.pem"
+   ],
+   "purpose": "issuer keys (owner, admitter-one, admitter-two, intruder-x, operator): offline archive under the operator's custody",
+   "sha256": "7662c821d81e95e52987d5b380a4225b2dd0c1dfad8e43cdf1d0a47f7f0326df"
+  },
+  "one-use-receipt-checkpoint": {
+   "bytes": 10440,
+   "file": "one-use-receipt-checkpoint.tar.age",
+   "files": [
+    "candidate-checkpoint/note.skey",
+    "candidate-checkpoint/note.vkey",
+    "candidate-receipt/ts.pem"
+   ],
+   "purpose": "Receipt signing key and checkpoint signing key (+ public verifier key): one capture, then manual retirement",
+   "sha256": "c55c4b57ce342679d3547e9daacd9672dc095c80243f2fee88765c3fa1079b02"
+  }
+ },
+ "recipient_age_public_key": "age10j748jfyazq8qk2yfnapmd4z80kcf5e09u47eg5n30vjgc7ju30qyn7hcj",
+ "recipient_note": "supplied by the operator, generated locally by him; no identity (private key) was ever seen by Claude",
+ "status": "TRANSIT RECORD (public). Hashes and inventory of the age-encrypted packages; no secret content."
+}

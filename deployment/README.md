@@ -4,3 +4,4 @@
 - `make_definition.py`: assembles `candidate/` from the output of `ts-prototype/scripts/run_lifecycle.sh prepare`; it copies no private key.
 - The private keys of the candidate set are **not** in this repository. Their values, and everything derived from them (thumbprints, profile digest, instance commitment, subject, `LogIdentityV0`, payload hashes), belong to that exact key set.
 - Review document: `spec/deployment-profile.md`. Normative S3-B must not start before the operator explicitly authorizes the freeze.
+- `candidate/custody/`: custody handoff for the candidate key set. `transit-record.json` (public: recipient, package SHA-256, member inventory, copies, nothing-deleted statement) and `verify_custody.py` (run by the operator locally with his age identity; prints only package hashes, public fingerprints and PASS/FAIL). The encrypted packages themselves are not in the repository.

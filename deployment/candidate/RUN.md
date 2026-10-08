@@ -16,17 +16,21 @@ Status: **PROPOSAL. Normative S3-B has not been started and must not start befor
 ## Commands
 
 ```
-cp deployment/candidate/env.example.sh ENV && edit the <...> paths in ENV            # nothing else
-bash ts-prototype/scripts/run_lifecycle.sh install ENV     # public configuration from the definition; checks manifest hashes and key custody; no key generation
-bash ts-prototype/scripts/run_lifecycle.sh capture ENV     # facade + runtime issuer tooling + capture client, public export, capture assembly, ANCHOR.sha256 (stops here)
-git add "$OUT" && git commit -m "S3-B capture and anchor"   # the OPERATOR records the anchor BEFORE verification (operator-generated record, not an independent channel)
-bash ts-prototype/scripts/run_lifecycle.sh verify ENV      # prototype checks F0-F8, G5 with the recorded anchor, the unchanged chain (network-isolated)
+cd REPO                                                     # the checkout; all commands run from its root
+cp deployment/candidate/env.example.sh ENV                  # then edit ONLY the <...> paths in ENV
+set -a; . ./ENV; set +a                                     # source ENV in THIS shell: the commands below use $OUT, $S1, $S2A, $S2B, $ENTRY, $G5, $LEAN_BIN
+bash ts-prototype/scripts/run_lifecycle.sh install ./ENV    # public configuration from the definition; checks manifest hashes and key custody; no key generation
+bash ts-prototype/scripts/run_lifecycle.sh capture ./ENV    # facade + runtime issuer tooling + capture client, public export, capture assembly, ANCHOR.sha256 (stops here)
+git add "$OUT" && git commit -m "S3-B capture and anchor"    # the OPERATOR records the anchor BEFORE verification (operator-generated record, not an independent channel)
+bash ts-prototype/scripts/run_lifecycle.sh verify ./ENV     # prototype checks F0-F8, G5 with the recorded anchor, the unchanged chain (network-isolated)
 python3 -B verifier/runner/s3c_verify.py --capture "$OUT/capture" --anchor-file "$OUT/ANCHOR.sha256" --out RUNNER_OUT \
     --s1 "$S1" --s2a "$S2A" --s2b "$S2B" --entry "$ENTRY" --g5 "$G5" --lean-bin-dir "$LEAN_BIN"      # candidate acceptance runner; RUNNER_OUT must be outside "$OUT/capture"
 ```
+
+`run_lifecycle.sh` sources ENV itself, but the later commands run in the parent shell, so ENV must have been sourced there first (`set -a` exports the variables). `ENV` is a plain shell file: no `<...>` placeholder may remain.
 
 Two invocations bracket the anchor commit on purpose: the anchor must exist before anything verifies the capture. Expected for the runner: exit 0, `BINDING_MATCH`. Any other result is reported as it is.
 
 ## After a successful acceptance
 
-No registration is planned under this log identity. Retirement of the Receipt key, if the operator decides to do it, is a separate manual step with its own record: `spec/operator-record-receipt-key-retirement.md`. Nothing here deletes a key.
+No registration is planned under this log identity. The selected plan (D8) is one-use retirement of the Receipt and checkpoint keys, executed manually by the operator, with its own record: `spec/operator-record-receipt-key-retirement.md`. Nothing here deletes a key, and nothing is deleted before the operator has confirmed local decryption of the custody packages and matching public fingerprints (`deployment/candidate/custody/verify_custody.py`).

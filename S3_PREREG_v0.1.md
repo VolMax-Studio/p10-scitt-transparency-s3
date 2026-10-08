@@ -1,8 +1,10 @@
-# S3_PREREG_v0.1 — P10 S3: SCITT Transparency Service Deployment and Offline Capture Verification
+# S3_PREREG_v0.1 — P10 Transparency Log Deployment and Offline Capture Verification
 
-Status: **DRAFT CANDIDATE, revision r15 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
+Status: **DRAFT CANDIDATE, revision r16 — preparation only.** Not ratified, not frozen, not signed, not tagged, not released. Nothing in this document is verified or accepted. Items marked `[OPEN]` are unresolved and MUST be closed before any freeze. Manifest coverage of this file (or of any file in this repository) confers no normative authority.
 
 Companion candidate documents: `spec/acceptance-runner-map.md` (traced execution path, S3-owned glue, runtime contract), `spec/CLOSURE_REPORT_OPEN_1_4_6.md` (evidence report).
+
+Revision r16 (relative to r15 at `3017af4`): documentation only. Title and target claim reworded ("P10 Transparency Log Deployment and Offline Capture Verification"; the target sentence is drafted and flagged, since the ChatGPT-supplied wording was not in the instruction; the RFC 9943 / SCRAPI non-claims are kept); custody handoff prepared (`deployment/candidate/custody/`: age-encrypted issuer-archive and one-use packages, hash and inventory record, local verification script; nothing deleted); D8 made consistent with one-use manual retirement by the operator; `deployment/candidate/RUN.md` corrected (ENV sourced in the parent shell) and its sequence checked without starting capture; `spec/open-items-resolution.md` added (proposals for the 13 OPEN items). Historical reports are unchanged. Nothing adopted.
 
 Revision r15 (relative to r14 at `9213446`): the candidate deployment definition was prepared on the operator's direction; it adopts nothing, freezes nothing and closes no OPEN item. (1) The prototype facade now authenticates the issuer of every statement (ES256 against a preconfigured issuer table, with transport of a separately held statement payload), before any append, journal intent, duplicate answer or Receipt; the interface was written first (`spec/registration-interface.md`), implemented at `10638c2`, regression-tested and qualified once (`ts-prototype/RESULTS.md` §G, `ts-prototype/evidence/auth-regression/`, `ts-prototype/evidence/qualification-auth-ml2/`). This is one mandatory registration check; authorization, payload checks and everything else listed in the non-claims remain absent, and no RFC 9943 / SCRAPI compliance is claimed. (2) `spec/deployment-profile.md` is rewritten as the candidate definition (D1–D13, each with proposal, evidence and limits); `deployment/candidate/` holds the resolved public configuration, the two bootstrap declaration payloads and their hashes, source and executable pins and the exact command (`RUN.md`); `verifier/artifacts/` supplies the exact entry and G5 bytes with a build record. (3) `spec/operator-record-receipt-key-retirement.md` is an operator template for a one-use Receipt-key retirement; nothing was deleted. (4) Corrections: the bootstrap is described as preconfigured declarations published as leaves 0 and 1 (authenticated, not an unchecked registration, not RFC 9943 mechanism (b)); Rust 1.82.0 is listed as a current runner prerequisite; the Go build claim is limited to the recorded builds; the anchor is an operator-generated record. The candidate private keys exist only in the ephemeral session container until the operator takes custody.
 
@@ -38,9 +40,9 @@ Revision r2 changes (relative to the first candidate commit `ba54cd4`): I2/I4/I1
 
 ## 1. Scope
 
-**Normative deployment model (Option A).** A deployable P10-compatible Transparency Service instance whose Statement Sequence uses the frozen `LeafEncodeV0` and whose captured outputs are accepted unchanged by the already frozen offline P10 verification chain.
+**Normative deployment model (Option A).** A deployable P10-compatible transparency-log instance (an RFC 9162 log with a SCITT-shaped registration front-end) whose Statement Sequence uses the frozen `LeafEncodeV0` and whose captured outputs are accepted unchanged by the already frozen offline P10 verification chain.
 
-**Target claim.** S3 demonstrates that a deployed P10-compatible Transparency Service, using the frozen LeafEncodeV0 and RFC9162_SHA256 receipts, can register and expose an exact Statement Sequence capture sufficient for the unchanged frozen P10 verification chain to independently reproduce and accept the captured instance offline.
+**Target claim.** S3 demonstrates that a deployed P10 transparency log — an RFC 9162 log issuing RFC 9942-form Receipts behind a SCITT-shaped registration front-end that authenticates issuers against preconfigured keys — using the frozen LeafEncodeV0 and RFC9162_SHA256 receipts, can register and expose an exact Statement Sequence capture sufficient for the unchanged frozen P10 verification chain to independently reproduce and accept the captured instance offline. S3 does not claim that this deployment is an RFC 9943 Transparency Service or is SCRAPI-compliant: RFC 9943 registration behaviour beyond issuer authentication, Registration Policy enforcement and the other duties of a Transparency Service are neither implemented nor claimed. *(Drafted by Claude on the operator's instruction, because the wording supplied by ChatGPT was not included in the message; to be replaced verbatim when supplied.)*
 
 **Layers.**
 
@@ -50,7 +52,7 @@ Revision r2 changes (relative to the first candidate commit `ba54cd4`): I2/I4/I1
 
 **Boundary.** S3 is a transport / transparency / deployment layer. It adds no P10 semantics. `TargetAdjudicationValidV0` and `AdjudicationBindingV0` are post-S2a stages of the frozen chain and run there unchanged; S3 defines no rule of its own for them.
 
-**Choice of Option A over Option B.** Option A means the "real Transparency Service" is a P10-compatible instance operated for this demonstration (for example an adapted open-source RFC 9162-style SCITT TS), so the claim is feasibility of such a deployment, not compatibility with an independent third-party service. Option B (a third-party TS hashing raw Statement bytes) is incompatible with the frozen `LeafEncodeV0`; adapting to it would be a new profile instance (e.g. `LeafEncodeV1`) and is not S3.
+**Choice of Option A over Option B.** Option A means the "real" log is a P10-compatible transparency-log instance operated for this demonstration (for example an adapted open-source RFC 9162-style SCITT TS), so the claim is feasibility of such a deployment, not compatibility with an independent third-party service. Option B (a third-party TS hashing raw Statement bytes) is incompatible with the frozen `LeafEncodeV0`; adapting to it would be a new profile instance (e.g. `LeafEncodeV1`) and is not S3.
 
 **Pinned baseline (proposed).** Chain components are identified by immutable commits (Section 6.4): S1 `e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1`, S2a `741d56d36d7b2bfe2e9e0080a1cba4393e4a47da`, S2b `8eaa91cad1ffa963158b365c6d0d7316f4965e89` (`v0.1.0-s2b-complete`).
 
@@ -283,6 +285,8 @@ Excluded from the repository and manifest: private keys, secrets, and any artifa
 ---
 
 ## Remaining OPEN items
+
+Proposed resolutions, supporting artifacts and scope exclusions for all of them: `spec/open-items-resolution.md` (proposals only; none is adopted or closed).
 
 1. Non-target `sub` value(s) (I2). Candidate: `urn:volmax:s3:policy-declaration`, `…:verification-material-declaration`, `…:operator-note` (`spec/deployment-profile.md` D5); exercised once with throwaway keys; not decided.
 2. Bootstrap mechanism and index-0 content (Section 4). Candidate: preconfigured declarations published as leaves 0 and 1, payloads and hashes in `deployment/candidate/` (D3/D4); not decided.

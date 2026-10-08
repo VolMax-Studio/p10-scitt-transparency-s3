@@ -50,6 +50,7 @@ type Config struct {
 	CosePEM, TsIss       string
 	ExpectThumbprint     string // hex; the Receipt key must be the one committed in the instance
 	PublicURL            string // base URL of this facade's own public read endpoint
+	PublicReadURL        string // TEST HOOK: base URL the facade reads the public log through (default PublicURL), e.g. a fault-injecting proxy
 	BatchSize            uint
 	BatchAge             time.Duration
 	CheckpointInterval   time.Duration
@@ -125,7 +126,11 @@ func Open(ctx context.Context, cfg Config) (*Service, error) {
 	if tp := iss.Thumbprint(); hex.EncodeToString(tp[:]) != cfg.ExpectThumbprint {
 		return nil, fmt.Errorf("Receipt key thumbprint %x is not the committed %s", tp, cfg.ExpectThumbprint)
 	}
-	u, err := url.Parse(cfg.PublicURL)
+	readURL := cfg.PublicURL
+	if cfg.PublicReadURL != "" {
+		readURL = cfg.PublicReadURL
+	}
+	u, err := url.Parse(readURL)
 	if err != nil {
 		return nil, err
 	}

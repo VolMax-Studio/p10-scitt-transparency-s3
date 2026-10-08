@@ -35,6 +35,7 @@ func main() {
 	flag.DurationVar(&c.CheckpointRepublish, "checkpoint-republish", 0, "Tessera checkpoint republish interval (0: default)")
 	flag.DurationVar(&c.PublishTimeout, "publish-timeout", 30*time.Second, "wait for a verified published checkpoint")
 	flag.IntVar(&c.MaxLeafInput, "max-leaf-input", 1<<16-1, "limit on len(LeafEncodeV0(statement))")
+	flag.StringVar(&c.PublicReadURL, "public-read-url", "", "TEST HOOK: read the public log through this base URL instead of the own public listener")
 	flag.StringVar(&c.FaultPoint, "fault-point", "", "TEST ONLY: self-SIGKILL at pre-add|submitted|integrated|receipt-stored|pre-response")
 	flag.IntVar(&c.FaultOnRequest, "fault-on-request", 0, "TEST ONLY: 1-based admitted registration request that triggers the fault")
 	flag.Parse()

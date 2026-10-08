@@ -4,6 +4,7 @@ Status: **PROPOSAL. Normative S3-B has not been started and must not start befor
 
 ## Preconditions
 
+0. **Freeze set.** From the repository root, `sha256sum -c deployment/candidate/freeze-set.sha256` reports every file OK (the exact files listed in `deployment/candidate/FREEZE_CANDIDATE.md`; this is the set the operator would freeze, and it is checked here, not assumed).
 1. **Source pin.** The checkout's `HEAD` satisfies the check recorded in `definition-manifest.json`:
    `git diff --quiet 10638c239b27d7c87b238a6f387c95882162c4dc HEAD -- ts-prototype/cmd ts-prototype/internal ts-prototype/producer ts-prototype/scripts ts-prototype/go.mod ts-prototype/go.sum`
    and `git status --porcelain -- ts-prototype ':!ts-prototype/evidence'` is empty (the capture phase refuses otherwise).
@@ -28,6 +29,8 @@ python3 -B verifier/runner/s3c_verify.py --capture "$OUT/capture" --anchor-file 
 ```
 
 `run_lifecycle.sh` sources ENV itself, but the later commands run in the parent shell, so ENV must have been sourced there first (`set -a` exports the variables). `ENV` is a plain shell file: no `<...>` placeholder may remain.
+
+**Reviewed offline invocation (`verifier/runner/CONTRACT.md` §4a).** The runner command above is the normative one only as written: no `--no-offline`, no `--pinned` (the reviewed `verifier/runner/PINNED_INPUTS.json` is used), `--out` outside the capture. After it, check in `RUNNER_OUT`: exit code 0; `verdict.json` `outcome` is `BINDING_MATCH`; `verdict.json` `executables_pinned` is `{"entry": true, "g5": true}`; `run-info.json` `network_isolated` is `true`; `run-info.json` `runner_source_sha256` equals the reviewed hashes (`s3c_verify.py` `7e6c457a…f628`, `s3c_chain.py` `de3450bb…0494`). If any of these fails the run is diagnostic and is not offline acceptance. The `verify` phase of `run_lifecycle.sh` is the prototype-check and glue-chain pass and does not replace this runner run.
 
 Two invocations bracket the anchor commit on purpose: the anchor must exist before anything verifies the capture. Expected for the runner: exit 0, `BINDING_MATCH`. Any other result is reported as it is.
 

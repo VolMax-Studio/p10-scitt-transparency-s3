@@ -1,0 +1,191 @@
+{
+ "selected_lean_bin_dir": "/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin",
+ "checks": [
+  {
+   "id": "s1-commit",
+   "ok": true,
+   "required": true,
+   "detail": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1 (want e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1)"
+  },
+  {
+   "id": "s1-clean",
+   "ok": true,
+   "required": true,
+   "detail": "clean"
+  },
+  {
+   "id": "s1-tag-peels-to-pin",
+   "ok": true,
+   "required": false,
+   "detail": "v0.1.0-s1-ratified -> e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1"
+  },
+  {
+   "id": "s2a-commit",
+   "ok": true,
+   "required": true,
+   "detail": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da (want 741d56d36d7b2bfe2e9e0080a1cba4393e4a47da)"
+  },
+  {
+   "id": "s2a-clean",
+   "ok": true,
+   "required": true,
+   "detail": "clean"
+  },
+  {
+   "id": "s2a-tag-peels-to-pin",
+   "ok": true,
+   "required": false,
+   "detail": "v0.1.0-s2a-ratified -> 741d56d36d7b2bfe2e9e0080a1cba4393e4a47da"
+  },
+  {
+   "id": "s2b-commit",
+   "ok": true,
+   "required": true,
+   "detail": "8eaa91cad1ffa963158b365c6d0d7316f4965e89 (want 8eaa91cad1ffa963158b365c6d0d7316f4965e89)"
+  },
+  {
+   "id": "s2b-clean",
+   "ok": true,
+   "required": true,
+   "detail": "clean"
+  },
+  {
+   "id": "s2b-tag-peels-to-pin",
+   "ok": true,
+   "required": false,
+   "detail": "v0.1.0-s2b-complete -> 8eaa91cad1ffa963158b365c6d0d7316f4965e89"
+  },
+  {
+   "id": "s2b-frozen-files-vs-PINS.txt",
+   "ok": true,
+   "required": true,
+   "detail": "differ: "
+  },
+  {
+   "id": "s2a-files-vs-UPSTREAM_HASHES",
+   "ok": true,
+   "required": true,
+   "detail": "differ: "
+  },
+  {
+   "id": "s1-verifier-manifest-sha256",
+   "ok": true,
+   "required": true,
+   "detail": "06bf9129bf480c79ed5281ec2e944ac5613d1c340552ce5a415f5bf4c8965907"
+  },
+  {
+   "id": "s1-static-open-s13-check",
+   "ok": true,
+   "required": true,
+   "detail": "090a34bf3f61751ebf27c41d9c1f1e2c710f557d009516b68742a6b2ec583f\"}\nSTATIC CHECKS PASSED -- evidence only; the .olean digests and the validating Lean runs are NOT done (run mode); OPEN-S13 is not closed."
+  },
+  {
+   "id": "lean[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin]-vs-S2a-manifest",
+   "ok": true,
+   "required": false,
+   "detail": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S2a pin 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847)"
+  },
+  {
+   "id": "lean[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin]-vs-S1-manifest",
+   "ok": true,
+   "required": false,
+   "detail": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S1 pin 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847)"
+  },
+  {
+   "id": "lake[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin]-vs-S1-manifest",
+   "ok": true,
+   "required": false,
+   "detail": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2 (S1 pin 8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2)"
+  },
+  {
+   "id": "leanchecker[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin]-vs-S1-manifest",
+   "ok": true,
+   "required": false,
+   "detail": "612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33 (S1 pin 612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33)"
+  },
+  {
+   "id": "libleanshared[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin]-vs-S1-manifest",
+   "ok": true,
+   "required": false,
+   "detail": "0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d (S1 pin 0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d)"
+  },
+  {
+   "id": "lean[/tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin]-version-vs-S1-manifest",
+   "ok": true,
+   "required": false,
+   "detail": "'Lean (version 4.33.0, commit 5da8a13c67369827303c441170d2f4051339df4c, Release)'"
+  },
+  {
+   "id": "selected-lean-vs-S1-manifest",
+   "ok": true,
+   "required": true,
+   "detail": "9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847 (S1 manifest lean_toolchain_artifact_sha256 = 9842f89b9a1874db969cc58933e4117c397338f795eb8febffeb79edd5272847)"
+  },
+  {
+   "id": "selected-lake-vs-S1-manifest",
+   "ok": true,
+   "required": true,
+   "detail": "8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2 (S1 manifest lake_executable_sha256 = 8c57ee92ed8547a8508b61bce38fc14da56e2856a4ed5a574d73e8f62647d7d2)"
+  },
+  {
+   "id": "selected-libleanshared-vs-S1-manifest",
+   "ok": true,
+   "required": true,
+   "detail": "0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d (S1 manifest lean_shared_library_sha256 = 0df64f2384d4152ccb675b2e6b9ad4769d71c8ce168f6e2c24324df0db897c4d)"
+  },
+  {
+   "id": "selected-lean-version-vs-S1-manifest",
+   "ok": true,
+   "required": true,
+   "detail": "Lean (version 4.33.0, commit 5da8a13c67369827303c441170d2f4051339df4c, Release)"
+  },
+  {
+   "id": "selected-leanchecker-vs-S1-manifest (not used on this chain)",
+   "ok": true,
+   "required": false,
+   "detail": "612915adfd75d37c27ade001eb287eebf24268b720f597f4f8ea16e9a5c55f33"
+  },
+  {
+   "id": "lean-executable-pinned-by-S2a-manifest-available",
+   "ok": true,
+   "required": true,
+   "detail": "candidate dir /tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/dl/lean-x/bin"
+  },
+  {
+   "id": "rustc-1.82.0 (spike/s3-entry/rust-toolchain.toml)",
+   "ok": true,
+   "required": true,
+   "detail": "rustc 1.82.0 (f6e511eec 2024-10-15)"
+  },
+  {
+   "id": "native-link-libuv (cc -luv)",
+   "ok": true,
+   "required": true,
+   "detail": ""
+  },
+  {
+   "id": "native-cc-version",
+   "ok": true,
+   "required": false,
+   "detail": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+  },
+  {
+   "id": "python-version",
+   "ok": true,
+   "required": false,
+   "detail": "3.13.16 (the S2b acceptance environment pins CPython 3.12.3 for its oracle; the spike chain uses only the standard library)"
+  },
+  {
+   "id": "spike-Cargo.lock-subset-of-S2b-Cargo.lock",
+   "ok": true,
+   "required": true,
+   "detail": "differ: "
+  },
+  {
+   "id": "candidate-g5-Cargo.lock-subset-of-S2b-Cargo.lock",
+   "ok": true,
+   "required": true,
+   "detail": "differ: "
+  }
+ ]
+}

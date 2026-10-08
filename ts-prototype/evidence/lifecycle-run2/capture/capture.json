@@ -1,0 +1,263 @@
+{
+ "detached_payloads": [],
+ "format": "P10-S3-CaptureIndex-v0-candidate",
+ "material": {
+  "instance_commitment": {
+   "path": "material/inst.bin",
+   "sha256": "81238e495727a9ffcc58a4ae3f617bde20c742911fb5e0cb70c171a697827221"
+  },
+  "profile_artifact": {
+   "path": "material/pB.json",
+   "sha256": "733512cb4dc4561980757c3dcee444d35eb5dfb0dc8442dd4ff5a3280de4de50"
+  },
+  "retained_target_payload": [
+   {
+    "path": "material/target_payload.json",
+    "sha256": "0c92a5a882722058031d235598a65753f5044624324e5f13fbd98c7d2bef2595"
+   }
+  ],
+  "s1_instance": {
+   "path": "material/iB.json",
+   "sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824"
+  }
+ },
+ "prefix": [
+  {
+   "index": "0",
+   "origin": "ts",
+   "path": "prefix/000000.cose",
+   "role": "registration-policy-test",
+   "sha256": "e0fad02325e51de97f2a38f7d36627e3744414f5d7a66afc3c5743230644554f"
+  },
+  {
+   "index": "1",
+   "origin": "ts",
+   "path": "prefix/000001.cose",
+   "role": "trust-anchor-test",
+   "sha256": "c62314eea126ba361c1edeece8fd5f17be8252f9eb06a8407f136406a7a5e5ec"
+  },
+  {
+   "index": "2",
+   "origin": "issuer",
+   "path": "prefix/000002.cose",
+   "role": "p10-lifecycle",
+   "sha256": "7b476e1e42bf2e9404395eefb9eb72d0b11c8846a3ed627315a5122002d7f305"
+  },
+  {
+   "index": "3",
+   "origin": "issuer",
+   "path": "prefix/000003.cose",
+   "role": "p10-lifecycle",
+   "sha256": "9ebde61e180d6943563adb2951ebab253b089ab028185773df5d67671bdd46a2"
+  },
+  {
+   "index": "4",
+   "origin": "issuer",
+   "path": "prefix/000004.cose",
+   "role": "p10-lifecycle",
+   "sha256": "43a30eaed8be7dcafb68e3931cb8b3ceb1d29ac923fe5a1719d2c5c8df6c1741"
+  },
+  {
+   "index": "5",
+   "origin": "issuer",
+   "path": "prefix/000005.cose",
+   "role": "p10-lifecycle",
+   "sha256": "d2755bca2f8a3c43895c6650c41bdde0caf1e4102280a5e14fba6f5addf9671d"
+  },
+  {
+   "index": "6",
+   "origin": "issuer",
+   "path": "prefix/000006.cose",
+   "role": "p10-target",
+   "sha256": "befb8307861a88b555a12298aa90bff0232c332a1332287d962ee6313fcab177"
+  }
+ ],
+ "provenance": [
+  {
+   "path": "provenance/binaries-sha256.txt",
+   "sha256": "98e156514afe976952b9500eb073edd2b6556a4541fd08b90e02052d96d22440"
+  },
+  {
+   "path": "provenance/export-result.json",
+   "sha256": "d7dcf9d3fc1b57f8bcf60103f0ad096499724f22a6882084aa4ad5676aab3fca"
+  },
+  {
+   "path": "provenance/facade-config.json",
+   "sha256": "4e9a994839735afc210542d62dcf299d920efb010639e5fc924155a67108e801"
+  },
+  {
+   "path": "provenance/facade-journal.jsonl",
+   "sha256": "23aa6866c469dfcdfde2810d40f1b33a160faad413c8e42f16d3acfbac53a69e"
+  },
+  {
+   "path": "provenance/note.vkey",
+   "sha256": "557694027253851fd9826a222c22fa4f78041f14fe42e6ebb8bfeb522d74f0b2"
+  },
+  {
+   "path": "provenance/producer-source-pin.txt",
+   "sha256": "062a5eada03b76fea344337abefd48961a08d11bc30439f2ab809dd814501636"
+  },
+  {
+   "path": "provenance/producer-steps.jsonl",
+   "sha256": "a5e97f7d25338533f902b1098096c00ac78be718f13a6eddf4e153bfe49d3e90"
+  },
+  {
+   "path": "provenance/public-checkpoints/000000.checkpoint",
+   "sha256": "7408fd4d537c85b66525383e7cdf024633cbbee00b28edbff3ce355de115f2d6"
+  },
+  {
+   "path": "provenance/public-checkpoints/000001.checkpoint",
+   "sha256": "d54a62b3e5c8711fda7e0acaf0744fca03a4ac4ee840bc04787344eee3cf605e"
+  },
+  {
+   "path": "provenance/public-checkpoints/000002.checkpoint",
+   "sha256": "e1425ad04362719faeb9dd38ef710312b71728dc91e01604c229b470b16feb11"
+  },
+  {
+   "path": "provenance/public-checkpoints/000003.checkpoint",
+   "sha256": "d84df2353357aa62d347b385e7dbba51629039abe5ccf0b1f610aa163a57dbcb"
+  },
+  {
+   "path": "provenance/public-checkpoints/000004.checkpoint",
+   "sha256": "ca3a08276189c13228d36f25e62468a99da1be90050f17390d373448059b6bba"
+  },
+  {
+   "path": "provenance/public-checkpoints/000005.checkpoint",
+   "sha256": "dba1118023dc05761a304329117a9380883094cacf0f4d8622125b1e3dca5f6e"
+  },
+  {
+   "path": "provenance/public-checkpoints/000006.checkpoint",
+   "sha256": "18cb4d71c8b36c3ace082d3a93d7d8ef33e06a7c6068a8e896a46aca35bf5f65"
+  },
+  {
+   "path": "provenance/public-http-responses/checkpoint",
+   "sha256": "18cb4d71c8b36c3ace082d3a93d7d8ef33e06a7c6068a8e896a46aca35bf5f65"
+  },
+  {
+   "path": "provenance/public-http-responses/tile/0/000.p/7",
+   "sha256": "4188c61dc53f09f59d36e2f5f118c73d4d596ba85a674087fc6da83ff0d1f8d9"
+  },
+  {
+   "path": "provenance/public-http-responses/tile/entries/000.p/7",
+   "sha256": "4c8257ad2b6846681091ee953d925e490d97e5f1c1fc6a9ab9cbae063f83b12a"
+  },
+  {
+   "path": "provenance/run-config.json",
+   "sha256": "f39c2e4aad281d8846b5ad7b6962043068dcffb8b9e035e0ce2429c02ab91b67"
+  },
+  {
+   "path": "provenance/submit-log.json",
+   "sha256": "725d63e4b3552bc812a154e7d76b4360f6d9ee65daad3086d6116eb7d143a54c"
+  }
+ ],
+ "public_keys": [
+  {
+   "name": "admitter-one",
+   "path": "public-keys/admitter-one.public.cose_key.cbor",
+   "sha256": "d2e67415640a7968080b66fa204dbffc300602d43d69230466d9f712ae08142f"
+  },
+  {
+   "name": "admitter-two",
+   "path": "public-keys/admitter-two.public.cose_key.cbor",
+   "sha256": "7ef61aa79fb576e533adfac1fc3126797df7886a699e1defe10060f43a32d16c"
+  },
+  {
+   "name": "intruder-x",
+   "path": "public-keys/intruder-x.public.cose_key.cbor",
+   "sha256": "670e7cc15ef8eb3a5c9ce06fc174eb365f78420a951677fd46a85f94769882fa"
+  },
+  {
+   "name": "policy-test",
+   "path": "public-keys/policy-test.public.cose_key.cbor",
+   "sha256": "d9567147ad034b082573354233734562920695e699c5ed2fe5eae7249930d7b0"
+  },
+  {
+   "name": "s3-owner-run2",
+   "path": "public-keys/s3-owner-run2.public.cose_key.cbor",
+   "sha256": "52ac087cbae7e4e71f26c425af3e4096066ba92cb0ad2b419cb9494b7853068b"
+  },
+  {
+   "name": "ts",
+   "path": "public-keys/ts.public.cose_key.cbor",
+   "sha256": "7c68579ccdde9f97481f7474227dd6f1400ab4efa6c5a665c245573bc8d5d1de"
+  }
+ ],
+ "receipts": [
+  {
+   "index": "0",
+   "path": "receipts/000000.receipt.cbor",
+   "selected": false,
+   "sha256": "04a9d7b95e9519181dd66c7c43bc25f81cca189e9dfb14b680acba819ffe972b"
+  },
+  {
+   "index": "1",
+   "path": "receipts/000001.receipt.cbor",
+   "selected": false,
+   "sha256": "07ef0d229f6eae0d86ea44ad2948d6ecc5f2c556139ee9e324aca5d49fc10d8d"
+  },
+  {
+   "index": "2",
+   "path": "receipts/000002.receipt.cbor",
+   "selected": false,
+   "sha256": "588efc2dde6174486899164a20e3fb17bc19730eb54083906310e4933cade6a3"
+  },
+  {
+   "index": "3",
+   "path": "receipts/000003.receipt.cbor",
+   "selected": false,
+   "sha256": "00f693fcc9322cdb56746c2cbac853352a98a442ec2e77f5cb08e738f28e4e60"
+  },
+  {
+   "index": "4",
+   "path": "receipts/000004.receipt.cbor",
+   "selected": false,
+   "sha256": "44b3c2ab8e8adf4d175c7facd39166f4b7d93a8880401e29b0daf8782ad3a6d9"
+  },
+  {
+   "index": "5",
+   "path": "receipts/000005.receipt.cbor",
+   "selected": false,
+   "sha256": "3b5c92c06676b45f1cbd111eb07b67b00b1cb1c1d90ddd6c2ec5a09bdf71d1b2"
+  },
+  {
+   "index": "6",
+   "path": "receipts/000006.receipt.cbor",
+   "selected": true,
+   "sha256": "315fd00ac3a99eeae8992f9905f8d52f836a996b131e6255564f6073fa950c35"
+  }
+ ],
+ "request": {
+  "path": "request.cbor",
+  "sha256": "7503d8f5ca2fbd1c46e9fface4cb77b18c5fc5a9a9604d0426ab1b12dbac9459"
+ },
+ "submissions": [
+  {
+   "index": "2",
+   "path": "submissions/000002.cose",
+   "sha256": "7b476e1e42bf2e9404395eefb9eb72d0b11c8846a3ed627315a5122002d7f305"
+  },
+  {
+   "index": "3",
+   "path": "submissions/000003.cose",
+   "sha256": "9ebde61e180d6943563adb2951ebab253b089ab028185773df5d67671bdd46a2"
+  },
+  {
+   "index": "4",
+   "path": "submissions/000004.cose",
+   "sha256": "43a30eaed8be7dcafb68e3931cb8b3ceb1d29ac923fe5a1719d2c5c8df6c1741"
+  },
+  {
+   "index": "5",
+   "path": "submissions/000005.cose",
+   "sha256": "d2755bca2f8a3c43895c6650c41bdde0caf1e4102280a5e14fba6f5addf9671d"
+  },
+  {
+   "index": "6",
+   "path": "submissions/000006.cose",
+   "sha256": "befb8307861a88b555a12298aa90bff0232c332a1332287d962ee6313fcab177"
+  }
+ ],
+ "target": {
+  "index": "6"
+ }
+}

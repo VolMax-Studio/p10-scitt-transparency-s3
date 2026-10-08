@@ -1,0 +1,22 @@
+{
+ "e2e": "some",
+ "post": {
+  "rule": null,
+  "verdict": "BINDING_MATCH"
+ },
+ "s2a": ".accept",
+ "s2b": {
+  "status": "Verified"
+ },
+ "s2b_detail": {
+  "checkpoint_size": 7,
+  "subject_idx": [
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "unreadable": []
+ }
+}

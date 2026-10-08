@@ -1,0 +1,63 @@
+{
+ "bootstrap": "leaves 0 and 1: EXPERIMENTAL synthetic test statements, operator-submitted through the facade, signed by a key in no key table; no policy exists and none is enforced",
+ "facade": {
+  "batch": "1:10ms",
+  "checkpoint_interval": "200ms",
+  "fetch_timeout": "10s",
+  "max_leaf_input": 65535,
+  "public_port": 19721,
+  "publish_timeout": "30s",
+  "register_port": 19720
+ },
+ "instance_subject": "p10s2sub:dfef11ffabb0972bf268c18e436d91e93a87d6082a746910e4a91341df99f501",
+ "issuer_key_thumbprints": {
+  "admitter-one": "d2e67415640a7968080b66fa204dbffc300602d43d69230466d9f712ae08142f",
+  "admitter-two": "7ef61aa79fb576e533adfac1fc3126797df7886a699e1defe10060f43a32d16c",
+  "intruder-x": "670e7cc15ef8eb3a5c9ce06fc174eb365f78420a951677fd46a85f94769882fa",
+  "s3-owner-run2": "52ac087cbae7e4e71f26c425af3e4096066ba92cb0ad2b419cb9494b7853068b"
+ },
+ "log_engine": {
+  "antispam": false,
+  "commit": "6bca8e8d5e23c9941f2b8a08f512b373f7131730",
+  "name": "github.com/transparency-dev/tessera",
+  "storage": "posix",
+  "version": "v1.0.4",
+  "witnesses": false
+ },
+ "log_identity_digest": "204b17c8c1316e67f4a3cf22fd22776cef5f6991597db7f632abc14b44601405",
+ "not_claimed": [
+  "policy enforcement",
+  "operator independence",
+  "SCRAPI/RFC 9943 compliance",
+  "witnessing",
+  "rotation",
+  "X.509"
+ ],
+ "note_vkey": "s3-proto/run2+6ee1495e+ARGDFKwTB60owy+qJDuG1U7j4yZfpSDundeoUhzNW9hL",
+ "origin": "s3-proto/run2",
+ "owner_iss": "s3-owner-run2",
+ "profile_digest": "733512cb4dc4561980757c3dcee444d35eb5dfb0dc8442dd4ff5a3280de4de50",
+ "receipt_key_thumbprint": "7c68579ccdde9f97481f7474227dd6f1400ab4efa6c5a665c245573bc8d5d1de",
+ "receipt_payload": "detached",
+ "sequence": [
+  "bootstrap-policy",
+  "bootstrap-trust-anchor",
+  "profile",
+  "instance",
+  "admission",
+  "closure",
+  "adjudication"
+ ],
+ "status": "EXPLORATORY CANDIDATE RUN CONFIGURATION (non-normative; not adopted)",
+ "ts_iss": "https://ts.example/volmax-s3-run2",
+ "unchanged_frozen_inputs": {
+  "a12_a14": {
+   "capability_proof_digest": "9482c3f775e78a72dd9b8290c67a59bf00716ac0adb86d5b7b0d8eb4045a4928",
+   "codec_digest": "c156965f810643b115b6bbe720c87e874522bfff298490713be5874677346dd9",
+   "proof_digest": "30f498438473d39566d951b75dd5ce7326d9c368da3cda4868635a3e422a8696"
+  },
+  "iB_sha256": "62353069823aace3a91b37ffabcdf7b2d608134457276b2a5e597ebb49e0e824",
+  "request_id": "7265712d30303031",
+  "verifier_manifest_digest": "f8380b19b43334925e7f7621e1f7d7912f36c789199d3f8d069b87f5ea176d46"
+ }
+}

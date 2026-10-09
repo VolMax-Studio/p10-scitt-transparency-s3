@@ -26,7 +26,7 @@ def read_json(path):
 
 
 def claim_result(job_dir, res):
-    """Publish result.json exactly once. Returns True if this caller won; False if a result already exists (never overwrites)."""
+    """Low-level primitive: the CALLER MUST HOLD the seal lock (publish_result and Worker.publish do). Publish result.json exactly once. Returns True if this caller won; False if a result already exists (never overwrites)."""
     final = os.path.join(job_dir, "result.json")
     tmp = os.path.join(job_dir, f".result.{os.getpid()}.{secrets.token_hex(4)}.tmp")
     with open(tmp, "w", encoding="utf-8") as f:
@@ -81,10 +81,16 @@ class SealLock:
 
 
 def register_interrupt(job_dir, reason, timeout=None):
-    """Record that the application is interrupting this job. Returns 'registered', 'too_late' (a result was already published: the job
-    finished first and its result stands) or 'forced' (the lock could not be obtained in time, e.g. its holder is stopped; the marker is
-    written anyway and any later publisher still honours it)."""
+    """Record that the application is interrupting this job. The marker is written ONLY while holding the seal lock. Returns:
+    'registered'  the lock was held, no result existed, interrupt.json now exists;
+    'too_late'    a result was already published: the job finished first and its result stands (nothing is written);
+    'timeout'     the lock could not be obtained in time (its holder is slow or unresponsive): nothing was written, nothing is decided.
+                  The caller must not retry blindly; it may stop a verified owner and call again (see JobManager._interrupt)."""
+    if os.path.exists(os.path.join(job_dir, "result.json")):
+        return "too_late"                       # a committed result is final; existence is monotonic so no lock is needed to read it
     with SealLock(job_dir, timeout) as lk:
+        if not lk.held:
+            return "timeout"
         if os.path.exists(os.path.join(job_dir, "result.json")):
             return "too_late"
         final = os.path.join(job_dir, "interrupt.json")
@@ -99,12 +105,17 @@ def register_interrupt(job_dir, reason, timeout=None):
             pass
         finally:
             os.unlink(tmp)
-        return "registered" if lk.held else "forced"
+        return "registered"
 
 
 def publish_result(job_dir, res, timeout=None):
-    """Claim result.json under the seal lock (supervisor side). Returns True if this caller published it."""
-    with SealLock(job_dir, timeout):
+    """Publish result.json (supervisor side) ONLY while holding the seal lock. Returns True if this call published it, False if a result
+    already existed (the committed result stands), None if the lock could not be obtained in time (nothing was published)."""
+    if os.path.exists(os.path.join(job_dir, "result.json")):
+        return False
+    with SealLock(job_dir, timeout) as lk:
+        if not lk.held:
+            return None
         return claim_result(job_dir, res)
 
 

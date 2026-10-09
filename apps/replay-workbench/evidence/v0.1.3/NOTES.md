@@ -1,0 +1,7 @@
+# v0.1.3 evidence (Claude Code cloud container, not the HP laptop)
+
+* `unittest-A-…` Python 3.13 normal /proc: 131 tests OK, 3 skipped. `unittest-B-no-proc-…` same suite with /proc unmounted: OK, 6 skipped (3 more tests exercise /proc start times and command lines). `unittest-C-pid1-runner-…` Python 3.12, runner is PID 1 of a fresh PID namespace: OK, 3 skipped. All with `env -i PATH=/usr/bin:/bin` (no Rust) and `-W error::ResourceWarning`; no ResourceWarning or ignored exception in any output. hardening+jobs+server repeated 3 times: OK each time.
+* Mutation checks (not recorded as files): restoring a lock-free interruption marker fails 4 of the new tests; publishing without the lock check fails 2.
+* A sealing race inside one instance (watcher thread vs shutdown) surfaced during this work as an occasional missing result right after shutdown; fixed by serializing sealing per instance, covered by `test_shutdown_returns_only_after_the_job_is_sealed`.
+* `integration-cloud-cached-smoke.txt` / `integration-cloud-report.tar.gz`: cached real-package run: COMPLETED, wrapper exit 0, BINDING_MATCH, reproduction MATCH (14/14, badge), 48.5 s; second start refused (JOB_ACTIVE); mid-run (partial) and final exports 0 checksum mismatches; exported runner/verdict.json SHA-256 6368022f06cc6ef6e4c9698cd45e71c44db505b4bf8b5812aaf0cbe26f41db22.
+* Earlier evidence (`../`, `../v0.1.1/`, `../v0.1.2/`) preserved.

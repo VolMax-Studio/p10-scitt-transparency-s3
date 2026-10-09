@@ -66,6 +66,7 @@ class JobManager:
         self.lock = threading.Lock()
         self.active = None              # {"job_id", "proc"}
         self._abandoned = False
+        self._interrupt_mutex = threading.RLock()
         self._instance_fd = try_lock(self.ws.p("instance.lock"))
         if self._instance_fd is None:
             raise WorkspaceInUse(f"another application instance is using the workspace {self.ws.root}")
@@ -82,15 +83,48 @@ class JobManager:
 
     # ---- sealing interrupted jobs ------------------------------------------------------------------------------------------
     def _interrupt(self, jid, reason, grace=None):
-        """Seal a job that has no result: stop its (identity-checked) worker and child group, publish an APP_FAILURE result,
-        regenerate the application report from that result. Never reruns anything. Safe to call repeatedly."""
+        """Serialize sealing within this instance (watcher thread, shutdown, status polling, recovery), so a caller never returns while another
+        thread of this process is still sealing the same job; cross-process safety is the seal lock's job."""
+        with self._interrupt_mutex:
+            return self._interrupt_locked(jid, reason, grace)
+
+    def _interrupt_locked(self, jid, reason, grace=None):
+        """Seal a job that has no result. Returns 'already' (a result was committed first and stands), 'sealed' or 'pending' (could not
+        be decided safely; nothing was written).
+
+        The interruption marker and the result are only ever written while holding the job's seal lock. If the lock does not become
+        available, its holder is either finishing (we wait for its result) or unresponsive: only a VERIFIED owner is terminated (TERM
+        was not needed: it is blocked; KILL after the grace period) and reaped, then the lock is taken and the job decided under it.
+        An owner that cannot be verified is left alone and the job stays pending."""
         jd = self.job_dir(jid)
         if os.path.exists(os.path.join(jd, "result.json")):
-            return
+            return "already"
         grace = self.orphan_grace if grace is None else grace
-        if register_interrupt(jd, reason, timeout=min(grace, 5.0)) == "too_late":
-            return          # the worker published first: the job finished before the interruption and its result stands
-        reason = (read_json(os.path.join(jd, "interrupt.json")) or {}).get("reason", reason)     # one reason, whoever seals first
+        reg = register_interrupt(jd, reason, timeout=min(grace, 5.0))
+        if reg == "timeout":
+            st = read_json(os.path.join(jd, "status.json")) or {}
+            wpid, wticks = st.get("worker_pid"), st.get("worker_start_ticks")
+            if not is_worker_process(wpid, wticks, jd):
+                return "pending"                    # somebody holds the lock and it is not a verified worker of this job: do not touch
+            end = time.monotonic() + grace
+            while time.monotonic() < end and not os.path.exists(os.path.join(jd, "result.json")) and is_worker_process(wpid, wticks, jd):
+                time.sleep(0.1)
+            if os.path.exists(os.path.join(jd, "result.json")):
+                return "already"
+            if is_worker_process(wpid, wticks, jd):
+                try:
+                    os.kill(wpid, signal.SIGKILL)
+                except OSError:
+                    pass
+                end = time.monotonic() + 10
+                while time.monotonic() < end and is_worker_process(wpid, wticks, jd):
+                    time.sleep(0.05)               # reaped: its locks are released when the process is gone
+            reg = register_interrupt(jd, reason, timeout=5.0)
+        if reg == "too_late":
+            return "already"            # the worker published first: the job finished before the interruption and its result stands
+        if reg != "registered":
+            return "pending"
+        reason = (read_json(os.path.join(jd, "interrupt.json")) or {}).get("reason", reason)     # one reason, whoever registered first
         st = read_json(os.path.join(jd, "status.json")) or {}
         wpid, wticks = st.get("worker_pid"), st.get("worker_start_ticks")
         if is_worker_process(wpid, wticks, jd):
@@ -106,7 +140,10 @@ class JobManager:
                     os.kill(wpid, signal.SIGKILL)
                 except OSError:
                     pass
-        # leftover child group (identity of its leader must still match)
+                end = time.monotonic() + 10
+                while time.monotonic() < end and is_worker_process(wpid, wticks, jd):
+                    time.sleep(0.05)
+        # leftover child group (lock proof, or the recorded leader's identity)
         cpg, cticks = st.get("child_pgid"), st.get("child_start_ticks")
         if cpg and group_signal_ok(jd, cpg, cticks):
             kill_group_guarded(jd, cpg, cticks, signal.SIGTERM)
@@ -115,13 +152,16 @@ class JobManager:
                 time.sleep(0.1)
             kill_group_guarded(jd, cpg, cticks, signal.SIGKILL)
         if os.path.exists(os.path.join(jd, "result.json")):
-            return
+            return "already"
         base = {"job_id": jid, "kind": st.get("kind"), "finished": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "execution": {"status": "APP_FAILURE", "reason": reason}, "p10": {"state": "NOT_EVALUATED"},
-                "reproduction": {"status": "NOT_EVALUATED", "badge": False, "checks": [], "reasons": ["the job was interrupted; any partial records are preserved but not promoted"]}}
+                "reproduction": {"status": "NOT_EVALUATED", "badge": False, "checks": [], "reasons": []}}
         base = downgrade(base, "APP_FAILURE", reason, "the job was interrupted; any partial records are preserved but not promoted")
-        if not publish_result(jd, base, timeout=5.0):
-            return
+        won = publish_result(jd, base, timeout=5.0)
+        if won is None:
+            return "pending"                        # lock not obtainable: nothing published
+        if not won:
+            return "already"
         spec = read_json(os.path.join(jd, "job.json"))
         try:
             if spec is None:
@@ -136,6 +176,7 @@ class JobManager:
             write_json_atomic(os.path.join(jd, "status.json"), dict(st, state="DONE", execution="APP_FAILURE", phase="interrupted", child_pgid=None))
         except OSError:
             pass
+        return "sealed"
 
     def recover(self):
         """At startup: unfinished jobs (no result.json) are interrupted: live orphan workers are stopped, results sealed as APP_FAILURE."""
@@ -232,11 +273,14 @@ class JobManager:
         if not st and not job:
             return None
         res = self._read(job_id, "result.json")
+        pending = False
         if res is None and not self._worker_alive(job_id):
-            self._interrupt(job_id, "WORKER_GONE_WITHOUT_RESULT", grace=0)
+            pending = self._interrupt(job_id, "WORKER_GONE_WITHOUT_RESULT", grace=0) == "pending"
             res = self._read(job_id, "result.json")
         if res is not None:      # result.json is authoritative; keep the progress record consistent with it
             st = dict(st, state="DONE", execution=res["execution"]["status"])
+        elif pending:
+            st = dict(st, interruption_pending=True)       # no result could be decided safely (the seal lock is held by an unverified owner)
         return {"job_id": job_id, "kind": job.get("kind"), "created": job.get("created"), "package_id": job.get("package_id"),
                 "execution_kind": (job.get("module_description") or {}).get("execution_kind"), "synthetic": (job.get("module_description") or {}).get("synthetic"),
                 "status": st, "result": res}
@@ -315,7 +359,7 @@ class JobManager:
         a = self.active
         if a and a["proc"].poll() is None:
             jid, proc = a["job_id"], a["proc"]
-            register_interrupt(self.job_dir(jid), "INTERRUPTED_BY_SHUTDOWN", timeout=min(wait, 5.0))     # loses if the job already published
+            register_interrupt(self.job_dir(jid), "INTERRUPTED_BY_SHUTDOWN", timeout=min(wait, 5.0))     # 'too_late' or 'timeout': nothing written; _interrupt below decides under the lock
             try:
                 os.kill(proc.pid, signal.SIGTERM)
             except ProcessLookupError:

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.3 – the timeout fallback no longer bypasses the seal lock (found in `f9ade39c822331e9501fcef955af257ea0568777`)
+
+Application layer only; wrapper, runner, frozen files, packages, tags and keys unchanged.
+
+1. **No marker and no result without the lock.** `register_interrupt()` no longer has a `forced` path: when the lock cannot be obtained it writes nothing and returns `timeout`. `publish_result()` returns `None` (nothing published) when it does not hold the lock, `False` when a result already exists (the committed result stands), `True` when it published. `claim_result()` is documented as a primitive whose caller must hold the lock; both call sites do. The worker's re-read after finalization remains only as defence in depth; it is no longer what makes the ordering correct.
+2. **Unresponsive owner.** `JobManager._interrupt()` returns `already`, `sealed` or `pending`. On a lock timeout it waits for a verified worker (lock proof plus identity checks) to finish for the grace period; if it is still unresponsive it is killed and reaped, and only then is the lock taken and the interruption registered and the job sealed under it. An owner that cannot be verified is left untouched and the job stays `pending` (`interruption_pending` in the status) with no marker and no result.
+3. **Tests.** 131 tests (123 before): the interruption at the boundary between the final check and `claim_result()` (the worker keeps the decision, the late attempts return `timeout`/`None`, the later registration returns `too_late`), registration and publication without the lock, a blocked real worker holding the lock during finalization (the marker must never exist while the owner is alive), an unverified owner, a publication timeout. Mutation checks: restoring the lock-free marker fails 4 of them, publishing without the lock check fails 2.
+4. Sealing within one instance is serialized (watcher thread, shutdown, status polling, recovery), so `shutdown()` cannot return while another thread is still sealing the job it just stopped (this showed up as an occasional missing result right after shutdown).
+5. `tests/fakes.py make_module()` closes its fixture file.
+
+
 ## 0.1.2 – terminal-state race and /proc-independent process identity (fixes found in `244ed8dca40e476467712d0d5869d9f8d6bdda05`)
 
 Application layer only; wrapper, runner, frozen files, packages, tags and keys unchanged.
@@ -18,4 +29,4 @@ Application layer only. The wrapper, runner, frozen files, packages, tags and ke
 3. **Export snapshot.** Every artifact is copied once as a stable prefix, hashed during that copy, and archived from the copy. `export-info.json` records sizes/hashes and whether the job had a final result.
 4. **Tests.** 95 tests (was 71). Readiness tests no longer depend on a Rust toolchain or any host tool (`S3Module.which` is injectable).
 
-Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`.
+Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`.

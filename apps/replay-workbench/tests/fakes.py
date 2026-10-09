@@ -208,5 +208,6 @@ def make_module():
     for p in sys.path:
         f = os.path.join(p, "stub_config.json")
         if os.path.isfile(f):
-            return StubModule(json.load(open(f)))
+            with open(f) as fh:
+                return StubModule(json.load(fh))
     raise RuntimeError("stub_config.json not found on sys.path")

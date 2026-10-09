@@ -218,6 +218,20 @@ class Finding2ProcessControl(JobBase):
         wait_for(lambda: not alive(child) and not alive(st["worker_pid"]), 10)
         self.assert_consistent_interrupted(m, jid, "INTERRUPTED_BY_SHUTDOWN")
 
+    def test_shutdown_returns_only_after_the_job_is_sealed(self):
+        # the watcher thread and shutdown() both seal a killed worker's job; shutdown must not return while the other is still sealing
+        for i in range(4):
+            pidfile = os.path.join(self.t, f"c{i}.pid")
+            m = self.manager(self.long_script(pidfile), extra={"synthetic": False})
+            jid, child, st = self.start_long(m, pidfile)
+            os.kill(st["worker_pid"], signal.SIGSTOP)
+            m.shutdown(wait=1.0)
+            self.assertTrue(os.path.exists(os.path.join(m.job_dir(jid), "result.json")), f"iteration {i}")
+            self.assert_consistent_interrupted(m, jid, "INTERRUPTED_BY_SHUTDOWN")
+            m.close()
+            self.managers.clear()
+            m._release_instance_lock()
+
     # identity guards --------------------------------------------------------------------------------------------------------------
     def fabricate(self, **status):
         jid = "20260102T000000Z-cafebabe"
@@ -590,12 +604,54 @@ class Finding4SealRace(JobBase):
         self.assert_agree(jd, final, "APP_FAILURE", badge=False)
         self.assertEqual(final["execution"]["reason"], "INTERRUPTED_BY_RESTART")
 
-    def test_forced_marker_when_the_lock_holder_is_unresponsive_is_still_honoured(self):
+    def test_registration_without_the_lock_writes_nothing(self):
         w, jd, res = self.worker_with_result()
-        with SealLock(jd):                                                         # a stopped worker holds the lock
-            self.assertEqual(register_interrupt(jd, "INTERRUPTED_BY_RESTART", timeout=0.2), "forced")
-        self.assertTrue(os.path.exists(os.path.join(jd, "interrupt.json")))
-        final, _ = w.publish(res)                                                  # when it resumes it sees the marker
+        with SealLock(jd):                                                         # the lock holder is slow or stopped
+            self.assertEqual(register_interrupt(jd, "INTERRUPTED_BY_RESTART", timeout=0), "timeout")
+            self.assertEqual(register_interrupt(jd, "INTERRUPTED_BY_RESTART", timeout=0.2), "timeout")
+        self.assertFalse(os.path.exists(os.path.join(jd, "interrupt.json")), "no marker without the synchronization lock")
+        final, _ = w.publish(res)                                                  # nothing was decided: the worker's own result stands
+        self.assert_agree(jd, final, "COMPLETED", badge=True)
+        self.assertEqual(register_interrupt(jd, "INTERRUPTED_BY_RESTART", timeout=0), "too_late")
+
+    def test_publication_without_the_lock_publishes_nothing(self):
+        w, jd, res = self.worker_with_result()
+        sealed = downgrade(res, "APP_FAILURE", "INTERRUPTED_BY_RESTART", "x")
+        with SealLock(jd):                                                         # another holder owns the lock
+            self.assertIsNone(publish_result(jd, sealed, timeout=0))
+            self.assertIsNone(publish_result(jd, sealed, timeout=0.2))
+        self.assertFalse(os.path.exists(os.path.join(jd, "result.json")), "nothing may be published without the lock")
+        self.assertEqual([n for n in os.listdir(jd) if n.endswith(".tmp")], [])
+        self.assertTrue(publish_result(jd, sealed, timeout=0))                     # lock free now
+        self.assertFalse(publish_result(jd, res, timeout=0), "an already committed result stands")
+        self.assertIsNone(read_json(os.path.join(jd, "interrupt.json")))
+
+    def test_interruption_between_the_final_check_and_claim_result(self):
+        """The worker holds the seal lock from the decision to the claim. An interruption attempted at the last possible moment (inside
+        claim_result, after decide_and_report finished) cannot register, so the worker's decision stands and every artifact agrees."""
+        w, jd, res = self.worker_with_result()
+        seen, real_claim = {}, worker_mod.claim_result
+
+        def boundary_claim(job_dir, r):
+            seen["marker_before"] = os.path.exists(os.path.join(job_dir, "interrupt.json"))
+            seen["reg"] = register_interrupt(job_dir, "INTERRUPTED_BY_SHUTDOWN", timeout=0)      # supervisor strikes right here
+            seen["pub"] = publish_result(job_dir, downgrade(r, "APP_FAILURE", "INTERRUPTED_BY_SHUTDOWN", "x"), timeout=0)
+            seen["marker_after"] = os.path.exists(os.path.join(job_dir, "interrupt.json"))
+            seen["result_before_claim"] = os.path.exists(os.path.join(job_dir, "result.json"))
+            return real_claim(job_dir, r)
+        with mock.patch.object(worker_mod, "claim_result", boundary_claim):
+            final, won = w.publish(res)
+        self.assertEqual((seen["reg"], seen["pub"]), ("timeout", None))
+        self.assertEqual((seen["marker_before"], seen["marker_after"], seen["result_before_claim"]), (False, False, False))
+        self.assertTrue(won)
+        self.assert_agree(jd, final, "COMPLETED", badge=True)
+        self.assertFalse(os.path.exists(os.path.join(jd, "interrupt.json")))
+        self.assertEqual(register_interrupt(jd, "INTERRUPTED_BY_SHUTDOWN", timeout=0), "too_late")       # now it has lost, explicitly
+
+    def test_interruption_just_before_the_worker_takes_the_lock_wins(self):
+        w, jd, res = self.worker_with_result()
+        self.assertEqual(register_interrupt(jd, "INTERRUPTED_BY_SHUTDOWN", timeout=0), "registered")
+        final, won = w.publish(res)
         self.assert_agree(jd, final, "APP_FAILURE", badge=False)
 
     def test_supervisor_publication_and_worker_publication_are_exclusive(self):
@@ -657,6 +713,72 @@ class Finding4SealRace(JobBase):
                     self.assertEqual((on_disk["execution"]["status"], on_disk["reproduction"]["badge"]), ("APP_FAILURE", False), i)
                     self.assertFalse(rep["axes"]["accepted_reference_reproduction"]["badge"])
         self.assertGreater(seen["too_late"] + seen["registered"], 100)
+
+    # --- supervisor recovery when the lock owner is unresponsive ---------------------------------------------------------------------
+    def test_recovery_stops_and_reaps_a_blocked_lock_owner_before_registering(self):
+        m1 = self.manager(good_script(), extra={"synthetic": False, "sabotage": {"profile_fifo": True}})
+        jid = m1.start("run", PKG, "/opt/lean/bin", None, None)
+        jd = m1.job_dir(jid)
+        st = wait_for(lambda: (lambda x: x if x and x.get("phase") == "sealing" else None)(read_json(os.path.join(jd, "status.json"))), 60)
+        worker = st["worker_pid"]
+        wait_for(lambda: util.lock_held(os.path.join(jd, "seal.lock")), 10)          # the worker is inside finalization, blocked, holding the lock
+        m1._simulate_crash()
+        samples, stop = [], threading.Event()
+
+        def watch():
+            while not stop.is_set():
+                samples.append((os.path.exists(os.path.join(jd, "interrupt.json")), alive(worker)))
+                time.sleep(0.01)
+        th = threading.Thread(target=watch, daemon=True)
+        th.start()
+
+        def release_fifo():          # the sabotage FIFO would also block the supervisor's own report regeneration: open it once the owner is gone
+            wait_for(lambda: not alive(worker), 30)
+            with open(os.path.join(jd, "profile.json"), "rb") as f:
+                f.read()
+        th2 = threading.Thread(target=release_fifo, daemon=True)
+        th2.start()
+        t0 = time.time()
+        m2 = self.manager(fakes.wrapper_script(0), extra={"synthetic": False}, orphan_grace=1.5)      # recovery
+        stop.set()
+        th.join(5)
+        th2.join(10)
+        self.assertGreaterEqual(time.time() - t0, 1.4, "the owner is given the grace period first")
+        self.assertFalse([x for x in samples if x == (True, True)], "the marker must never exist while the unresponsive owner is alive")
+        self.assertFalse(alive(worker))
+        r = m2.status(jid)["result"]
+        self.assertEqual(r["execution"], {"status": "APP_FAILURE", "reason": "INTERRUPTED_BY_RESTART"})
+        self.assertFalse(r["reproduction"]["badge"])
+        self.assertEqual(read_json(os.path.join(jd, "interrupt.json"))["by_pid"], os.getpid(), "the marker was written by the supervisor, under the lock")
+        self.assertEqual(read_json(os.path.join(jd, "app-report.json"))["axes"]["application_execution"]["status"], "APP_FAILURE")
+        self.raw_unchanged(jd)
+
+    def test_recovery_does_not_touch_an_unverified_lock_owner(self):
+        jid = "20260107T000000Z-0ddba11e"
+        m = self.manager(fakes.wrapper_script(0), orphan_grace=0.3)
+        jd = self.ws.p("runs", jid)                                                 # created after start-up recovery: nobody has sealed it
+        os.makedirs(jd)
+        write_json_atomic(os.path.join(jd, "status.json"), {"state": "RUNNING", "execution": "RUNNING", "kind": "run"})      # no worker recorded
+        fd = os.open(os.path.join(jd, "seal.lock"), os.O_RDWR | os.O_CREAT)
+        fcntl.flock(fd, fcntl.LOCK_EX)                                              # held by something we cannot verify
+        self.addCleanup(os.close, fd)
+        self.assertEqual(m._interrupt(jid, "INTERRUPTED_BY_RESTART", grace=0.3), "pending")
+        self.assertFalse(os.path.exists(os.path.join(jd, "interrupt.json")))
+        self.assertFalse(os.path.exists(os.path.join(jd, "result.json")))
+        s = m.status(jid)
+        self.assertTrue(s["status"].get("interruption_pending"))
+        self.assertIsNone(s["result"])
+        self.assertNotEqual(s["status"]["state"], "DONE")
+
+    def test_supervisor_publication_timeout_is_pending_not_published(self):
+        jid = "20260107T000000Z-0ddba11f"
+        m = self.manager(fakes.wrapper_script(0), orphan_grace=0.2)
+        jd = self.ws.p("runs", jid)
+        os.makedirs(jd)
+        write_json_atomic(os.path.join(jd, "status.json"), {"state": "RUNNING", "execution": "RUNNING", "kind": "run"})
+        with mock.patch.object(jobs, "publish_result", lambda *a, **k: None):       # lock lost between registration and publication
+            self.assertEqual(m._interrupt(jid, "INTERRUPTED_BY_RESTART", grace=0.2), "pending")
+        self.assertFalse(os.path.exists(os.path.join(jd, "result.json")))
 
     # --- real worker process, real shutdown, finalization held open -----------------------------------------------------------------
     def test_shutdown_during_finalization_in_a_real_worker_is_consistent(self):

@@ -42,7 +42,7 @@ including the `#token=` part, in a browser on the same machine. Options: `--work
 * `result.json` of a job is its single authoritative terminal record, published exactly once; `status.json` is progress information only and is shown consistent with it. A job without a result is never shown as finished or successful.
 * Write errors are never swallowed: a failing log open/write/flush, event/status write or `app-report.json` write turns the job into `APP_FAILURE` (reasons `LOG_WRITE_FAILED`, `SUPERVISION_CALLBACK_FAILED`, `REPORT_FINALIZATION_FAILED:*`, `WORKER_EXCEPTION:*`) with no reproduction badge. The original runner records stay on disk untouched; the application result only notes what had been observed.
 * Two locks in the workspace: `instance.lock` (one application instance per workspace) and `active-job.lock` (held by the worker for its lifetime; one active job even if the instance that started it has died).
-* Interruption and final publication are serialized per job (`seal.lock`): whoever takes the lock first wins, and `result.json`, `app-report.json` and status always describe that one decision (see `CHANGELOG.md` 0.1.2).
+* Interruption and final publication are serialized per job (`seal.lock`): whoever takes the lock first wins, and `result.json`, `app-report.json` and status always describe that one decision. Neither the interruption marker nor a result is ever written without holding that lock; if the lock cannot be obtained the state is `timeout`/`pending`, and an unresponsive verified worker is killed and reaped before the supervisor decides (see `CHANGELOG.md` 0.1.2 and 0.1.3).
 * Worker and command group carry proof-of-life locks (`worker.lock`, `child.lock`), so process identity works on hosts without a readable `/proc`; with `/proc` the start time and command line are checked too.
 * On startup, jobs without a result are interrupted: a live orphan worker is sent TERM (KILL after a grace period), its leftover child process group is cleaned, and the job is sealed as `APP_FAILURE` / `INTERRUPTED_BY_RESTART` (`INTERRUPTED_BY_SHUTDOWN` on shutdown). An interrupted job can never later gain a success badge. Signals go only to processes whose recorded identity (start time, and for workers the command line) still matches.
 * The export archive is built from one stable snapshot per artifact: the bytes that are hashed are the bytes that are archived. A running job's export is marked partial in `export-info.json`.
@@ -61,7 +61,7 @@ The wrapper's exit status (0 success, 1 failed replay/comparison, 2 prerequisite
 ## Tests
 
 ```bash
-python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 123 tests, about 45 s
+python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 131 tests, about 55 s
 ```
 
 The tests need no Rust, Lean or network namespace on the test host. They use injected synthetic dependencies (synthetic archives and records, a scripted command context and a **stub module**). A stub run is labelled

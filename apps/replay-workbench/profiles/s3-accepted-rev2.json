@@ -1,0 +1,54 @@
+{
+  "format": "p10-replay-workbench-profile-v0",
+  "profile_id": "p10-s3-accepted-e56d3ea-rev2",
+  "module": "s3",
+  "description": "Reproduce the accepted S3 capture from the exact rev2 offline package with its unchanged verify_offline.sh and runner.",
+  "archive": {
+    "name": "p10-s3-offline-e56d3ea-rev2.tar.gz",
+    "sha256": "e19f8d84cac0ecb2de61dbd0e7085014d525829ba51007b7fdaa24895df37d9b",
+    "root": "p10-s3-offline"
+  },
+  "s3_package_head": "e56d3ea8bbe14c9c88a0dde339c29b55b1032a66",
+  "tags": {
+    "v0.1.0-s3a-frozen": {"object": "8f0c97f3745131f79936dec71ebe09316332f5ab", "target": "7c3b2d4b919c356a566f8f5d3628d4f546e41afa"},
+    "v0.1.0-s3-accepted": {"object": "4148a7403e8d5ed0a30ca878d617323bb3a75b3a", "target": "5acc277a13dc122e39fcb5f9f3e646b06cc95009"}
+  },
+  "dependencies": {
+    "s1": "e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1",
+    "s2a": "741d56d36d7b2bfe2e9e0080a1cba4393e4a47da",
+    "s2b": "8eaa91cad1ffa963158b365c6d0d7316f4965e89"
+  },
+  "anchor_sha256": "2662c2daf912d2ce4796a26b13464d7bc2df6ba8825fa399fed3a87185d700a7",
+  "accepted_verdict_sha256": "6368022f06cc6ef6e4c9698cd45e71c44db505b4bf8b5812aaf0cbe26f41db22",
+  "rust_version": "1.82.0",
+  "wrapper": {"path": "verify_offline.sh", "sha256": "59b638e048a535bce74687580486b72c8290f7d6155dc876471a33a899939359"},
+  "files": {
+    "repo/verifier/runner/s3c_verify.py": "7e6c457a6cc54e7a5c05610f80361201aa958022e44d8aa303a982ffbe95f628",
+    "repo/verifier/runner/s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494",
+    "repo/spike/host/preflight.py": "8b95eadbedc42ce53c303514962601fa6ae630da123208a0a9464bc8c2b83c5d",
+    "repo/verifier/artifacts/s3-spike-entry": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+    "repo/verifier/artifacts/s3-g5": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd"
+  },
+  "runner_source_sha256": {
+    "s3c_verify.py": "7e6c457a6cc54e7a5c05610f80361201aa958022e44d8aa303a982ffbe95f628",
+    "s3c_chain.py": "de3450bbb1b6268773bbee9eb7bc2d5e86d2ad433d59985b8ccf05b56bd50494"
+  },
+  "entry_binary_sha256": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+  "g5_binary_sha256": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+  "references": [
+    "repo/ts-prototype/evidence/s3b-capture/runner/verdict.json",
+    "repo/ts-prototype/evidence/s3b-capture/runner-2/verdict.json"
+  ],
+  "anchor_file": "repo/ts-prototype/evidence/s3b-capture/ANCHOR.sha256",
+  "sumfiles": [
+    {"label": "PACKAGE_SHA256SUMS", "dir": ".", "file": "PACKAGE_SHA256SUMS"},
+    {"label": "frozen set", "dir": "repo", "file": "deployment/candidate/freeze-set.sha256"}
+  ],
+  "limits": {
+    "upload_bytes": 67108864,
+    "members": 25000,
+    "extracted_bytes": 536870912,
+    "log_bytes": 67108864,
+    "deadline_minutes": 60
+  }
+}

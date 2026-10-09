@@ -29,6 +29,19 @@ It prints a URL such as `http://127.0.0.1:41873/#token=...` and opens it in your
 including the `#token=` part, in a browser on the same machine. Options: `--workspace DIR` (default `~/.local/share/p10-replay-workbench/`, mode 0700),
 `--port N`, `--deadline-minutes N` (default 60). Stop with Ctrl+C; an active job is stopped first (TERM, then KILL) and sealed as interrupted. Only one instance can use a workspace at a time: a second `run.py` on the same `--workspace` exits with an explanation.
 
+## Saved host settings and desktop launcher (v0.2.0)
+
+* **Host settings.** *Save host settings* stores the Lean bin directory, the optional public allowed-signers path and the job deadline in `settings.json` in the workspace (owner-only file, atomic write, strict validation, unknown keys rejected; paths may be anywhere). They are restored into the fields whenever you open the page, also after the application restarted on a different port. Restoring only fills the fields: readiness is not assumed, nothing is started, no badge. A missing file means defaults; an unreadable or invalid file shows a warning and defaults, and saving replaces it. No token, key or file content is stored.
+* **Port.** Automatic by default, chosen anew at every start (`--port N` still works and fails if the port is taken; there is no fixed default and no silent fallback).
+* **Desktop launcher** (user-level, no sudo, nothing is started):
+
+  ```bash
+  python3 apps/replay-workbench/run.py --install-launcher     # creates the menu entry "P10 Replay Workbench" and its icon
+  python3 apps/replay-workbench/run.py --remove-launcher      # removes exactly those two files
+  ```
+
+  Files: `~/.local/share/applications/p10-replay-workbench.desktop` and `~/.local/share/icons/hicolor/scalable/apps/p10-replay-workbench.svg` (`$XDG_DATA_HOME` is honoured when set to an absolute path). The entry runs this checkout's `run.py` with the current interpreter in a terminal window, which shows the URL, lets you stop the server with Ctrl+C (or by closing the window), and stays open after a startup error (for example when another instance is already running). Installing again is harmless; if you move the checkout, install again. A file of the same name that this application did not create is never overwritten or removed, and symbolic links are never followed. The launcher does not touch AppArmor or sysctl settings, install toolchains or elevate privileges: unprivileged network namespaces remain an explicit host prerequisite.
+
 ## Use
 
 1. **Import package** – choose the `.tar.gz`; the app hashes it while streaming (limit 64 MiB), checks the approved digest, then extracts it safely into its private workspace (the archive and extraction are kept; the next start reuses them, which also reuses ignored Lean build caches).
@@ -61,7 +74,7 @@ The wrapper's exit status (0 success, 1 failed replay/comparison, 2 prerequisite
 ## Tests
 
 ```bash
-python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 131 tests, about 55 s
+python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 164 tests, about 60 s
 ```
 
 The tests need no Rust, Lean or network namespace on the test host. They use injected synthetic dependencies (synthetic archives and records, a scripted command context and a **stub module**). A stub run is labelled

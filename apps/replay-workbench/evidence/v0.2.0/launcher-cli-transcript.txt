@@ -1,0 +1,31 @@
+$ HOME=<tmp> python3 apps/replay-workbench/run.py --install-launcher
+created: <tmp-home>/.local/share/icons/hicolor/scalable/apps/p10-replay-workbench.svg
+created: <tmp-home>/.local/share/applications/p10-replay-workbench.desktop
+The launcher appears as 'P10 Replay Workbench' in your applications menu (log out and in if it does not show up).
+It runs this checkout's run.py; if you move the checkout, run --install-launcher again. Remove it with --remove-launcher.
+
+$ (second time)
+unchanged: <tmp-home>/.local/share/icons/hicolor/scalable/apps/p10-replay-workbench.svg
+unchanged: <tmp-home>/.local/share/applications/p10-replay-workbench.desktop
+The launcher appears as 'P10 Replay Workbench' in your applications menu (log out and in if it does not show up).
+It runs this checkout's run.py; if you move the checkout, run --install-launcher again. Remove it with --remove-launcher.
+
+$ cat ~/.local/share/applications/p10-replay-workbench.desktop
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=P10 Replay Workbench
+Comment=Offline replay of the approved S3 package (local, loopback only)
+Exec=/usr/bin/python3 /home/user/p10-scitt-transparency-s3/apps/replay-workbench/run.py --pause-on-error
+Icon=<tmp-home>/.local/share/icons/hicolor/scalable/apps/p10-replay-workbench.svg
+Terminal=true
+Categories=Utility;Development;
+StartupNotify=false
+X-P10-Replay-Workbench-Launcher=1
+
+$ python3 apps/replay-workbench/run.py --remove-launcher
+removed: <tmp-home>/.local/share/applications/p10-replay-workbench.desktop
+removed: <tmp-home>/.local/share/icons/hicolor/scalable/apps/p10-replay-workbench.svg
+$ (again)
+absent: <tmp-home>/.local/share/applications/p10-replay-workbench.desktop
+absent: <tmp-home>/.local/share/icons/hicolor/scalable/apps/p10-replay-workbench.svg

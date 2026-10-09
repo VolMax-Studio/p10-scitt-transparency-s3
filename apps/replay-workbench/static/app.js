@@ -33,8 +33,28 @@
   function inputsKey() { return [state.packageId, $("leanbin").value, $("signers").value].join("\u0000"); }
   function fmt(sec) { sec = Math.floor(sec); return Math.floor(sec / 60) + "m " + (sec % 60) + "s"; }
 
-  function saveInputs() { try { localStorage.setItem("p10wb-in", JSON.stringify({ l: $("leanbin").value, s: $("signers").value, d: $("deadline").value })); } catch (e) {} }
-  function loadInputs() { try { const v = JSON.parse(localStorage.getItem("p10wb-in") || "{}"); if (v.l) $("leanbin").value = v.l; if (v.s) $("signers").value = v.s; if (v.d) $("deadline").value = v.d; } catch (e) {} }
+  function currentSettings() {
+    const o = { lean_bin: $("leanbin").value.trim(), allowed_signers: $("signers").value.trim() };
+    const d = Number($("deadline").value);
+    o.deadline_minutes = $("deadline").value.trim() === "" || !isFinite(d) ? NaN : d;
+    return o;
+  }
+  async function loadSettings() {
+    const w = $("settings-warning");
+    try {
+      const r = await api("GET", "/api/settings");
+      $("leanbin").value = r.settings.lean_bin; $("signers").value = r.settings.allowed_signers; $("deadline").value = r.settings.deadline_minutes;
+      if (r.warning) { w.hidden = false; text(w, r.warning); } else { w.hidden = true; text(w, ""); }
+      const any = r.settings.lean_bin || r.settings.allowed_signers;
+      text($("settings-status"), r.warning ? "Saved host settings could not be used; defaults are shown." : (any ? "Saved host settings restored (fields only; readiness has not been checked)." : "No saved host settings yet."));
+    } catch (e) { text($("settings-status"), "Host settings unavailable: " + e.message); }
+  }
+  async function saveSettings() {
+    const o = currentSettings();
+    if (Number.isNaN(o.deadline_minutes)) { text($("settings-status"), "Not saved: the deadline must be a number."); return; }
+    try { await api("POST", "/api/settings", o); $("settings-warning").hidden = true; text($("settings-status"), "Host settings saved."); }
+    catch (e) { text($("settings-status"), "Not saved: " + e.message); }
+  }
 
   function invalidateReadiness() {
     if (state.readyKey !== null && state.readyKey !== inputsKey()) {
@@ -48,7 +68,7 @@
     state.module = j.modules[0];
     text($("workspace"), "Workspace: " + state.module.workspace + " | Profile: " + state.module.profile_id + " | Profile SHA-256: " + state.module.profile_sha256);
     $("deadline").value = state.module.default_deadline_minutes;
-    loadInputs();
+    await loadSettings();
     if (state.module.synthetic) { const b = $("banner"); b.hidden = false; text(b, state.module.execution_kind); }
     if (state.module.packages.length === 1) { state.packageId = state.module.packages[0]; text($("import-status"), "Approved package already imported: " + state.packageId); }
   }
@@ -75,7 +95,6 @@
   }
   async function start(path) {
     if (!state.packageId) { text($("run-line"), "Import the approved package first."); return; }
-    saveInputs();
     try {
       const r = await api("POST", path, body());
       state.jobId = r.job_id; state.after = 0; text($("log-out"), ""); text($("log-err"), ""); text($("jobid"), r.job_id); resetResults();
@@ -175,6 +194,8 @@
   $("btn-raw-verdict").addEventListener("click", () => showRaw("verdict.json"));
   $("btn-raw-info").addEventListener("click", () => showRaw("run-info.json"));
   $("btn-raw-report").addEventListener("click", () => showRaw("app-report.json"));
-  for (const id of ["leanbin", "signers"]) $(id).addEventListener("input", () => { saveInputs(); invalidateReadiness(); });
+  $("btn-save-settings").addEventListener("click", saveSettings);
+  for (const id of ["leanbin", "signers"]) $(id).addEventListener("input", () => { invalidateReadiness(); text($("settings-status"), "Unsaved changes."); });
+  $("deadline").addEventListener("input", () => text($("settings-status"), "Unsaved changes."));
   loadModule().then(loadJobs).catch((e) => { text($("run-line"), "Cannot reach the application: " + e.message + " (open the URL printed by run.py, including its #token part)"); });
 })();

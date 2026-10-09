@@ -21,6 +21,9 @@
   <div class="row"><label for="leanbin">Lean bin directory (absolute path)</label><input type="text" id="leanbin" spellcheck="false" placeholder="/home/you/toolchains/lean-4.33.0/bin"></div>
   <div class="row"><label for="signers">Allowed-signers file, optional (public, absolute path)</label><input type="text" id="signers" spellcheck="false" placeholder="leave empty to skip the signature check"></div>
   <div class="row"><label for="deadline">Job deadline (minutes)</label><input type="number" id="deadline" min="1" max="1440" value="60"></div>
+  <div class="row"><button id="btn-save-settings" type="button">Save host settings</button><span id="settings-status" class="note" role="status"></span></div>
+  <div id="settings-warning" class="banner" hidden></div>
+  <p class="hint">Saved host settings (Lean directory, allowed-signers path, deadline) are kept in the workspace and restored the next time you open the page, on any port. Restoring them only fills the fields: readiness is not assumed and nothing is started.</p>
   <p class="hint">Without an allowed-signers file the tag signatures are shown as <em>Signature not checked</em>. Browsers hide absolute file paths, so the two paths are typed.</p>
 </section>
 

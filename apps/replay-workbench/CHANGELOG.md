@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 – persistent host settings and desktop launcher
+
+Application layer only; wrapper, runner, profile, packages, binaries, frozen files, tags and keys unchanged. Automatic port selection is unchanged.
+
+1. **Host settings** (`workbench/settings.py`, `GET/POST /api/settings`, *Save host settings* button): Lean directory, optional public allowed-signers path and job deadline are stored on the server side in `<workspace>/settings.json` (owner-only, atomic, strict JSON, unknown keys rejected, same path/deadline validation as a job start, no workspace-only restriction). The UI restores them into the fields at load, on any port; restoring never sets a readiness state, starts a job or yields a badge. Missing file: defaults; invalid or unreadable file (including links and FIFOs): warning and defaults. The settings API keeps the Host, Origin and token checks. Browser `localStorage` is no longer used.
+2. **Launcher** (`workbench/launcher.py`, `run.py --install-launcher` / `--remove-launcher`): user-level `.desktop` entry and SVG icon under `$XDG_DATA_HOME` (default `~/.local/share`), Exec quoting per the Desktop Entry specification (spaces, `%`, quotes, backslashes, `$`, backticks tested by round trip and by actually executing the parsed command), marker-based ownership (foreign files are never overwritten or removed, symlinks never followed), idempotent install, no external commands, nothing started. `--pause-on-error` keeps the launcher terminal open after a startup error; `SIGHUP` now stops the server and any active job cleanly.
+3. **Tests**: settings store, API boundaries, persistence across ports, parser without a fixed default port, UI source checks, launcher quoting/idempotency/ownership/removal and a CLI test with spy `sudo`/`sysctl`/AppArmor tools that must never be called.
+
+
 ## 0.1.3 – the timeout fallback no longer bypasses the seal lock (found in `f9ade39c822331e9501fcef955af257ea0568777`)
 
 Application layer only; wrapper, runner, frozen files, packages, tags and keys unchanged.
@@ -29,4 +38,4 @@ Application layer only. The wrapper, runner, frozen files, packages, tags and ke
 3. **Export snapshot.** Every artifact is copied once as a stable prefix, hashed during that copy, and archived from the copy. `export-info.json` records sizes/hashes and whether the job had a final result.
 4. **Tests.** 95 tests (was 71). Readiness tests no longer depend on a Rust toolchain or any host tool (`S3Module.which` is injectable).
 
-Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`.
+Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`; HP trial (v0.1.3) under `evidence/hp-20261009/`; v0.2.0 under `evidence/v0.2.0/`.

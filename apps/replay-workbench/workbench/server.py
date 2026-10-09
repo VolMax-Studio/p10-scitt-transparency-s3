@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import importer, reports
 from .jobs import Busy, BadRequest, JobManager, valid_job_id
+from .settings import SettingsError, SettingsStore
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
 STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/app.css": ("app.css", "text/css; charset=utf-8"),
@@ -24,6 +25,8 @@ class App:
         self.host_header = f"127.0.0.1:{port}"
         self.origin = f"http://127.0.0.1:{port}"
         self.import_lock = threading.Lock()
+        self.settings = SettingsStore(workspace.p("settings.json"), jobs.default_deadline_minutes, jobs.min_deadline_minutes)
+        self.settings_lock = threading.Lock()
 
 
 def make_server(port=0):
@@ -119,6 +122,10 @@ def make_server(port=0):
                     d["default_deadline_minutes"] = app.jobs.default_deadline_minutes
                     d["packages"] = sorted(x for x in os.listdir(app.ws.p("packages")) if len(x) == 64)
                     return self._json(200, {"modules": [d]})
+                if path == "/api/settings":
+                    with app.settings_lock:
+                        cur, warn = app.settings.load()
+                    return self._json(200, {"settings": cur, "warning": warn, "defaults": app.settings.defaults()})
                 if path == "/api/runs":
                     return self._json(200, {"runs": app.jobs.list()})
                 m = RUN_RE.match(path)
@@ -163,6 +170,16 @@ def make_server(port=0):
                     return
                 if path == "/api/packages":
                     return self._upload()
+                if path == "/api/settings":
+                    body = self._body_json()
+                    try:
+                        with app.settings_lock:
+                            saved = app.settings.save(body)
+                    except SettingsError as e:
+                        raise BadRequest(str(e))
+                    except OSError as e:
+                        return self._err(500, "SETTINGS_WRITE_FAILED", type(e).__name__)
+                    return self._json(200, {"settings": saved})
                 if path in ("/api/inspect", "/api/runs"):
                     body = self._body_json()
                     self._only(body, ("package_id", "lean_bin", "allowed_signers", "deadline_minutes"))

@@ -1,0 +1,32 @@
+import: {'app_status': 'SUPPORTED', 'sha256': 'e19f8d84cac0ecb2de61dbd0e7085014d525829ba51007b7fdaa24895df37d9b', 'members': None, 'reused': True}
+readiness: {'reason': None, 'status': 'COMPLETED'} blocking: []
+run job: 20261009T182605Z-de2d7d2c
+second start while active: {'error': 'JOB_ACTIVE', 'detail': 'another job is active in this workspace'}
+export[mid-run]: 5 files, checksum mismatches: [], job_had_final_result=False, names=['REPORT_SHA256SUMS', 'export-info.json', 'logs/wrapper-stderr.log', 'logs/wrapper-stdout.log', 'readiness.json', 'runner/preflight.json']
+{
+ "execution": {
+  "reason": null,
+  "status": "COMPLETED"
+ },
+ "p10": {
+  "state": "AVAILABLE",
+  "outcome": "BINDING_MATCH",
+  "stage": "post-s2a",
+  "reason": {
+   "code": "BindingMatch",
+   "rule": null
+  }
+ },
+ "reproduction": {
+  "status": "MATCH",
+  "badge": true
+ },
+ "checks_ok": true,
+ "n_checks": 14,
+ "wrapper_exit": 0,
+ "synthetic": false,
+ "elapsed": 198.5,
+ "job": "20261009T182605Z-de2d7d2c"
+}
+export[final]: 10 files, checksum mismatches: [], job_had_final_result=True, names=['REPORT_SHA256SUMS', 'app-report.json', 'export-info.json', 'logs/wrapper-stderr.log', 'logs/wrapper-stdout.log', 'profile.json', 'readiness.json', 'result.json', 'runner/preflight.json', 'runner/run-info.json', 'runner/verdict.json']
+status.state/execution: DONE COMPLETED

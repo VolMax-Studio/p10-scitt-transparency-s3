@@ -17,6 +17,7 @@ class Base(unittest.TestCase):
         self.lean = os.path.join(self.t, "lean", "bin")
         self.root = fakes.build_package(self.managed, self.profile, self.lean)
         self.mod = S3Module(self.profile)
+        self.mod.which = lambda t, path=None: "/fake/bin/" + t      # readiness tests must not depend on tools installed on the test host
         self.tmpdir = os.path.join(self.t, "jt")
         os.makedirs(self.tmpdir)
 
@@ -64,6 +65,12 @@ class Readiness(Base):
     def test_checksum_text_alone_does_not_pass(self):
         recs, _ = self.inspect(sum_rc=1, sum_out="x: OK\n")
         self.assertEqual(recs["sum-frozen set"]["status"], "fail")
+
+    def test_readiness_does_not_depend_on_host_toolchain(self):
+        self.mod.which = lambda t, path=None: None if t == "rustc" else "/fake/bin/" + t
+        recs, _ = self.inspect()
+        self.assertEqual(recs["tool-rustc"]["status"], "fail")
+        self.assertEqual([r["id"] for r in self.mod.blocking(list(recs.values()))], ["tool-rustc"])
 
     def test_hash_mismatch_blocks(self):
         with open(os.path.join(self.root, "verify_offline.sh"), "ab") as f:

@@ -140,7 +140,7 @@ def make_server(port=0):
                                 return self._err(400, "BAD_REQUEST", "after must be an integer")
                     return self._json(200, app.jobs.events(jid, after))
                 if sub == "report":
-                    data = reports.export_archive(app.jobs.job_dir(jid))
+                    data = app.jobs.export(jid)
                     return self._send(200, data, "application/gzip", {"Content-Disposition": f'attachment; filename="replay-report-{jid}.tar.gz"'})
                 if sub.startswith("artifacts/"):
                     data = reports.read_served(app.jobs.job_dir(jid), m.group(3))

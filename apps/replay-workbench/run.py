@@ -27,7 +27,12 @@ def main(argv=None):
     a = ap.parse_args(argv)
     module = modules.default_module()
     ws = importer.Workspace(a.workspace)
-    mgr = jobs.JobManager(ws, module, default_deadline_minutes=a.deadline_minutes)
+    try:
+        mgr = jobs.JobManager(ws, module, default_deadline_minutes=a.deadline_minutes)
+    except jobs.WorkspaceInUse as e:
+        print("Cannot start:", e, file=sys.stderr)
+        print("Stop the other instance first, or use --workspace with a different directory.", file=sys.stderr)
+        return 2
     token = secrets.token_urlsafe(32)
     srv, app = server.create(ws, module, mgr, token, a.port)
     url = f"http://127.0.0.1:{app.port}/#token={token}"
@@ -47,7 +52,7 @@ def main(argv=None):
     try:
         srv.serve_forever()
     finally:
-        mgr.shutdown()
+        mgr.close()
         srv.server_close()
     return 0
 

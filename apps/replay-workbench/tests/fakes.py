@@ -180,7 +180,7 @@ class StubModule(S3Module):
     """Synthetic module: readiness answers and wrapper script come from stub_config.json; collect() is the real mapping logic."""
 
     def __init__(self, cfg):
-        super().__init__(cfg["profile"], synthetic=True)
+        super().__init__(cfg["profile"], synthetic=cfg.get("synthetic", True))
         self.cfg = cfg
 
     def inspect(self, managed_dir, host_config, ctx):
@@ -188,6 +188,17 @@ class StubModule(S3Module):
 
     def command(self, managed_dir, host_config, fresh_output, ctx):
         assert not os.path.exists(fresh_output)
+        sab = self.cfg.get("sabotage") or {}      # test-only fault injection into the job directory (a stub cannot be selected in production)
+        d = ctx.dir
+        if sab.get("stdout_dir"):
+            os.mkdir(os.path.join(d, "stdout.log"))
+        if sab.get("stdout_devfull"):
+            os.symlink("/dev/full", os.path.join(d, "stdout.log"))
+        if sab.get("report_dir"):
+            os.mkdir(os.path.join(d, "app-report.json"))
+        if sab.get("status_dir"):
+            os.remove(os.path.join(d, "status.json"))
+            os.mkdir(os.path.join(d, "status.json"))
         return {"argv": ["bash", self.cfg["script"], fresh_output], "env": {"PATH": "/usr/bin:/bin"}, "cwd": managed_dir, "namespace_flag": None, "output_dir": fresh_output}
 
 

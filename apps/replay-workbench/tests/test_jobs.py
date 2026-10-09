@@ -62,20 +62,23 @@ class JobBase(unittest.TestCase):
             a = m.active
             if a and a["proc"].poll() is None:
                 try:
+                    os.kill(a["proc"].pid, signal.SIGCONT)
                     os.killpg(a["proc"].pid, signal.SIGKILL)
                 except OSError:
                     pass
                 a["proc"].wait()
+            m._release_instance_lock()
 
-    def manager(self, script, readiness=None, limits=None, min_deadline=1):
+    def manager(self, script, readiness=None, limits=None, min_deadline=1, extra=None, orphan_grace=15.0):
         path = os.path.join(self.t, "wrapper.sh")
         with open(path, "w") as f:
             f.write(script)
         prof = fakes.test_profile(**(limits or {}))
         cfg = {"profile": prof, "script": path, "readiness": readiness if readiness is not None else [{"id": "x", "label": "stub readiness", "status": "pass", "detail": ""}]}
+        cfg.update(extra or {})
         with open(os.path.join(self.cfgdir, "stub_config.json"), "w") as f:
             json.dump(cfg, f)
-        m = jobs.JobManager(self.ws, fakes.StubModule(cfg), module_ref="tests.fakes:make_module", extra_sys_path=[APP, self.cfgdir])
+        m = jobs.JobManager(self.ws, fakes.StubModule(cfg), module_ref="tests.fakes:make_module", extra_sys_path=[APP, self.cfgdir], orphan_grace=orphan_grace)
         m.min_deadline_minutes = min_deadline
         self.managers.append(m)
         return m
@@ -206,6 +209,7 @@ class Supervision(JobBase):
 
     def test_restart_recovery_marks_interrupted_and_never_reruns(self):
         m = self.manager(fakes.wrapper_script(0))
+        m.close()
         jid = "20260101T000000Z-deadbeef"
         jd = self.ws.p("runs", jid)
         os.makedirs(os.path.join(jd, "runner-out"))

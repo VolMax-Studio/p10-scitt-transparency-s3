@@ -49,6 +49,7 @@ class S3Module:
     def __init__(self, profile, synthetic=False, profile_bytes=None):
         self.profile = profile
         self.synthetic = bool(synthetic)
+        self.which = shutil.which      # injectable: tests replace it so readiness tests do not depend on installed host tools
         self.profile_sha256 = hashlib.sha256(profile_bytes if profile_bytes is not None
                                              else json.dumps(profile, sort_keys=True).encode()).hexdigest()
 
@@ -86,7 +87,7 @@ class S3Module:
         cargo = os.path.join(env.get("CARGO_HOME") or (home and os.path.join(home, ".cargo")) or "", "bin")
         if cargo and os.path.isdir(cargo):
             extra.append(cargo)
-        rc = shutil.which("rustc", path=host_env.get("PATH", ""))
+        rc = self.which("rustc", path=host_env.get("PATH", ""))
         if rc and os.path.dirname(rc) not in path + extra:
             extra.append(os.path.dirname(rc))
         env["PATH"] = ":".join(extra + path)
@@ -118,10 +119,10 @@ class S3Module:
 
         # 1. commands, Rust, Lean
         for t in REQUIRED_TOOLS:
-            where = shutil.which(t, path=env["PATH"])
+            where = self.which(t, path=env["PATH"])
             add(rec("tool-" + t, f"Command {t}", "pass" if where else "fail", where or "not found on the application PATH"))
-        add(rec("tool-ssh-keygen", "Command ssh-keygen (optional signature check)", "info" if shutil.which("ssh-keygen", path=env["PATH"]) else "warn",
-                shutil.which("ssh-keygen", path=env["PATH"]) or "not found; tag signatures cannot be verified"))
+        add(rec("tool-ssh-keygen", "Command ssh-keygen (optional signature check)", "info" if self.which("ssh-keygen", path=env["PATH"]) else "warn",
+                self.which("ssh-keygen", path=env["PATH"]) or "not found; tag signatures cannot be verified"))
         lb = host_config.get("lean_bin", "")
         ok_lb = bool(lb) and os.path.isabs(lb) and os.path.isfile(os.path.join(lb, "lean")) and os.access(os.path.join(lb, "lean"), os.X_OK) \
             and os.path.isfile(os.path.join(lb, "lake")) and os.access(os.path.join(lb, "lake"), os.X_OK)

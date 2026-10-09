@@ -182,7 +182,7 @@ class Boundary(ServerBase):
         self.assertEqual(r.status, 200)
         with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tf:
             names = sorted(m.name for m in tf)
-            allowed = {"replay-report/" + n for n in reports.ARTIFACTS.values()} | {"replay-report/REPORT_SHA256SUMS"}
+            allowed = {"replay-report/" + n for n in reports.ARTIFACTS.values()} | {"replay-report/REPORT_SHA256SUMS", "replay-report/export-info.json"}
             self.assertTrue(set(names) <= allowed, set(names) - allowed)
             self.assertIn("replay-report/runner/verdict.json", names)
             self.assertIn("replay-report/app-report.json", names)

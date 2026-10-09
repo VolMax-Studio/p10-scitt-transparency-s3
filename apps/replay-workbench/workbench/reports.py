@@ -3,10 +3,14 @@ import hashlib
 import io
 import json
 import os
+import secrets
+import shutil
+import stat
 import subprocess
 import tarfile
+import tempfile
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.1.1"
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE_GLOBS = ("run.py", "workbench", "static", "profiles")
 
@@ -105,36 +109,81 @@ def finalize(job_dir, spec, result):
         f.write(json.dumps(spec.get("profile", {}), indent=1, sort_keys=True).encode() + b"\n")
     rep = build_report(job_dir, spec, result)
     try:
-        st = json.load(open(os.path.join(job_dir, "status.json")))
-        rep["host"]["resource_settings"] = st.get("resources")
+        with open(os.path.join(job_dir, "status.json")) as f:
+            rep["host"]["resource_settings"] = json.load(f).get("resources")
     except (OSError, ValueError):
         pass
     write_atomic(os.path.join(job_dir, "app-report.json"), json.dumps(rep, indent=1, sort_keys=True).encode() + b"\n")
 
 
-def export_archive(job_dir):
-    """Return bytes of a tar.gz containing only allowlisted job artifacts plus REPORT_SHA256SUMS."""
-    entries = []
-    for rel, name in ARTIFACTS.items():
-        p = os.path.join(job_dir, rel)
-        if os.path.isfile(p) and not os.path.islink(p):
-            entries.append((name, p))
-    entries.sort()
-    sums = "".join(f"{sha256_file(p)}  {n}\n" for n, p in entries).encode()
-    buf = io.BytesIO()
-    with tarfile.open(fileobj=buf, mode="w:gz") as tf:
-        for n, p in entries + [("REPORT_SHA256SUMS", None)]:
-            ti = tarfile.TarInfo("replay-report/" + n)
-            ti.mode, ti.uid, ti.gid, ti.uname, ti.gname = 0o644, 0, 0, "", ""
-            if p is None:
-                ti.size = len(sums)
-                tf.addfile(ti, io.BytesIO(sums))
-            else:
-                ti.size = os.path.getsize(p)
-                ti.mtime = int(os.path.getmtime(p))
+def snapshot_file(path, dest_dir):
+    """Copy one stable prefix of `path` into a private temp file; return (tmp_path, size, sha256) or None.
+
+    The size is fixed from fstat at open time and exactly that many bytes are copied and hashed in one pass, so bytes appended
+    afterwards (a log of a running job) cannot make the hash and the archived bytes differ. Symlinks and non-regular files are refused.
+    """
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    except OSError:
+        return None
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            return None
+        want, h = st.st_size, hashlib.sha256()
+        tmp = os.path.join(dest_dir, "snap-" + secrets.token_hex(8))
+        out = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        got = 0
+        with os.fdopen(out, "wb") as o:
+            while got < want:
+                b = os.read(fd, min(1 << 20, want - got))
+                if not b:
+                    break
+                h.update(b)
+                o.write(b)
+                got += len(b)
+        return tmp, got, h.hexdigest()
+    finally:
+        os.close(fd)
+
+
+def export_archive(job_dir, tmp_dir=None, partial=False, _after_snapshot=None):
+    """Return bytes of a tar.gz containing only allowlisted job artifacts, REPORT_SHA256SUMS and export-info.json.
+
+    Every artifact is snapshotted once; the hash in REPORT_SHA256SUMS and the archived bytes come from that same snapshot.
+    `partial` records that the job had no final result when the export was made.
+    """
+    tmp_dir = tmp_dir or tempfile.gettempdir()
+    work = tempfile.mkdtemp(prefix="export-", dir=tmp_dir)
+    try:
+        snaps = []
+        for rel, name in sorted(ARTIFACTS.items(), key=lambda kv: kv[1]):
+            sn = snapshot_file(os.path.join(job_dir, rel), work)
+            if sn:
+                snaps.append((name, *sn))
+        if _after_snapshot:
+            _after_snapshot()
+        info = json.dumps({"format": "p10-replay-workbench-export-v0", "app_version": APP_VERSION, "job_had_final_result": not partial,
+                           "note": "each file is one stable snapshot; logs of a running job may be incomplete",
+                           "files": {n: {"bytes": size, "sha256": h} for n, _, size, h in snaps}}, indent=1, sort_keys=True).encode() + b"\n"
+        sums = "".join(f"{h}  {n}\n" for n, _, _, h in snaps).encode()
+        sums += f"{hashlib.sha256(info).hexdigest()}  export-info.json\n".encode()
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+            def add_bytes(n, data):
+                ti = tarfile.TarInfo("replay-report/" + n)
+                ti.mode, ti.uid, ti.gid, ti.uname, ti.gname, ti.size, ti.mtime = 0o644, 0, 0, "", "", len(data), 0
+                tf.addfile(ti, io.BytesIO(data))
+            for n, p, size, h in snaps:
+                ti = tarfile.TarInfo("replay-report/" + n)
+                ti.mode, ti.uid, ti.gid, ti.uname, ti.gname, ti.size, ti.mtime = 0o644, 0, 0, "", "", size, 0
                 with open(p, "rb") as f:
                     tf.addfile(ti, f)
-    return buf.getvalue()
+            add_bytes("export-info.json", info)
+            add_bytes("REPORT_SHA256SUMS", sums)
+        return buf.getvalue()
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
 
 
 def read_served(job_dir, name):

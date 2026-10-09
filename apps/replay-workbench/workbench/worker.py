@@ -19,7 +19,8 @@ if APP_DIR not in sys.path:
     sys.path.insert(0, APP_DIR)
 
 from workbench import reports  # noqa: E402
-from workbench.util import claim_result, downgrade, proc_start_ticks, read_json, write_json_atomic  # noqa: E402,F401
+from workbench.util import (SealLock, child_lock_path, claim_result, downgrade, group_has_live_members, proc_start_ticks, read_json, try_lock,
+                            worker_lock_path, write_json_atomic)  # noqa: E402,F401
 
 MAX_EVENTS = 5000
 CMD_CAPTURE = 1 << 20
@@ -49,7 +50,8 @@ class RunResult:
 class Worker:
     def __init__(self, job_dir):
         self.dir = job_dir
-        self.spec = json.load(open(os.path.join(job_dir, "job.json"), encoding="utf-8"))
+        with open(os.path.join(job_dir, "job.json"), encoding="utf-8") as f:
+            self.spec = json.load(f)
         self.tmpdir = os.path.join(job_dir, "tmp")
         os.makedirs(self.tmpdir, mode=0o700, exist_ok=True)
         self.workspace = self.spec["workspace"]
@@ -109,17 +111,13 @@ class Worker:
     def deadline_hit(self):
         return time.monotonic() > self.deadline_at
 
-    def kill_group(self, pgid, proc=None):
-        """TERM, wait 5 s, KILL. Child cleanup is verified by probing the group; `proc` (the group leader, our child) is reaped while
-        waiting so that its zombie does not keep the group looking alive."""
+    def kill_group(self, pgid, proc=None, use_lock=True):
+        """TERM, wait 5 s, KILL. Child cleanup is verified by looking for live (non-zombie) members of the group; `proc` (the group leader,
+        our child) is reaped while waiting."""
         def alive():
             if proc is not None:
                 proc.poll()
-            try:
-                os.killpg(pgid, 0)
-                return True
-            except (ProcessLookupError, PermissionError):
-                return False
+            return group_has_live_members(self.dir, pgid, use_lock)
         if not alive():
             return {"term": False, "kill": False}
         try:
@@ -152,12 +150,16 @@ class Worker:
         if self.cancel.is_set():
             res["cancelled"] = True
             return res
+        child_lock = try_lock(child_lock_path(self.dir))     # inherited by the whole command group: "held" means a group member lives
         try:
             p = subprocess.Popen(argv, shell=False, env=env, cwd=cwd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 start_new_session=True, close_fds=True)
+                                 start_new_session=True, close_fds=True, pass_fds=(child_lock,) if child_lock is not None else ())
         except OSError as e:
             res["start_error"] = f"{type(e).__name__}: {e}"
             return res
+        finally:
+            if child_lock is not None:
+                os.close(child_lock)
         pgid = p.pid
         overflow, fatal, errors = threading.Event(), threading.Event(), []
 
@@ -212,7 +214,7 @@ class Worker:
                 elif t_end and time.monotonic() > t_end:
                     stop = "timeout"
                 if stop:
-                    res["cleanup"] = self.kill_group(pgid, p)
+                    res["cleanup"] = self.kill_group(pgid, p, child_lock is not None)
                     break
                 time.sleep(0.1)
             try:
@@ -224,16 +226,21 @@ class Worker:
                 if t.is_alive():
                     t.join(timeout=5)
             if not stop:
-                self.kill_group(pgid, p)   # reap stray children of a normally exited command; no-op when the group is gone
+                self.kill_group(pgid, p, child_lock is not None)   # reap stray children of a normally exited command; no-op when the group is gone
         except BaseException:
             try:
-                self.kill_group(pgid, p)
+                self.kill_group(pgid, p, child_lock is not None)
                 if p.poll() is None:
                     p.kill()
                 p.wait(timeout=10)
             except Exception:
                 pass
             raise
+        for stream in (p.stdout, p.stderr):
+            try:
+                stream.close()
+            except OSError:
+                pass
         if errors:
             res["io_error"] = errors[0]
         elif stop is None and fatal.is_set():
@@ -293,25 +300,55 @@ class Worker:
         """Written by the supervisor before it stops or recovers this job (restart, shutdown); read at sealing time."""
         return read_json(os.path.join(self.dir, "interrupt.json"))
 
-    def seal(self, res):
-        """Finalize the report for the final result. Any failure to do so turns the job into an explicit application failure."""
-        marker = self.interrupt_marker()
-        if marker:
-            res = downgrade(res, "APP_FAILURE", marker.get("reason", "INTERRUPTED"), "the job was interrupted by the application; partial records are preserved, not promoted")
-        try:
-            reports.finalize(self.dir, self.spec, res)
-        except Exception as e:
+    def decide_and_report(self, res):
+        """Called with the seal lock held. Decide the final result from the interruption state, write the application report for exactly
+        that result, and re-check that the state did not change meanwhile (a writer that bypasses the lock). Failure to write the report
+        turns the job into an explicit application failure."""
+        base = res
+        for _ in range(5):
+            marker, stopped = self.interrupt_marker(), self.cancel.is_set()
+            cur = base
+            if marker:
+                cur = downgrade(base, "APP_FAILURE", marker.get("reason", "INTERRUPTED"), "the job was interrupted by the application; partial records are preserved, not promoted")
+            elif stopped and base["execution"]["status"] == "COMPLETED":
+                cur = downgrade(base, "CANCELLED", "cancelled", "a stop request arrived before the result was published; partial records are preserved, not promoted")
             try:
-                with open(os.path.join(self.dir, "report-error.txt"), "w") as f:
-                    traceback.print_exc(file=f)
-            except OSError:
-                pass
-            res = downgrade(res, "APP_FAILURE", "REPORT_FINALIZATION_FAILED:" + type(e).__name__, "the application report could not be written")
-        return res
+                reports.finalize(self.dir, self.spec, cur)
+            except Exception as e:
+                try:
+                    with open(os.path.join(self.dir, "report-error.txt"), "w") as f:
+                        traceback.print_exc(file=f)
+                except OSError:
+                    pass
+                cur = downgrade(cur, "APP_FAILURE", "REPORT_FINALIZATION_FAILED:" + type(e).__name__, "the application report could not be written")
+            if (self.interrupt_marker() is not None) == (marker is not None) and self.cancel.is_set() == stopped:
+                return cur
+        return downgrade(base, "APP_FAILURE", "INTERRUPTION_STATE_UNSTABLE", "interruption state kept changing while sealing")
+
+    def publish(self, res):
+        """Serialize with interruption registration: whichever side takes the seal lock first wins. If the worker is first, the job
+        finished before the interruption and its result stands (the late registration returns 'too_late'); if the interruption is first,
+        the result is converted to an application failure. result.json, app-report.json and status are derived from that one decision."""
+        with SealLock(self.dir) as lk:
+            final = self.decide_and_report(res)
+            won = claim_result(self.dir, final)
+        return final, won
 
     def main(self):
         signal.signal(signal.SIGTERM, self.handle_term)
         signal.signal(signal.SIGINT, self.handle_term)
+        self.save_status()                                            # records pid and start time BEFORE the proof-of-life lock exists
+        self._worker_lock = try_lock(worker_lock_path(self.dir))     # held until this process exits: proof of life for recovery
+        if self._worker_lock is None:
+            return 5                                                  # another worker already serves this job
+        try:
+            if os.path.exists(os.path.join(self.dir, "result.json")) or self.interrupt_marker():
+                return 6                                              # sealed or interrupted before it even started: run nothing
+            return self._run()
+        finally:
+            os.close(self._worker_lock)
+
+    def _run(self):
         unpromoted = {"p10": {"state": "NOT_EVALUATED"}, "reproduction": {"status": "NOT_EVALUATED", "badge": False, "checks": [], "reasons": ["interrupted or failed"]}}
         try:
             self.apply_resources()
@@ -329,8 +366,7 @@ class Worker:
             except OSError:
                 pass
             res = self.finish("APP_FAILURE", "WORKER_EXCEPTION:" + type(e).__name__, dict(unpromoted))
-        res = self.seal(res)
-        won = claim_result(self.dir, res)
+        res, won = self.publish(res)
         code = 0
         if not won:                                       # superseded: the supervisor already sealed this job as interrupted
             winner = read_json(os.path.join(self.dir, "result.json")) or res

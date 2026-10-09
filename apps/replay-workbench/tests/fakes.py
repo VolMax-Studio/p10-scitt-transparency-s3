@@ -196,6 +196,8 @@ class StubModule(S3Module):
             os.symlink("/dev/full", os.path.join(d, "stdout.log"))
         if sab.get("report_dir"):
             os.mkdir(os.path.join(d, "app-report.json"))
+        if sab.get("profile_fifo"):         # finalization blocks at the first write of profile.json until a test opens the FIFO for reading
+            os.mkfifo(os.path.join(d, "profile.json"))
         if sab.get("status_dir"):
             os.remove(os.path.join(d, "status.json"))
             os.mkdir(os.path.join(d, "status.json"))

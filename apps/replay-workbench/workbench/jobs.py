@@ -20,8 +20,8 @@ import threading
 import time
 
 from . import reports
-from .util import (claim_result, downgrade, group_leader_ok, is_worker_process, kill_group_guarded, proc_alive, proc_start_ticks, read_json,
-                   try_lock, write_json_atomic)
+from .util import (downgrade, group_signal_ok, is_worker_process, kill_group_guarded, publish_result, read_json, register_interrupt, try_lock,
+                   write_json_atomic)
 
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORKER_PY = os.path.join(APP_DIR, "workbench", "worker.py")
@@ -88,13 +88,8 @@ class JobManager:
         if os.path.exists(os.path.join(jd, "result.json")):
             return
         grace = self.orphan_grace if grace is None else grace
-        try:
-            with open(os.path.join(jd, "interrupt.json"), "x", encoding="utf-8") as f:
-                json.dump({"reason": reason, "by_pid": os.getpid()}, f)
-        except FileExistsError:
-            pass
-        except OSError:
-            pass
+        if register_interrupt(jd, reason, timeout=min(grace, 5.0)) == "too_late":
+            return          # the worker published first: the job finished before the interruption and its result stands
         reason = (read_json(os.path.join(jd, "interrupt.json")) or {}).get("reason", reason)     # one reason, whoever seals first
         st = read_json(os.path.join(jd, "status.json")) or {}
         wpid, wticks = st.get("worker_pid"), st.get("worker_start_ticks")
@@ -113,19 +108,19 @@ class JobManager:
                     pass
         # leftover child group (identity of its leader must still match)
         cpg, cticks = st.get("child_pgid"), st.get("child_start_ticks")
-        if cpg and group_leader_ok(cpg, cticks):
-            kill_group_guarded(cpg, cticks, signal.SIGTERM)
+        if cpg and group_signal_ok(jd, cpg, cticks):
+            kill_group_guarded(jd, cpg, cticks, signal.SIGTERM)
             end = time.monotonic() + 5
-            while time.monotonic() < end and group_leader_ok(cpg, cticks):
+            while time.monotonic() < end and group_signal_ok(jd, cpg, cticks):
                 time.sleep(0.1)
-            kill_group_guarded(cpg, cticks, signal.SIGKILL)
+            kill_group_guarded(jd, cpg, cticks, signal.SIGKILL)
         if os.path.exists(os.path.join(jd, "result.json")):
             return
         base = {"job_id": jid, "kind": st.get("kind"), "finished": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "execution": {"status": "APP_FAILURE", "reason": reason}, "p10": {"state": "NOT_EVALUATED"},
                 "reproduction": {"status": "NOT_EVALUATED", "badge": False, "checks": [], "reasons": ["the job was interrupted; any partial records are preserved but not promoted"]}}
         base = downgrade(base, "APP_FAILURE", reason, "the job was interrupted; any partial records are preserved but not promoted")
-        if not claim_result(jd, base):
+        if not publish_result(jd, base, timeout=5.0):
             return
         spec = read_json(os.path.join(jd, "job.json"))
         try:
@@ -308,7 +303,7 @@ class JobManager:
 
     def _force_stop(self, job_id, proc):
         st = self._read(job_id, "status.json") or {}
-        kill_group_guarded(st.get("child_pgid"), st.get("child_start_ticks"), signal.SIGKILL)
+        kill_group_guarded(self.job_dir(job_id), st.get("child_pgid"), st.get("child_start_ticks"), signal.SIGKILL)
         if proc.poll() is None:
             try:
                 os.killpg(proc.pid, signal.SIGKILL)       # the worker leads its own session/group (we started it)
@@ -320,11 +315,7 @@ class JobManager:
         a = self.active
         if a and a["proc"].poll() is None:
             jid, proc = a["job_id"], a["proc"]
-            try:
-                with open(os.path.join(self.job_dir(jid), "interrupt.json"), "x", encoding="utf-8") as f:
-                    json.dump({"reason": "INTERRUPTED_BY_SHUTDOWN", "by_pid": os.getpid()}, f)
-            except OSError:
-                pass
+            register_interrupt(self.job_dir(jid), "INTERRUPTED_BY_SHUTDOWN", timeout=min(wait, 5.0))     # loses if the job already published
             try:
                 os.kill(proc.pid, signal.SIGTERM)
             except ProcessLookupError:

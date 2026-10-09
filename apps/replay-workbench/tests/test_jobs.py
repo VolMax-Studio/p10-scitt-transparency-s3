@@ -15,15 +15,22 @@ APP = fakes.APP
 
 
 def alive(pid):
+    """Process exists and is not a zombie. Works without /proc (then a zombie cannot be told apart; own children are reaped first)."""
+    try:
+        os.waitpid(pid, os.WNOHANG)          # reaps a finished child of this process; raises for non-children
+    except (ChildProcessError, OSError):
+        pass
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
         return False
+    except PermissionError:
+        return True
     try:
         with open(f"/proc/{pid}/stat") as f:
             return f.read().rsplit(")", 1)[1].split()[0] != "Z"
-    except OSError:
-        return False
+    except (OSError, IndexError):
+        return True
 
 
 def read_text(path):

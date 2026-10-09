@@ -1,0 +1,130 @@
+{"modules": [{"module": "s3", "profile_id": "p10-s3-accepted-e56d3ea-rev2", "profile_sha256": "09f3ed424d02c930931ab97995ff704d943ec50c32e8d1dcc5a6955aa14851c4", "description": "Reproduce the accepted S3 capture from the exact rev2 offline package with its unchanged verify_offline.sh and runner.", "
+import: {'app_status': 'SUPPORTED', 'package_id': 'e19f8d84cac0ecb2de61dbd0e7085014d525829ba51007b7fdaa24895df37d9b', 'sha256': 'e19f8d84cac0ecb2de61dbd0e7085014d525829ba51007b7fdaa24895df37d9b', 'bytes': None, 'reused': True, 'members': None}
+start: {'job_id': '20261009T083053Z-a5ab7143', 'kind': 'run'}
+  [    0.0s] phase: readiness
+  [    3.8s] phase: wrapper
+  [    3.8s] info: starting wrapper: unshare -n -- bash /tmp/claude-0/-home-user/627e7ab8-4ea2-53f9-b6c4-dcfa0ef710a7/scratchpad/wbint/ws/packages/e19f8d84cac0
+  [    3.8s] phase: == 1. host prerequisites (NOT carried by this package)
+  [    3.8s] phase: == 2. package and Git state
+  [    4.2s] phase: == 3. offline runner (no --no-offline, no --pinned; network namespace is created and measured by the runner)
+  [  195.0s] phase: == 4. comparison (made only after the run)
+  [  195.1s] phase: collecting
+  [  195.1s] state: COMPLETED
+{
+ "execution": {
+  "reason": null,
+  "status": "COMPLETED"
+ },
+ "p10": {
+  "outcome": "BINDING_MATCH",
+  "reason": {
+   "code": "BindingMatch",
+   "rule": null
+  },
+  "record_problems": {
+   "run-info.json": null,
+   "verdict.json": null
+  },
+  "rows": {
+   "A1": "match",
+   "A10": "match",
+   "A11": "match",
+   "A12": "match",
+   "A13": "match",
+   "A14": "match",
+   "A15": "match",
+   "A2": "match",
+   "A3": "match",
+   "A4": "match",
+   "A5": "match",
+   "A6": "match",
+   "A7": "match",
+   "A8": "match",
+   "A9": "match"
+  },
+  "stage": "post-s2a",
+  "state": "AVAILABLE"
+ },
+ "reproduction": {
+  "badge": true,
+  "checks": [
+   {
+    "detail": "wrapper exit 0",
+    "id": "wrapper-exit-0",
+    "ok": true
+   },
+   {
+    "detail": "",
+    "id": "verdict-valid",
+    "ok": true
+   },
+   {
+    "detail": "",
+    "id": "run-info-valid",
+    "ok": true
+   },
+   {
+    "detail": "BINDING_MATCH",
+    "id": "outcome-binding-match",
+    "ok": true
+   },
+   {
+    "detail": "6368022f06cc6ef6e4c9698cd45e71c44db505b4bf8b5812aaf0cbe26f41db22",
+    "id": "verdict-sha-equals-approved-digest",
+    "ok": true
+   },
+   {
+    "detail": "repo/ts-prototype/evidence/s3b-capture/runner/verdict.json",
+    "id": "verdict-bytes-equal-runner",
+    "ok": true
+   },
+   {
+    "detail": "repo/ts-prototype/evidence/s3b-capture/runner-2/verdict.json",
+    "id": "verdict-bytes-equal-runner-2",
+    "ok": true
+   },
+   {
+    "detail": "{\"entry\": true, \"g5\": true}",
+    "id": "executables-pinned-true",
+    "ok": true
+   },
+   {
+    "detail": "True",
+    "id": "network-isolated-measured",
+    "ok": true
+   },
+   {
+    "detail": "[]",
+    "id": "no-problems",
+    "ok": true
+   },
+   {
+    "detail": "[]",
+    "id": "no-tcb-source-mismatch",
+    "ok": true
+   },
+   {
+    "detail": "",
+    "id": "runner-source-hashes",
+    "ok": true
+   },
+   {
+    "detail": "53ba44408b1de7322010681f45bb4aa576931f0974c448d9e6b7a662683ca863",
+    "id": "entry-binary-hash",
+    "ok": true
+   },
+   {
+    "detail": "a2b4b1efeda26302ec5f0710905c46f7c180ad862035959d47ba1e33305ee0bd",
+    "id": "g5-binary-hash",
+    "ok": true
+   }
+  ],
+  "reasons": [],
+  "status": "MATCH"
+ },
+ "wrapper_exit": 0,
+ "wrapper_exit_meaning": "full replay success",
+ "readiness_blocking": [],
+ "synthetic": false
+}
+job: 20261009T083053Z-a5ab7143

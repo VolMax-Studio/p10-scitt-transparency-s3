@@ -1,0 +1,177 @@
+lmax-studio-HP-470-17-inch-G9-Notebook-PC:~$ (
+set -euo pipefail
+
+S3_PACKAGE_DIR="$HOME/volmax-projects/p10-s3-offline-hp.9DoPdh/p10-s3-offline"
+S3_LEAN_BIN="$HOME/volmax-projects/iot2/PORTFOLIO/p10-underdetermination-lean-s1/.toolchain/lean4-4.33.0/bin"
+S3_ALLOWED_SIGNERS="$HOME/volmax-projects/p10-scitt-transparency-s3-freeze/.git/ivan-s3-allowed-signers"
+
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Instalacija pinovanog Rust-a.
+if ! command -v rustup >/dev/null 2>&1; then
+    S3_RUST_INSTALLER="$(mktemp)"
+    curl --proto '=https' --tlsv1.2 -fsS \
+        https://sh.rustup.rs -o "$S3_RUST_INSTALLER"
+
+    sh "$S3_RUST_INSTALLER" -y \
+        --profile minimal \
+        --default-toolchain 1.82.0 \
+        --no-modify-path
+
+    rm -f "$S3_RUST_INSTALLER"
+else
+)   ./verify_offline.shLOWED_SIGNERS" \_OFFLINE_SOURCE_ONLY=0leged_userns=$S3_US
+info: syncing channel updates for 1.82.0-x86_64-unknown-linux-gnu
+
+  1.82.0-x86_64-unknown-linux-gnu unchanged - rustc 1.82.0 (f6e511eec 2024-10-15)
+
+info: checking for self-update (current version: 1.29.1)
+[sudo] password for volmax-studio: 
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease               
+Hit:2 https://persistent.oaistatic.com/codex-app-prod/linux/deb stable InRelease
+Hit:3 https://dl.google.com/linux/chrome-stable/deb stable InRelease           
+Hit:4 https://deb.nodesource.com/node_22.x nodistro InRelease                  
+Get:5 https://pkgs.tailscale.com/stable/ubuntu noble InRelease                 
+Hit:7 https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease
+Hit:6 https://hub-dist.unity3d.com/artifactory/hub-debian-prod-local stable InRelease
+Ign:8 https://screenrec.com/download/ubuntu stable InRelease                   
+Ign:9 https://ppa.launchpadcontent.net/kicad/kicad-8.0-releases/ubuntu noble InRelease
+Ign:10 http://rs.archive.ubuntu.com/ubuntu noble InRelease                     
+Hit:11 http://rs.archive.ubuntu.com/ubuntu noble-updates InRelease             
+Hit:12 http://rs.archive.ubuntu.com/ubuntu noble-backports InRelease           
+Hit:9 https://ppa.launchpadcontent.net/kicad/kicad-8.0-releases/ubuntu noble InRelease
+Hit:10 http://rs.archive.ubuntu.com/ubuntu noble InRelease                  
+Hit:8 https://screenrec.com/download/ubuntu stable InRelease                
+Fetched 6,649 B in 47s (142 B/s)                 
+Reading package lists... Done
+N: Skipping acquire of configured file 'main/binary-i386/Packages' as repository 'https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev antigravity-debian InRelease' doesn't support architecture 'i386'
+W: https://screenrec.com/download/ubuntu/dists/stable/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+build-essential is already the newest version (12.10ubuntu1).
+libuv1-dev is already the newest version (1.48.0-1.1build1).
+The following packages were automatically installed and are no longer required:
+  gyp handlebars libebackend-1.2-11t64 libebook-1.2-21t64
+  libebook-contacts-1.2-4t64 libedata-book-1.2-27t64 libedata-cal-2.0-2t64
+  libedataserverui-1.2-4t64 libgl1-amber-dri libglapi-mesa libjs-async
+  libjs-events libjs-inherits libjs-is-typedarray libjs-prettify
+  libjs-regenerate libjs-source-map libjs-sprintf-js
+  libjs-typedarray-to-buffer libphonenumber8 libre2-10 libssl-dev node-abbrev
+  node-ampproject-remapping node-ansi-escapes node-ansi-regex node-ansi-styles
+  node-aproba node-are-we-there-yet node-argparse node-arrify node-async
+  node-async-each node-auto-bind node-babel-plugin-add-module-exports
+  node-babel7-runtime node-balanced-match node-base64-js
+  node-binary-extensions node-brace-expansion node-busboy node-camelcase
+  node-caniuse-lite node-chownr node-chrome-trace-event node-ci-info
+  node-cjs-module-lexer node-cli-boxes node-cli-cursor node-clone
+  node-clone-deep node-collection-visit node-color-convert node-color-name
+  node-colors node-commander node-commondir node-concat-stream
+  node-console-control-strings node-convert-source-map node-core-js
+  node-core-js-pure node-core-util-is node-data-uri-to-buffer
+  node-decompress-response node-deep-is node-defaults node-define-property
+  node-delegates node-depd node-diff node-electron-to-chromium node-encoding
+  node-end-of-stream node-err-code node-error-ex node-es-module-lexer
+  node-escape-string-regexp node-eslint-utils node-eslint-visitor-keys
+  node-esquery node-estraverse node-esutils node-events node-fancy-log
+  node-fast-deep-equal node-fast-levenshtein node-fetch node-find-up
+  node-flatted node-for-in node-for-own node-foreground-child
+  node-fs-readdir-recursive node-fs-write-stream-atomic node-fs.realpath
+  node-function-bind node-functional-red-black-tree node-get-caller-file
+  node-get-stream node-get-value node-glob node-globals node-got
+  node-graceful-fs node-growl node-has-flag node-has-unicode node-has-value
+  node-has-values node-hosted-git-info node-iconv-lite node-ieee754 node-iferr
+  node-imurmurhash node-indent-string node-inflight node-inherits node-ini
+  node-interpret node-ip node-ip-regex node-is-arrayish node-is-binary-path
+  node-is-buffer node-is-descriptor node-is-extendable node-is-extglob
+  node-is-path-cwd node-is-plain-obj node-is-plain-object node-is-stream
+  node-is-typedarray node-is-windows node-isarray node-isexe node-isobject
+  node-js-tokens node-jsesc node-json-buffer node-json-parse-better-errors
+  node-json-schema node-json-schema-traverse node-json-stable-stringify
+  node-jsonify node-jsonparse node-kind-of node-levn node-loader-runner
+  node-locate-path node-lodash-packages node-log-driver node-lowercase-keys
+  node-lru-cache node-map-visit node-memfs node-merge-stream
+  node-mimic-response node-minimatch node-minimist node-minipass
+  node-mixin-deep node-mute-stream node-n3 node-negotiator node-neo-async
+  node-npm-run-path node-object-inspect node-object-visit node-once
+  node-optimist node-optionator node-osenv node-p-cancelable node-p-limit
+  node-p-locate node-p-map node-pascalcase node-path-dirname node-path-exists
+  node-path-is-absolute node-path-is-inside node-path-type node-pify
+  node-pkg-dir node-postcss-value-parser node-prelude-ls
+  node-process-nextick-args node-promise-inflight node-promise-retry
+  node-promzard node-prr node-pump node-punycode node-quick-lru
+  node-randombytes node-read node-readable-stream node-rechoir node-regenerate
+  node-regenerate-unicode-properties node-regenerator-runtime
+  node-regenerator-transform node-regexpp node-regjsgen node-repeat-string
+  node-require-directory node-require-from-string node-resolve
+  node-resolve-cwd node-resolve-from node-restore-cursor node-resumer
+  node-retry node-run-queue node-safe-buffer node-sellside-emitter
+  node-serialize-javascript node-set-blocking node-set-immediate-shim
+  node-shebang-command node-shebang-regex node-shell-quote node-signal-exit
+  node-slash node-slice-ansi node-source-list-map node-source-map
+  node-source-map-support node-spdx-correct node-spdx-exceptions
+  node-spdx-expression-parse node-spdx-license-ids node-sprintf-js node-ssri
+  node-stack-utils node-string-decoder node-strip-bom node-strip-json-comments
+  node-supports-color node-tapable node-terser node-text-table node-through
+  node-time-stamp node-to-fast-properties node-tslib node-type-check
+  node-typedarray node-typedarray-to-buffer node-undici
+  node-unicode-canonical-property-names-ecmascript
+  node-unicode-match-property-value-ecmascript
+  node-unicode-property-aliases-ecmascript node-unique-filename
+  node-unset-value node-uri-js node-util-deprecate node-uuid node-v8flags
+  node-validate-npm-package-license node-wcwidth.js node-webpack-sources
+  node-wordwrap node-wrappy node-write-file-atomic node-xtend node-y18n
+  node-yallist node-yaml p7zip-full
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 102 not upgraded.
+rustc 1.82.0 (f6e511eec 2024-10-15)
+kernel.apparmor_restrict_unprivileged_userns = 0
+Namespace preduslov: OK
+== 1. host prerequisites (NOT carried by this package)
+PASS tool python3
+PASS tool git
+PASS tool unshare
+PASS tool rustc
+PASS tool sha256sum
+PASS tool cmp
+PASS tool tar
+PASS Lean bin directory /home/volmax-studio/volmax-projects/iot2/PORTFOLIO/p10-underdetermination-lean-s1/.toolchain/lean4-4.33.0/bin
+PASS rustc 1.82.0 (f6e511eec 2024-10-15) (inside spike/s3-entry)
+PASS unshare -rn
+== 2. package and Git state
+PASS PACKAGE_SHA256SUMS: all 5997 listed files match
+PASS repo HEAD e56d3ea8bbe14c9c88a0dde339c29b55b1032a66
+PASS tag object v0.1.0-s3a-frozen 8f0c97f3745131f79936dec71ebe09316332f5ab -> 7c3b2d4b919c356a566f8f5d3628d4f546e41afa
+PASS tag object v0.1.0-s3-accepted 4148a7403e8d5ed0a30ca878d617323bb3a75b3a -> 5acc277a13dc122e39fcb5f9f3e646b06cc95009
+PASS v0.1.0-s3a-frozen carries a signature block (validity: see README_PACKAGE.md, needs the signer's public key)
+PASS v0.1.0-s3-accepted carries a signature block (validity: see README_PACKAGE.md, needs the signer's public key)
+PASS signature of v0.1.0-s3a-frozen verifies against ALLOWED_SIGNERS
+PASS signature of v0.1.0-s3-accepted verifies against ALLOWED_SIGNERS
+PASS s1 at e4db3747eaeeb1a07227bb9029f9a9c3b566cdb1, clean
+PASS s2a at 741d56d36d7b2bfe2e9e0080a1cba4393e4a47da, clean
+PASS s2b at 8eaa91cad1ffa963158b365c6d0d7316f4965e89, clean
+PASS frozen set (deployment/candidate/freeze-set.sha256): all 99 listed files match
+PASS anchor 2662c2daf912d2ce4796a26b13464d7bc2df6ba8825fa399fed3a87185d700a7
+PASS accepted verdict.json present (6368022f06cc6ef6e4c9698cd45e71c44db505b4bf8b5812aaf0cbe26f41db22)
+== 3. offline runner (no --no-offline, no --pinned; network namespace is created and measured by the runner)
+BINDING_MATCH  stage=post-s2a  reason={"code": "BindingMatch", "rule": null}
+  verdict: /home/volmax-studio/volmax-projects/p10-s3-offline-hp.9DoPdh/p10-s3-offline/out/run-20261008T214835Z/verdict.json
+runner exit code: 0
+== 4. comparison (made only after the run)
+PASS runner exit 0
+PASS verdict.json is byte-identical to the accepted runner/verdict.json
+PASS verdict.json is byte-identical to the accepted runner-2/verdict.json
+verdict.json sha256: 6368022f06cc6ef6e4c9698cd45e71c44db505b4bf8b5812aaf0cbe26f41db22 (accepted: 6368022f06cc6ef6e4c9698cd45e71c44db505b4bf8b5812aaf0cbe26f41db22)
+PASS outcome BINDING_MATCH
+PASS executables_pinned entry and g5
+PASS network_isolated true (measured)
+PASS no problems
+PASS no tcb_source_mismatch
+PASS runner s3c_verify.py hash
+PASS runner s3c_chain.py hash
+PASS entry binary hash
+PASS g5 binary hash
+ALL PASS: the offline replay reproduced the accepted verdict on this host. Output: /home/volmax-studio/volmax-projects/p10-s3-offline-hp.9DoPdh/p10-s3-offline/out/run-20261008T214835Z
+kernel.apparmor_restrict_unprivileged_userns = 1
+(volmax_env) volmax-studio@volmax-studio-HP-470-17-inch-G9-Notebook-PC:~$ 
+

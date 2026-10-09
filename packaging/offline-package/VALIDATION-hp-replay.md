@@ -38,3 +38,23 @@ Which package revision (original or rev2) was used and how it was transferred; t
 | `evidence/hp-replay-20261008T214835Z/run-info.json` | `4c82c728e1b9bfeedbd1c66445e8c728fae3903c7893b945b29ac3227b1d8a3b` |
 | `evidence/hp-replay-20261008T214835Z/preflight.json` | `1c3ba055f0724a77eb03859fc8728376a9e30040702004c11a45fd96f398fd9f` |
 | `VALIDATION-hp-replay.md` (this record) | recorded in the commit's `MANIFEST.sha256` |
+
+## Addendum — terminal transcript received and inspected
+
+The operator then supplied the terminal transcript as a file: `evidence/hp-replay-20261008T214835Z/s3-hp-terminal-20261008.txt` (10,993 bytes, 177 lines), SHA-256 `a8d66981b10fdeec353da0bee75fec9e1d497d6ff88d5b191d156208294e2c68`, equal to the checksum the operator gave; stored byte-identical to what was received (`cmp`). It supersedes Section B's statement that the transcript was not inspected: Claude has now read it. It remains **operator-supplied evidence** (pasted terminal text), not something Claude produced or observed running. Nothing was rerun.
+
+**Transcript observations (what the pasted text shows).**
+
+- Wrapper output of the package's `verify_offline.sh`: `PASS PACKAGE_SHA256SUMS: all 5997 listed files match`; repo HEAD `e56d3ea8…`; both tag objects (`v0.1.0-s3a-frozen` `8f0c97f3…` → `7c3b2d4b…`, `v0.1.0-s3-accepted` `4148a740…` → `5acc277a…`) with signature blocks present; **`PASS signature of v0.1.0-s3a-frozen verifies against ALLOWED_SIGNERS` and the same for `v0.1.0-s3-accepted`** (the allowed-signers file is named in the pasted text by path; Claude has not seen its contents); S1/S2a/S2b at the pins and clean; `frozen set (deployment/candidate/freeze-set.sha256): all 99 listed files match`; anchor `2662c2da…00a7`; accepted-verdict hash `6368022f…db22`.
+- Runner: `BINDING_MATCH stage=post-s2a`, `runner exit code: 0`; the comparison section, printed after the run, shows `verdict.json` byte-identical to the accepted `runner/` and `runner-2/` verdicts (SHA-256 `6368022f…db22`), `executables_pinned entry and g5`, `network_isolated true (measured)`, no problems, no `tcb_source_mismatch`, runner source hashes and both binary hashes; the last wrapper line is `ALL PASS: the offline replay reproduced the accepted verdict on this host`, with output directory `…/out/run-20261008T214835Z`.
+- Prerequisites shown: `rustc 1.82.0 (f6e511eec 2024-10-15)`; an apt step reporting `libuv1-dev` and `build-essential` already the newest versions (0 newly installed); an `unshare -rn` check passing.
+- Kernel setting: `kernel.apparmor_restrict_unprivileged_userns = 0` is printed before the checks (followed by `Namespace preduslov: OK`) and **`kernel.apparmor_restrict_unprivileged_userns = 1` is printed after `ALL PASS`**, i.e. the value shown at the end is `1`.
+- The wording of the two checksum lines (`all N listed files match`) is the output format of the revised wrapper (`VALIDATION-rev2.md`); that is a reading of the printed text, since the transcript does not name the tarball used.
+
+**Runner-record checks (unchanged, from Section A).** The archived `verdict.json`, `run-info.json` and `preflight.json` were inspected as files: hashes, 31 preflight checks, pins, isolation and host details come from those records, not from the transcript. The transcript and the records agree: run directory `run-20261008T214835Z` matches the archive name and the record's start time, and the verdict hash is the same.
+
+**Limits.** The command section of the pasted text is partly garbled by the paste (line 23 interleaves fragments of several commands), so the exact command line cannot be reconstructed from it and none is inferred. The transcript contains the operator's host name and local paths, and an `apt` listing of the machine's package sources; it is stored unmodified at the operator's request. It does not establish independent operator validation (the same operator ran both hosts), and nothing in it or in the records is used to infer the cause of the earlier desktop-session interruption or the number of replay attempts. This remains a reproduction on a second host, not a universal portability claim.
+
+| Added file | SHA-256 |
+|---|---|
+| `evidence/hp-replay-20261008T214835Z/s3-hp-terminal-20261008.txt` | `a8d66981b10fdeec353da0bee75fec9e1d497d6ff88d5b191d156208294e2c68` |

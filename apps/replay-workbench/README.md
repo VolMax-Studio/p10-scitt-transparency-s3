@@ -34,7 +34,7 @@ including the `#token=` part, in a browser on the same machine. Options: `--work
 * **Home** lists the available modules. Today that is one card, **S3 — Accepted capture replay** (*Open module*). "Available" means the module is implemented in this application; it says nothing about the host or about any result, and the card never shows a badge. S1, S2a and S2b are stages of the S3 chain, not modules.
 * **S3 module screen** (*← Home* link on top): package import, readiness, run/stop, the three separate result axes and **Details** (logs, checks, raw records, export, job history). The Lean directory, allowed-signers path and deadline in use are shown in a summary with a link to Host settings.
 * **Host settings** (also reachable from the top bar): edit and save the Lean directory, allowed-signers path and deadline (see below).
-* **Active-job indicator:** while any job runs, a bar on every screen names it and links to its existing status view. Moving between Home, Host settings and the module, or reloading the page, never starts, stops or restarts a job; only **Stop active job** on the module screen stops one. Opening an earlier job from the job history shows that job only, under a banner saying so; it is never shown on Home and does not count as readiness or verification of anything today.
+* **Active-job indicator:** while any job runs, a bar on every screen names it and links to its existing status view. Moving between Home, Host settings and the module, or reloading the page, never starts, stops or restarts a job; only **Stop active job** on the module screen stops one. A job is **current** if it was started in this page session or was still running when the page first looked at it; a job that is already finished and was not started in this page session is an **earlier job**, however it was opened (job history, a `&job=<id>` link, a reload). An earlier job is shown under a banner that names it and scopes its result to it (the actual result and badge are shown unchanged); its readiness records appear only under Details, never in the current Readiness section; it is never shown on Home and does not count as readiness or verification of anything today. The address bar follows the viewed job, so a reload shows the same job.
 * Navigation is client-side (URL fragment `#token=…&view=home|settings|module&id=s3`). An unknown module identifier or page shows "Unknown module" with a link back to Home.
 
 ## Saved host settings and desktop launcher (v0.2.0)
@@ -86,7 +86,7 @@ The wrapper's exit status (0 success, 1 failed replay/comparison, 2 prerequisite
 ## Tests
 
 ```bash
-python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 183 tests, about 70 s
+python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # about 190 tests, about 75 s
 ```
 
 The tests need no Rust, Lean or network namespace on the test host. They use injected synthetic dependencies (synthetic archives and records, a scripted command context and a **stub module**). A stub run is labelled

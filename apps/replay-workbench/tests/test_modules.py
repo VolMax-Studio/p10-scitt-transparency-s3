@@ -192,12 +192,27 @@ class UiSource(unittest.TestCase):
         self.assertIn("MODULE_ID_RE", self.js)
         self.assertEqual(self.js.count("view-s3"), 1)
 
-    def test_past_jobs_are_labelled_and_do_not_set_readiness(self):
+    def test_job_classification_comes_from_the_fetched_status_not_from_the_way_it_was_opened(self):
         self.assertIn("earlier job", self.js)
+        cl = self.js[self.js.index("function classify("):self.js.index("function viewJob(")]
+        self.assertIn('st.status.state === "DONE"', cl)
+        self.assertIn("state.fresh === st.job_id", cl)
+        self.assertIn("else state.past = true;", cl)
+        # every way of opening a job goes through viewJob/poll, which classify before anything is rendered; no caller decides "past" itself
+        self.assertNotRegex(self.js, r"viewJob\([^)]*,")
+        poll = self.js[self.js.index("async function poll()"):self.js.index("function setVal(")]
+        self.assertLess(poll.index("classify(st)"), poll.index("finish(st)"))
         fin = self.js[self.js.index("function finish("):self.js.index("function renderRows(")]
         self.assertIn("const fresh = !state.past && state.fresh === st.job_id;", fin)
         self.assertEqual(fin.count("state.readyKey = inputsKey()"), 1)
         self.assertIn("if (fresh) {\n      state.readyKey", fin)
+        self.assertNotIn('text($("ready-rows"), "")', fin, "viewing an earlier job must not clear the current readiness rows")
+        self.assertIn("renderRows($(\"past-ready-rows\")", fin)
+
+    def test_address_bar_follows_the_viewed_job_so_reload_shows_the_same_job(self):
+        self.assertIn("function setJobInUrl(", self.js)
+        self.assertIn("history.replaceState", self.js[self.js.index("function setJobInUrl("):self.js.index("function viewJob(")])
+        self.assertIn("setJobInUrl(r.job_id)", self.js)
 
     def test_no_third_party_or_inline_code_and_text_only_rendering(self):
         for bad in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "eval(", "localStorage"):

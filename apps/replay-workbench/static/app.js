@@ -152,8 +152,8 @@
     if (d.packages.length === 1 && !state.packageId) { state.packageId = d.packages[0]; text($("import-status"), "Approved package already imported: " + state.packageId); }
     loadJobs();
     updateButtons();
-    if (jobFromLink) { viewJob(jobFromLink, false); return; }
-    if (state.active) { viewJob(state.active.job_id, false, true); return; }        // looking at the running job; nothing is started
+    if (jobFromLink) { viewJob(jobFromLink); return; }
+    if (state.active) { viewJob(state.active.job_id); return; }                      // looking at the running job; nothing is started
     if (state.jobId) { resumeJob(); }
   }
   function stopDetailPolling() { clearTimeout(state.timer); state.timer = null; }       // only the browser stops polling; the job is untouched
@@ -164,9 +164,21 @@
     b.hidden = false;
     text(b, "Viewing an earlier job (" + id + (created ? ", started " + created : "") + "). It describes only that job: not this host today, not a new run and not the module.");
   }
-  function viewJob(id, past, running) {
-    state.jobId = id; state.after = 0; state.past = !!past && !running;
-    if (running) state.fresh = id;       // a job that is still running is this session's job, wherever it was started
+  // A job shown on this screen is CURRENT when it was started in this page session or was still running when we first looked at it
+  // (we are watching a live job). A job that is already finished when first fetched, and was not started in this page session, is HISTORICAL,
+  // whichever way it was opened (history list, indicator link, URL, reload). The classification comes from the fetched status.
+  function classify(st) {
+    const done = !!(st.status && st.status.state === "DONE");
+    if (state.fresh === st.job_id) state.past = false;
+    else if (!done) { state.fresh = st.job_id; state.past = false; }
+    else state.past = true;
+    showPastBanner(st.job_id, st.created);
+  }
+  function setJobInUrl(id) {         // keeps the address bar in step with the viewed job, so a reload shows the same job (replace: no history entry)
+    if (state.view === "module") history.replaceState(null, "", hashFor("module", "s3", id));
+  }
+  function viewJob(id) {
+    state.jobId = id; state.after = 0; state.past = false; setJobInUrl(id);
     text($("jobid"), id); text($("log-out"), ""); text($("log-err"), ""); resetResults();
     showPastBanner(id, "");
     poll();
@@ -198,7 +210,7 @@
     try {
       const r = await api("POST", path, body());
       state.past = false; showPastBanner();
-      state.jobId = r.job_id; state.after = 0; state.fresh = r.job_id;
+      state.jobId = r.job_id; state.after = 0; state.fresh = r.job_id; setJobInUrl(r.job_id);
       text($("log-out"), ""); text($("log-err"), ""); text($("jobid"), r.job_id); resetResults();
       text($("run-line"), r.kind === "readiness" ? "Readiness started." : "Replay started.");
       refreshActive(); poll();
@@ -224,7 +236,7 @@
       const s = st.status;
       text($("phase"), s.phase || "-");
       if (s.started) text($("elapsed"), fmt((Date.now() - Date.parse(s.started)) / 1000));
-      if (state.past) showPastBanner(jid, st.created);
+      classify(st);
       if (s.state === "DONE") { finish(st); return; }
     } catch (e) { text($("run-line"), "Status unavailable: " + e.message); }
     state.timer = setTimeout(poll, 1000);
@@ -233,7 +245,7 @@
   function setVal(id, value, cls) { const v = $("v-" + id); text(v, value); v.className = "val " + (cls || ""); }
   function finish(st) {
     const r = st.result || {};
-    const fresh = !state.past && state.fresh === st.job_id;          // only a job started in this page session may count as "this session's" readiness
+    const fresh = !state.past && state.fresh === st.job_id;          // only a current job may count as this session's readiness
     const ex = r.execution || {};
     setVal("exec", ex.status || "?", ex.status === "COMPLETED" ? "good" : (ex.status === "RUNNING" ? "" : "bad"));
     text($("d-exec"), (ex.reason ? "Reason: " + ex.reason + ". " : "") + (st.execution_kind || "") + (r.elapsed_seconds != null ? " | " + fmt(r.elapsed_seconds) : ""));
@@ -250,7 +262,7 @@
     text($("d-repro"), (rp.reasons || []).join(" "));
     if (r.wrapper_exit !== undefined && st.kind !== "readiness") text($("wrapper-exit"), "Wrapper exit status: " + (r.wrapper_exit === null ? "none (signal " + (r.supervision && r.supervision.signal) + ")" : r.wrapper_exit) + (r.wrapper_exit_meaning ? " (" + r.wrapper_exit_meaning + ")" : "") + ". This is not a P10 outcome.");
     if (fresh) renderRows($("ready-rows"), r.readiness || []);
-    else { text($("ready-rows"), ""); renderRows($("past-ready-rows"), r.readiness || []); }
+    else renderRows($("past-ready-rows"), r.readiness || []);          // the current Readiness section is left exactly as it is
     const cl = $("checks"); cl.textContent = "";
     for (const c of rp.checks || []) cl.append(li(c.ok ? "pass" : "fail", c.id, c.detail));
     const arts = r.artifacts || {}; text($("hashes"), Object.keys(arts).map((k) => k + ": " + (arts[k].present ? arts[k].sha256 + " (" + arts[k].bytes + " bytes)" : "absent") + (arts[k].problem ? " [" + arts[k].problem + "]" : "")).join("\n"));
@@ -289,7 +301,7 @@
         if (r.module && r.module !== "s3") continue;
         const e = li(r.state === "DONE" ? (r.execution === "COMPLETED" ? "pass" : "warn") : "info", r.job_id, r.kind + " | " + (r.state === "DONE" ? "finished: " : "") + r.execution);
         e.style.cursor = "pointer"; e.tabIndex = 0;
-        const open = () => { state.fresh = null; viewJob(r.job_id, r.state === "DONE", r.state !== "DONE"); };
+        const open = () => viewJob(r.job_id);
         e.addEventListener("click", open); e.addEventListener("keydown", (ev) => { if (ev.key === "Enter") open(); });
         ul.append(e);
       }

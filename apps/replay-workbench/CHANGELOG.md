@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1 – earlier-job labelling by URL and reload (display-only fix in 0.3.0)
+
+Application layer, presentation only. Execution and record interpretation, wrapper, runner, S3 profile, frozen files, packages, tags, keys and `ARCHITECTURE.md` are unchanged.
+
+1. **Fix.** A completed job opened through a URL (`#…&view=module&id=s3&job=<id>`) or after a reload carried no earlier-job banner, because only the history-list path declared the job "past". The classification now comes from the fetched status and the page-session identity, whichever way the job was opened: a job is **current** if it was started in this page session or was still running when first fetched (watching a live job), and **earlier** if it is already finished when first fetched and was not started in this page session. Earlier jobs show the banner (naming the job and scoping the result to it); the actual result and badge are shown unchanged, and their readiness records appear only under Details, never in the current Readiness section, which is no longer cleared when an earlier job is viewed. A live job attached after a reload or by URL finishes with the normal current-session display.
+2. **Address bar follows the viewed job** (`history.replaceState`, no extra history entries), so a reload shows the same job; navigating elsewhere drops the job from the URL.
+3. **Start race.** Starting a job in the instant after the previous one showed as finished could be refused as "another job is active" while that worker process was still exiting; start now waits up to three seconds only in that situation (a published result, worker still exiting). A job that is genuinely running is still refused.
+4. **Tests.** `tests/ui/browser_check_jobs.js` (real browser, stub module that is not marked synthetic so the badge path is exercised): completed-job URL in a fresh page session, reload of that URL, an earlier readiness job, current readiness surviving the view of an earlier job, reload of an active-job URL and of the page while a job runs, explicit Stop of the attached job, normal completion of a job started in the current page session, and the same job reopened in a fresh page session. Plus source checks and a start-race regression. Mutation check: making earlier jobs "current" again fails the browser test.
+
+
 ## 0.3.0 – module home screen
 
 Application layer, presentation and module selection only. Wrapper, runner, S3 profile, packages, binaries, frozen files, tags, keys and `ARCHITECTURE.md` are unchanged; execution and record interpretation are unchanged; jobs and reports stored by earlier versions are untouched.
@@ -49,4 +59,4 @@ Application layer only. The wrapper, runner, frozen files, packages, tags and ke
 3. **Export snapshot.** Every artifact is copied once as a stable prefix, hashed during that copy, and archived from the copy. `export-info.json` records sizes/hashes and whether the job had a final result.
 4. **Tests.** 95 tests (was 71). Readiness tests no longer depend on a Rust toolchain or any host tool (`S3Module.which` is injectable).
 
-Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`; HP trial (v0.1.3) under `evidence/hp-20261009/`; v0.2.0 under `evidence/v0.2.0/`; v0.3.0 under `evidence/v0.3.0/`.
+Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`; HP trial (v0.1.3) under `evidence/hp-20261009/`; v0.2.0 under `evidence/v0.2.0/`; v0.3.0 under `evidence/v0.3.0/`; v0.3.1 under `evidence/v0.3.1/`.

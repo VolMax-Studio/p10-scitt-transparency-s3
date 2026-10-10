@@ -225,6 +225,14 @@ class JobManager:
             raise BadRequest("deadline_minutes must be between 1 and 1440")
         with self.lock:
             lock_fd = try_lock(self.ws.p("active-job.lock"))
+            a = self.active
+            if lock_fd is None and a is not None:
+                # the previous job has published its result (it shows as finished) but its worker process is still exiting: give it a moment
+                done = os.path.join(self.job_dir(a["job_id"]), "result.json")
+                end = time.monotonic() + 3.0
+                while lock_fd is None and os.path.exists(done) and time.monotonic() < end:
+                    time.sleep(0.05)
+                    lock_fd = try_lock(self.ws.p("active-job.lock"))
             if lock_fd is None:
                 raise Busy("another job is active in this workspace")
             try:

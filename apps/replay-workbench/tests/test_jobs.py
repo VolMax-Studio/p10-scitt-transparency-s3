@@ -214,6 +214,15 @@ class Supervision(JobBase):
         self.assertNotEqual(jid, jid2)
         self.done(m, jid2)
 
+    def test_start_right_after_a_job_shows_as_finished_is_not_refused(self):
+        # a finished job's worker process may still be exiting for a few milliseconds; that must not make the next start fail with Busy
+        m = self.manager(fakes.wrapper_script(0))
+        for _ in range(6):
+            jid = m.start("readiness", PKG, "/opt/lean/bin", None, None)
+            self.done(m, jid)
+            m.start("readiness", PKG, "/opt/lean/bin", None, None)
+            wait_for(lambda: not m.is_busy(), 30)
+
     def test_restart_recovery_marks_interrupted_and_never_reruns(self):
         m = self.manager(fakes.wrapper_script(0))
         m.close()

@@ -29,6 +29,14 @@ It prints a URL such as `http://127.0.0.1:41873/#token=...` and opens it in your
 including the `#token=` part, in a browser on the same machine. Options: `--workspace DIR` (default `~/.local/share/p10-replay-workbench/`, mode 0700),
 `--port N`, `--deadline-minutes N` (default 60). Stop with Ctrl+C; an active job is stopped first (TERM, then KILL) and sealed as interrupted. Only one instance can use a workspace at a time: a second `run.py` on the same `--workspace` exits with an explanation.
 
+## Screens (v0.3.0)
+
+* **Home** lists the available modules. Today that is one card, **S3 — Accepted capture replay** (*Open module*). "Available" means the module is implemented in this application; it says nothing about the host or about any result, and the card never shows a badge. S1, S2a and S2b are stages of the S3 chain, not modules.
+* **S3 module screen** (*← Home* link on top): package import, readiness, run/stop, the three separate result axes and **Details** (logs, checks, raw records, export, job history). The Lean directory, allowed-signers path and deadline in use are shown in a summary with a link to Host settings.
+* **Host settings** (also reachable from the top bar): edit and save the Lean directory, allowed-signers path and deadline (see below).
+* **Active-job indicator:** while any job runs, a bar on every screen names it and links to its existing status view. Moving between Home, Host settings and the module, or reloading the page, never starts, stops or restarts a job; only **Stop active job** on the module screen stops one. Opening an earlier job from the job history shows that job only, under a banner saying so; it is never shown on Home and does not count as readiness or verification of anything today.
+* Navigation is client-side (URL fragment `#token=…&view=home|settings|module&id=s3`). An unknown module identifier or page shows "Unknown module" with a link back to Home.
+
 ## Saved host settings and desktop launcher (v0.2.0)
 
 * **Host settings.** *Save host settings* stores the Lean bin directory, the optional public allowed-signers path and the job deadline in `settings.json` in the workspace (owner-only file, atomic write, strict validation, unknown keys rejected; paths may be anywhere). They are restored into the fields whenever you open the page, also after the application restarted on a different port. Restoring only fills the fields: readiness is not assumed, nothing is started, no badge. A missing file means defaults; an unreadable or invalid file shows a warning and defaults, and saving replaces it. No token, key or file content is stored.
@@ -45,10 +53,14 @@ including the `#token=` part, in a browser on the same machine. Options: `--work
 ## Use
 
 1. **Import package** – choose the `.tar.gz`; the app hashes it while streaming (limit 64 MiB), checks the approved digest, then extracts it safely into its private workspace (the archive and extraction are kept; the next start reuses them, which also reuses ignored Lean build caches).
-2. Type the **Lean bin directory** (and optionally the allowed-signers file). Browsers do not reveal absolute paths, so these are text fields.
+2. Enter the **Lean bin directory** (and optionally the allowed-signers file) under **Host settings** and save them. Browsers do not reveal absolute paths, so these are text fields.
 3. **Check readiness** – mechanical diagnostics (commands, Rust, Lean, namespace method, `sha256sum -c` exit status of `PACKAGE_SHA256SUMS` and the frozen set, pinned HEADs/tags/hashes, the existing `preflight.py` run offline, disk/memory). It never starts the wrapper or builds Lean. It is advisory and goes stale when you change an input.
 4. **Run replay** – starts one dedicated worker; the wrapper runs under a fresh network namespace. Phases come from the wrapper's own headers (navigation only). **Stop** sends TERM to the job's process group, then KILL after 5 s. Closing the tab does not cancel the job. Only one job can be active; a second start is refused.
 5. Read the **three result panels**, open the details (hashes, check list, raw `verdict.json` / `run-info.json`), and **Export report archive** (`replay-report-<job>.tar.gz` with `app-report.json`, the original records, logs, the profile copy and `REPORT_SHA256SUMS`). Exports may contain local host names and paths.
+
+## Module registry and API additions (v0.3.0)
+
+Modules are registered by the application's own code (`workbench/modules/__init__.py`; only S3). Uploaded archives, requests and the UI cannot define modules, commands or code, and unknown or malformed module identifiers are rejected. Additive API changes, all backward compatible: module descriptors carry `id`, `title`, `summary`, `action` and `available`; `GET /api/modules/<id>` (404 `UNKNOWN_MODULE` otherwise); `POST /api/inspect` and `POST /api/runs` accept an optional `module` (400 `UNKNOWN_MODULE` otherwise); `POST /api/packages?module=<id>` is optional; job summaries carry `module`, defaulting to `s3` for jobs stored by earlier versions, which are kept unchanged.
 
 ## Process and workspace control (v0.1.1)
 
@@ -74,7 +86,7 @@ The wrapper's exit status (0 success, 1 failed replay/comparison, 2 prerequisite
 ## Tests
 
 ```bash
-python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 164 tests, about 60 s
+python3 -m unittest discover -s apps/replay-workbench -t apps/replay-workbench -p "test_*.py"   # 183 tests, about 70 s
 ```
 
 The tests need no Rust, Lean or network namespace on the test host. They use injected synthetic dependencies (synthetic archives and records, a scripted command context and a **stub module**). A stub run is labelled

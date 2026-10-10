@@ -62,7 +62,10 @@ class S3Module:
     # ---- describe ---------------------------------------------------------------------------------------------------------
     def describe(self):
         p = self.profile
-        return {"module": self.name, "profile_id": p["profile_id"], "profile_sha256": self.profile_sha256,
+        return {"module": self.name, "id": self.name, "title": "S3 \u2014 Accepted capture replay",
+                "summary": "Reproduce the accepted S3 capture offline using the approved package and the existing verification chain.",
+                "action": "Open module", "available": True,
+                "profile_id": p["profile_id"], "profile_sha256": self.profile_sha256,
                 "description": p["description"], "archive_name": p["archive"]["name"], "archive_sha256": p["archive"]["sha256"],
                 "synthetic": self.synthetic,
                 "execution_kind": ("SYNTHETIC TEST RUN - not an offline P10 run" if self.synthetic

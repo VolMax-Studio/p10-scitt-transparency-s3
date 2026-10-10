@@ -65,7 +65,8 @@ def main(argv=None):
         if extra:
             ap.error("--install-launcher / --remove-launcher take no other options")
         return launcher_command(a)
-    module = modules.default_module()
+    registry = modules.default_registry()
+    module = registry.get("s3")
     ws = importer.Workspace(a.workspace)
     try:
         mgr = jobs.JobManager(ws, module, default_deadline_minutes=a.deadline_minutes)
@@ -75,7 +76,7 @@ def main(argv=None):
         _pause(a.pause_on_error)
         return 2
     token = secrets.token_urlsafe(32)
-    srv, app = server.create(ws, module, mgr, token, a.port)
+    srv, app = server.create(ws, module, mgr, token, a.port, registry)
     url = f"http://127.0.0.1:{app.port}/#token={token}"
     print("P10 Replay Workbench (loopback only; single user)")
     print("  workspace:", ws.root)

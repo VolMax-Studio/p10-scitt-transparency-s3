@@ -10,7 +10,7 @@ import subprocess
 import tarfile
 import tempfile
 
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.3.0"
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE_GLOBS = ("run.py", "workbench", "static", "profiles")
 

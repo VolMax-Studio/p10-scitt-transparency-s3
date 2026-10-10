@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 – module home screen
+
+Application layer, presentation and module selection only. Wrapper, runner, S3 profile, packages, binaries, frozen files, tags, keys and `ARCHITECTURE.md` are unchanged; execution and record interpretation are unchanged; jobs and reports stored by earlier versions are untouched.
+
+1. **Home** with one module card (*S3 — Accepted capture replay*, *Open module*), built from the server's module list. No badge, no placeholders, no S1/S2 cards.
+2. **S3 module screen** with a *← Home* link; import, readiness, run/stop, the three result axes, Details (logs, checks, raw records, export, history) as before. **Host settings** screen using the existing settings API; the module screen shows the settings in use.
+3. **Active-job indicator** on every screen with a link to the job's status view. Navigation and reload never start, stop or restart a job; Stop is an explicit button acting on the named active job. Earlier jobs are shown only on request, under a banner, and their readiness rows are kept out of the current Readiness section.
+4. **Module registry** (`workbench/modules/__init__.py`): code-registered, only S3, unknown or malformed identifiers rejected (UI, `GET /api/modules/<id>`, optional `module` in job and upload requests). Jobs record `module_id`; older jobs read as `s3`.
+5. **Tests**: registry, API rejection of unknown identifiers, module descriptor without verification claims, archives cannot define modules, older stored jobs, UI source checks (navigation code cannot start/stop jobs, past jobs labelled), and a real-browser scenario (`tests/ui/browser_check.js`, skipped without node/Playwright/Chromium): Home → S3 → Host settings → S3, navigation and reload during a running synthetic job, explicit Stop, past-job labelling, unknown modules.
+
+
 ## 0.2.0 – persistent host settings and desktop launcher
 
 Application layer only; wrapper, runner, profile, packages, binaries, frozen files, tags and keys unchanged. Automatic port selection is unchanged.
@@ -38,4 +49,4 @@ Application layer only. The wrapper, runner, frozen files, packages, tags and ke
 3. **Export snapshot.** Every artifact is copied once as a stable prefix, hashed during that copy, and archived from the copy. `export-info.json` records sizes/hashes and whether the job had a final result.
 4. **Tests.** 95 tests (was 71). Readiness tests no longer depend on a Rust toolchain or any host tool (`S3Module.which` is injectable).
 
-Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`; HP trial (v0.1.3) under `evidence/hp-20261009/`; v0.2.0 under `evidence/v0.2.0/`.
+Version 0.1.0 evidence under `evidence/` is preserved; v0.1.1 evidence is under `evidence/v0.1.1/`; v0.1.2 under `evidence/v0.1.2/`; v0.1.3 under `evidence/v0.1.3/`; HP trial (v0.1.3) under `evidence/hp-20261009/`; v0.2.0 under `evidence/v0.2.0/`; v0.3.0 under `evidence/v0.3.0/`.

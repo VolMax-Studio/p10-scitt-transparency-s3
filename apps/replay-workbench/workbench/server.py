@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import importer, reports
 from .jobs import Busy, BadRequest, JobManager, valid_job_id
+from .modules import Registry, UnknownModule
 from .settings import SettingsError, SettingsStore
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
@@ -16,12 +17,19 @@ STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/app.css": ("app.css
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; "
        "form-action 'none'; frame-ancestors 'none'")
 MAX_JSON = 64 * 1024
+MODULE_RE = re.compile(r"^/api/modules/([^/]+)$")
 RUN_RE = re.compile(r"^/api/runs/([^/]+)(?:/(events|cancel|report|artifacts/([A-Za-z0-9._-]+)))?$")
 
 
 class App:
-    def __init__(self, workspace, module, jobs, token, port):
+    def __init__(self, workspace, module, jobs, token, port, registry=None):
         self.ws, self.module, self.jobs, self.token, self.port = workspace, module, jobs, token, port
+        if registry is None:
+            registry = Registry()
+            registry.register(module)
+        self.registry = registry
+        if registry.get(module.name) is not module:
+            raise ValueError("the job manager's module must be the registered module")
         self.host_header = f"127.0.0.1:{port}"
         self.origin = f"http://127.0.0.1:{port}"
         self.import_lock = threading.Lock()
@@ -94,6 +102,14 @@ def make_server(port=0):
                 raise BadRequest("JSON object expected")
             return obj
 
+        def _descriptor(self, module):
+            app = self.server.app
+            d = module.describe()
+            d["workspace"] = app.ws.root
+            d["default_deadline_minutes"] = app.jobs.default_deadline_minutes
+            d["packages"] = sorted(x for x in os.listdir(app.ws.p("packages")) if len(x) == 64)
+            return d
+
         @staticmethod
         def _only(obj, allowed):
             extra = set(obj) - set(allowed)
@@ -117,11 +133,13 @@ def make_server(port=0):
                 if not self._gate(True, False):
                     return
                 if path == "/api/modules":
-                    d = app.module.describe()
-                    d["workspace"] = app.ws.root
-                    d["default_deadline_minutes"] = app.jobs.default_deadline_minutes
-                    d["packages"] = sorted(x for x in os.listdir(app.ws.p("packages")) if len(x) == 64)
-                    return self._json(200, {"modules": [d]})
+                    return self._json(200, {"modules": [self._descriptor(app.registry.get(i)) for i in app.registry.ids()]})
+                mm = MODULE_RE.match(path)
+                if mm:
+                    try:
+                        return self._json(200, {"module": self._descriptor(app.registry.get(mm.group(1)))})
+                    except UnknownModule:
+                        return self._err(404, "UNKNOWN_MODULE", "no such module")
                 if path == "/api/settings":
                     with app.settings_lock:
                         cur, warn = app.settings.load()
@@ -169,6 +187,13 @@ def make_server(port=0):
                 if not self._gate(True, True):
                     return
                 if path == "/api/packages":
+                    q = self.path.split("?", 1)[1] if "?" in self.path else ""
+                    for kv in q.split("&"):
+                        if kv.startswith("module="):
+                            try:
+                                app.registry.get(kv[7:])
+                            except UnknownModule:
+                                return self._err(404, "UNKNOWN_MODULE", "no such module")      # rejected before the body is read
                     return self._upload()
                 if path == "/api/settings":
                     body = self._body_json()
@@ -182,10 +207,18 @@ def make_server(port=0):
                     return self._json(200, {"settings": saved})
                 if path in ("/api/inspect", "/api/runs"):
                     body = self._body_json()
-                    self._only(body, ("package_id", "lean_bin", "allowed_signers", "deadline_minutes"))
+                    self._only(body, ("module", "package_id", "lean_bin", "allowed_signers", "deadline_minutes"))
                     kind = "readiness" if path == "/api/inspect" else "run"
+                    mod_id = None
+                    if "module" in body:
+                        try:
+                            mod_id = app.registry.get(body["module"]).name       # unknown or malformed identifiers are rejected
+                        except UnknownModule:
+                            return self._err(400, "UNKNOWN_MODULE", "no such module")
                     try:
-                        jid = app.jobs.start(kind, body.get("package_id"), body.get("lean_bin"), body.get("allowed_signers"), body.get("deadline_minutes"))
+                        jid = app.jobs.start(kind, body.get("package_id"), body.get("lean_bin"), body.get("allowed_signers"), body.get("deadline_minutes"), mod_id)
+                    except UnknownModule:
+                        return self._err(400, "UNKNOWN_MODULE", "no such module")
                     except Busy as e:
                         return self._err(409, "JOB_ACTIVE", str(e))
                     return self._json(202, {"job_id": jid, "kind": kind})
@@ -232,8 +265,8 @@ def make_server(port=0):
     return srv
 
 
-def create(workspace, module, jobs, token, port=0):
+def create(workspace, module, jobs, token, port=0, registry=None):
     """Bind 127.0.0.1:<port> and attach the App; returns (server, app)."""
     srv = make_server(port)
-    srv.app = App(workspace, module, jobs, token, srv.server_address[1])
+    srv.app = App(workspace, module, jobs, token, srv.server_address[1], registry)
     return srv, srv.app

@@ -20,6 +20,7 @@ import threading
 import time
 
 from . import reports
+from .modules import UnknownModule
 from .util import (downgrade, group_signal_ok, is_worker_process, kill_group_guarded, publish_result, read_json, register_interrupt, try_lock,
                    write_json_atomic)
 
@@ -203,7 +204,9 @@ class JobManager:
         os.close(fd)
         return False
 
-    def start(self, kind, package_id, lean_bin, allowed_signers=None, deadline_minutes=None):
+    def start(self, kind, package_id, lean_bin, allowed_signers=None, deadline_minutes=None, module_id=None):
+        if module_id is not None and module_id != self.module.name:
+            raise UnknownModule(module_id if isinstance(module_id, str) and len(module_id) <= 64 else "?")
         if kind not in ("readiness", "run"):
             raise BadRequest("kind must be readiness or run")
         if not isinstance(package_id, str) or not PKG_ID_RE.match(package_id):
@@ -232,7 +235,7 @@ class JobManager:
                     os.mkdir(jd, 0o700)
                 finally:
                     os.umask(old)
-                spec = {"job_id": job_id, "kind": kind, "package_id": package_id, "managed_dir": managed, "workspace": self.ws.root,
+                spec = {"job_id": job_id, "kind": kind, "module_id": self.module.name, "package_id": package_id, "managed_dir": managed, "workspace": self.ws.root,
                         "host_config": {"lean_bin": lean_bin, "allowed_signers": allowed_signers or None},
                         "module_ref": self.module_ref, "extra_sys_path": self.extra_sys_path, "deadline_s": float(dl) * 60.0,
                         "log_limit": lim["log_bytes"], "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -282,6 +285,7 @@ class JobManager:
         elif pending:
             st = dict(st, interruption_pending=True)       # no result could be decided safely (the seal lock is held by an unverified owner)
         return {"job_id": job_id, "kind": job.get("kind"), "created": job.get("created"), "package_id": job.get("package_id"),
+                "module": job.get("module_id") or (job.get("module_description") or {}).get("module") or "s3",
                 "execution_kind": (job.get("module_description") or {}).get("execution_kind"), "synthetic": (job.get("module_description") or {}).get("synthetic"),
                 "status": st, "result": res}
 
@@ -291,7 +295,7 @@ class JobManager:
             if valid_job_id(jid):
                 s = self.status(jid)
                 if s:
-                    out.append({"job_id": jid, "kind": s["kind"], "created": s["created"], "execution": s["status"].get("execution"), "state": s["status"].get("state")})
+                    out.append({"job_id": jid, "kind": s["kind"], "module": s["module"], "created": s["created"], "execution": s["status"].get("execution"), "state": s["status"].get("state")})
         return out
 
     def events(self, job_id, after=0, limit=500, tail=32768):

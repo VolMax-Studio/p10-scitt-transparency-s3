@@ -8,6 +8,8 @@ P10 S3 connects a running transparency log to a repeatable verification workflow
 
 ![P10 S3 workflow: issuer-authenticated registration through the Go facade and Tessera, public capture of statements and Receipts, and offline verification through G5 and the frozen P10 chain.](docs/assets/p10-s3-workflow.svg)
 
+**IETF draft:** [P10 Underdetermination Profile: Adjudication Statements over SCITT (revision -01)](https://www.ietf.org/archive/id/draft-nestorov-scitt-p10-underdetermination-01.html) · [Datatracker](https://datatracker.ietf.org/doc/draft-nestorov-scitt-p10-underdetermination/).
+
 ## What we built
 
 | Component | What it does |
@@ -107,3 +109,7 @@ The signed decisions also explain the adoption of the declared verification TCB.
 </details>
 
 **Project:** Ivan Nestorov / VolMax-Studio — author, operator and ratifier. Implementation assistance: Claude Code. Architecture and review assistance: ChatGPT / Sol. Implementation history is recorded in commits; Ivan's freeze and acceptance are recorded in the signed tags above.
+
+## License
+
+Original S3 code and documentation: **MIT OR Apache-2.0**, at your option. See [LICENSE-MIT](LICENSE-MIT), [LICENSE-APACHE](LICENSE-APACHE) and [NOTICE.md](NOTICE.md). Third-party components retain their applicable licenses.

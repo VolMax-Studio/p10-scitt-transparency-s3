@@ -1,5 +1,7 @@
 # P10 S3 — From live registration to offline replay
 
+> **Public-reader correction (2026-11-01):** read [`PUBLIC_READER_NOTE.md`](PUBLIC_READER_NOTE.md) for the exact historical content pins, later license grants, the accepted leaf-7 public locator, and the correction to the stale S3-private statement in Internet-Draft `-02`. Signed historical tags remain unchanged.
+
 **Register signed statements. Capture the public log. Reproduce the accepted result offline.**
 
 P10 S3 connects a running transparency log to a repeatable verification workflow. A Go registration front-end authenticates issuers and writes their statements to Tessera. A separate capture client collects the log's public output and the returned Receipts. The frozen P10 chain then checks that capture offline, using public material only.
@@ -8,7 +10,7 @@ P10 S3 connects a running transparency log to a repeatable verification workflow
 
 ![P10 S3 workflow: issuer-authenticated registration through the Go facade and Tessera, public capture of statements and Receipts, and offline verification through G5 and the frozen P10 chain.](docs/assets/p10-s3-workflow.svg)
 
-**IETF draft:** [P10 Underdetermination Profile: Adjudication Statements over SCITT (revision -01)](https://www.ietf.org/archive/id/draft-nestorov-scitt-p10-underdetermination-01.html) · [Datatracker](https://datatracker.ietf.org/doc/draft-nestorov-scitt-p10-underdetermination/).
+**IETF draft:** [P10 Underdetermination Profile: Adjudication Statements over SCITT (revision -02)](https://www.ietf.org/archive/id/draft-nestorov-scitt-p10-underdetermination-02.html) · [Datatracker](https://datatracker.ietf.org/doc/draft-nestorov-scitt-p10-underdetermination/).
 
 ## What we built
 
